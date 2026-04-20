@@ -54,24 +54,8 @@ Variants {
             }
 
             // --- State Variables ---
-            property bool showHelpIcon: true
-            property bool isRecording: false // Track screen recording
-            
-            // Background poller to check if wl-screenrec is active
-            Process {
-                id: recPoller
-                command: ["bash", "-c", "pgrep -x wl-screenrec >/dev/null && echo '1' || echo '0'"]
-                stdout: StdioCollector {
-                    onStreamFinished: {
-                        barWindow.isRecording = (this.text.trim() === "1");
-                    }
-                }
-            }
-
-            Timer {
-                interval: 500; running: true; repeat: true
-                onTriggered: recPoller.running = true
-            }
+            property bool showHelpIcon: true            
+          
             
             Process {
                 id: settingsReader
@@ -141,9 +125,6 @@ Variants {
             property int typeInIndex: 0
             property string dateStr: fullDateStr.substring(0, typeInIndex)
 
-            property string weatherIcon: ""
-            property string weatherTemp: "--°"
-            property string weatherHex: mocha.yellow
             
             property string wifiStatus: "Off"
             property string wifiIcon: "󰤮"
@@ -218,7 +199,7 @@ Variants {
                                         }
                                     }
                                 }
-                            } catch(e) {}
+                            } catch(e) { console.warn(e) }
                         }
                     }
                 }
@@ -243,7 +224,7 @@ Variants {
                     onStreamFinished: {
                         let txt = this.text.trim();
                         if (txt !== "") {
-                            try { barWindow.musicData = JSON.parse(txt); } catch(e) {}
+                            try { barWindow.musicData = JSON.parse(txt); } catch(e) { console.warn(e) }
                         }
                     }
                 }
@@ -341,7 +322,7 @@ Variants {
                                 if (barWindow.volIcon !== data.icon) barWindow.volIcon = data.icon;
                                 let newMuted = (data.is_muted === "true");
                                 if (barWindow.isMuted !== newMuted) barWindow.isMuted = newMuted;
-                            } catch(e) {}
+                            } catch(e) { console.warn(e) }
                         }
                         audioWaiter.running = true;
                     }
@@ -363,7 +344,7 @@ Variants {
                                 if (barWindow.wifiIcon !== data.icon) barWindow.wifiIcon = data.icon;
                                 if (barWindow.wifiSsid !== data.ssid) barWindow.wifiSsid = data.ssid;
                                 if (barWindow.ethStatus !== data.eth_status) barWindow.ethStatus = data.eth_status;
-                            } catch(e) {}
+                            } catch(e) { console.warn(e) }
                         }
                         networkWaiter.running = true;
                     }
@@ -384,7 +365,7 @@ Variants {
                                 if (barWindow.btStatus !== data.status) barWindow.btStatus = data.status;
                                 if (barWindow.btIcon !== data.icon) barWindow.btIcon = data.icon;
                                 if (barWindow.btDevice !== data.connected) barWindow.btDevice = data.connected;
-                            } catch(e) {}
+                            } catch(e) { console.warn(e) }
                         }
                         btWaiter.running = true;
                     }
@@ -406,7 +387,7 @@ Variants {
                                 if (barWindow.batPercent !== newBat) barWindow.batPercent = newBat;
                                 if (barWindow.batIcon !== data.icon) barWindow.batIcon = data.icon;
                                 if (barWindow.batStatus !== data.status) barWindow.batStatus = data.status;
-                            } catch(e) {}
+                            } catch(e) { console.warn(e) }
                         }
                         batteryWaiter.running = true;
                     }
@@ -414,26 +395,6 @@ Variants {
             }
             Process { id: batteryWaiter; command: ["bash", "-c", "~/.config/hypr/scripts/quickshell/watchers/battery_wait.sh"]; onExited: batteryPoller.running = true }
 
-
-            Process {
-                id: weatherPoller
-                command: ["bash", "-c", `
-                    echo "$(~/.config/hypr/scripts/quickshell/calendar/weather.sh --current-icon)"
-                    echo "$(~/.config/hypr/scripts/quickshell/calendar/weather.sh --current-temp)"
-                    echo "$(~/.config/hypr/scripts/quickshell/calendar/weather.sh --current-hex)"
-                `]
-                stdout: StdioCollector {
-                    onStreamFinished: {
-                        let lines = this.text.trim().split("\n");
-                        if (lines.length >= 3) {
-                            barWindow.weatherIcon = lines[0];
-                            barWindow.weatherTemp = lines[1];
-                            barWindow.weatherHex = lines[2] || mocha.yellow;
-                        }
-                    }
-                }
-            }
-            Timer { interval: 150000; running: true; repeat: true; triggeredOnStart: true; onTriggered: weatherPoller.running = true }
 
             // Native Qt Time Formatting
             Timer {

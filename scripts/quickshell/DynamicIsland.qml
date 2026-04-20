@@ -279,7 +279,7 @@ PanelWindow {
                         let d = JSON.parse(this.text);
                         if (!islandWindow.userIsSeeking) islandWindow.musicData = d;
                     }
-                } catch(e) {}
+                } catch(e) { console.warn(e) }
             }
         }
     }
@@ -290,7 +290,7 @@ PanelWindow {
             onStreamFinished: {
                 try {
                     if (this.text && this.text.trim().length > 0) islandWindow.eqData = JSON.parse(this.text);
-                } catch(e) {}
+                } catch(e) { console.warn(e) }
             }
         }
     }
@@ -554,7 +554,7 @@ PanelWindow {
                             });
                         }
                     }
-                } catch(e) {}
+                } catch(e) { console.warn(e) }
             }
         }
     }
@@ -1393,7 +1393,7 @@ PanelWindow {
                             // DND: silent badge only
                             if (!islandWindow.expanded) islandWindow.notifBadgeVisible = true;
                         }
-                    } catch(e) {}
+                    } catch(e) { console.warn(e) }
                 }
                 notifIpcWatcher.running = false;
                 notifIpcWatcher.running = true;

@@ -116,7 +116,7 @@ Item {
             syncModel(inputsModel, data.inputs || []);
             syncModel(appsModel, data.apps || []);
             updateHeroData();
-        } catch(e) {}
+        } catch(e) { console.warn(e) }
     }
 
     function updateHeroData() {

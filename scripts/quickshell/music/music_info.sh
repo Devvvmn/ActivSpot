@@ -41,6 +41,7 @@ if [ "$STATUS" = "Playing" ] || [ "$STATUS" = "Paused" ]; then
         if [ ! -f "$lockFile" ] && [ -n "$rawUrl" ]; then
             touch "$lockFile"
             (
+                trap "rm -f '$lockFile'" EXIT
                 if [[ "$rawUrl" == http* ]]; then
                     curl -s -L --max-time 10 -o "$finalArt" "$rawUrl"
                 else
