@@ -1,5 +1,8 @@
 # ActivSpot — Dynamic Island for Hyprland
 
+<img width="1946" height="95" alt="image" src="https://github.com/user-attachments/assets/a7ede955-5f4f-4315-ab26-dc21555a0c17" />
+
+
 My vision of a dynamic island for Hyprland. Originally developed for personal use, shared after genuine interest from the Reddit community.
 
 > Based on [nixos-configuration](https://github.com/ilyamiro/nixos-configuration) by ilyamiro
@@ -61,18 +64,6 @@ Run instalation script
 | Super + C     | Clipboard Viewer |
 
 ---
-
-
-<img width="368" height="67" alt="image" src="https://github.com/user-attachments/assets/6b1e909a-c3ab-4de4-a492-14d4215bf18f" />
-<img width="491" height="72" alt="image" src="https://github.com/user-attachments/assets/3417d83d-12a4-49ca-a692-7443f2533233" />
-<img width="380" height="81" alt="image" src="https://github.com/user-attachments/assets/390b11e1-6bb0-4755-a616-45997fcef61d" />
-<img width="789" height="653" alt="image" src="https://github.com/user-attachments/assets/62824d74-a4bd-4d90-83bf-12e5fe19c1db" />
-<img width="799" height="479" alt="image" src="https://github.com/user-attachments/assets/a50dcc30-e9ad-4a4a-a1ac-22b294ec1e4d" />
-<img width="793" height="369" alt="image" src="https://github.com/user-attachments/assets/e13da3d2-187c-4f65-b17a-14a7fb46b03c" />
-and more ..
-
-
-
 
 ## Architecture
 
