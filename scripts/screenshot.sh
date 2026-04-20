@@ -183,7 +183,7 @@ if [ "$FULL_MODE" = true ] || [ -n "$GEOMETRY" ]; then
     else
       grim - | wl-copy
     fi
-    notify-send -a "Screenshot" "Скриншот скопирован" "Скриншот в буфере обмена"
+    notify-send -a "Screenshot" “Screenshot copied” “Screenshot copied to clipboard”
   fi
   exit 0
 fi
