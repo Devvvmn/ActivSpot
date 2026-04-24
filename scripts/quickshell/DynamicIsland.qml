@@ -49,6 +49,7 @@ PanelWindow {
     // =========================================================
     property bool expanded:      false
     property bool hovered:       false
+    property bool isDragHovered: false
     property bool userIsSeeking: false
 
     // Page navigation: "clock" | "music" | "notifs"
@@ -62,14 +63,16 @@ PanelWindow {
     }
     property var availablePages: {
         let p = ["clock"];
+        if (islandWindow.stashModel.count > 0) p.push("stash");
         if (islandWindow.isRecording)   p.push("recording");
         if (islandWindow.discordInCall) p.push("discord");
         if (islandWindow.isMediaActive) p.push("music");
         if (notifHistory.count > 0 || islandWindow.notifActive) p.push("notifs");
         return p;
     }
+    property bool _isRefreshingStash: false
     onAvailablePagesChanged: {
-        if (availablePages.indexOf(currentPage) < 0)
+        if (!_isRefreshingStash && availablePages.indexOf(currentPage) < 0)
             currentPage = availablePages.length > 0 ? availablePages[0] : "clock";
     }
     function navigateNext() {
@@ -145,6 +148,41 @@ PanelWindow {
 
     ListModel { id: notifHistoryList }
     property alias notifHistory: notifHistoryList
+
+    // Stash Model for robust file tray
+    ListModel { id: stashModelList }
+    property alias stashModel: stashModelList
+
+    Process {
+        id: stashScanner
+        command: ["bash", "-c", "mkdir -p ~/.cache/qs_stash && ls -1p ~/.cache/qs_stash/ 2>/dev/null | grep -v 'drop_debug.txt' | grep -v 'drop_log.txt'"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                islandWindow._isRefreshingStash = true;
+                let files = this.text.trim().split('\n');
+                islandWindow.stashModel.clear();
+                for (let i = 0; i < files.length; i++) {
+                    if (files[i]) {
+                        var isDirectory = files[i].endsWith('/');
+                        var rawName = isDirectory ? files[i].slice(0, -1) : files[i];
+                        islandWindow.stashModel.append({
+                            fileURL: "file:///home/jaya/.cache/qs_stash/" + rawName,
+                            filePath: "/home/jaya/.cache/qs_stash/" + rawName,
+                            isFav: false,
+                            isDir: isDirectory
+                        });
+                    }
+                }
+                islandWindow._isRefreshingStash = false;
+                if (islandWindow.availablePages.indexOf(islandWindow.currentPage) < 0) {
+                    islandWindow.currentPage = islandWindow.availablePages.length > 0 ? islandWindow.availablePages[0] : "clock";
+                }
+            }
+        }
+    }
+    Component.onCompleted: {
+        stashScanner.running = true;
+    }
 
     // Pulse animations — lifted to island level so pages can bind to them
     property real notifPulse: 0.9
@@ -248,6 +286,7 @@ PanelWindow {
         { name: "discord",   expandedH: 270, comp: discordPageComp   },
         { name: "music",     expandedH: 630, comp: musicPageComp     },
         { name: "notifs",    expandedH: 450, comp: notifsPageComp    },
+        { name: "stash",     expandedH: 134, comp: stashPageComp     },
     ]
 
     Component { id: clockPageComp;     ClockPage     { island: islandWindow } }
@@ -256,12 +295,55 @@ PanelWindow {
     Component { id: musicPageComp;     MusicPage     { island: islandWindow } }
     Component { id: notifsPageComp;    NotifsPage    { island: islandWindow } }
     Component { id: notifExpandedComp; NotifExpandedPage { island: islandWindow } }
+    Component { id: stashPageComp;     StashPage     { island: islandWindow } }
 
     function dismissNotif() {
         notifHideTimer.stop();
         notifActive = false;
         notifData   = null;
         if (!wasExpandedBeforeNotif) expanded = false;
+    }
+
+    Timer {
+        id: stashRefreshTimer
+        interval: 300
+        onTriggered: stashScanner.running = true
+    }
+
+    function handleImageDrop(urls) {
+        islandWindow.exec("echo 'drop received: " + urls + "' >> ~/.cache/qs_stash/drop_debug.txt");
+        var hasImage = false;
+        
+        var targetDir = "~/.cache/qs_stash/";
+        if (urls.length > 1) {
+            var groupName = "group_" + Date.now();
+            targetDir = "~/.cache/qs_stash/" + groupName + "/";
+            islandWindow.exec("mkdir -p " + targetDir);
+        }
+        
+        for (var i = 0; i < urls.length; i++) {
+            var url = urls[i].toString().trim();
+            islandWindow.exec("echo 'processing url: " + url + "' >> ~/.cache/qs_stash/drop_debug.txt");
+            // We now support ALL file types, not just images!
+            if (url.startsWith("http://") || url.startsWith("https://")) {
+                islandWindow.exec("mkdir -p ~/.cache/qs_stash && wget -q -P " + targetDir + " '" + url + "' &");
+                hasImage = true;
+            } else if (url.startsWith("file://")) {
+                var filePath = decodeURIComponent(url.replace('file://', ''));
+                islandWindow.exec("mkdir -p ~/.cache/qs_stash && cp -r '" + filePath + "' " + targetDir + " >> ~/.cache/qs_stash/drop_log.txt 2>&1 &");
+                hasImage = true;
+            } else if (url.startsWith("data:image/")) {
+                // Complex to parse inline
+            } else {
+                islandWindow.exec("mkdir -p ~/.cache/qs_stash && cp -r '" + url + "' " + targetDir + " >> ~/.cache/qs_stash/drop_log.txt 2>&1 &");
+                hasImage = true;
+            }
+        }
+        if (hasImage) {
+            islandWindow.currentPage = "stash";
+            islandWindow.expanded = true;
+            stashRefreshTimer.restart();
+        }
     }
 
     // =========================================================
@@ -643,10 +725,16 @@ PanelWindow {
             if (islandWindow.currentPage === "discord"   && islandWindow.discordInCall) return discordCollapsed.preferredWidth;
             if (islandWindow.currentPage === "music"     && islandWindow.isMediaActive) return musicCollapsed.preferredWidth;
             if (islandWindow.currentPage === "notifs")                                  return notifsCollapsed.preferredWidth;
+            if (islandWindow.currentPage === "stash")                                   return stashCollapsed.preferredWidth;
             return clockCollapsed.preferredWidth;
         }
         property int collapsedH: s(48)
-        property int expandedW:  Math.min(s(760), Screen.width - s(32))
+        property int expandedW: {
+            if (islandWindow.currentPage === "stash") {
+                return Math.min(s(700), Screen.width - s(32));
+            }
+            return Math.min(s(760), Screen.width - s(32));
+        }
         property int expandedH: {
             if (islandWindow.notifActive) return s(88);
             let page = islandWindow.pageRegistry.find(p => p.name === islandWindow.currentPage);
@@ -875,6 +963,41 @@ PanelWindow {
             }
         }
 
+        // ── DropArea for Global Image Drop ────────────
+        DropArea {
+            anchors.fill: parent
+            keys: ["text/uri-list"]
+            
+            property bool _justDropped: false
+
+            onEntered: (drag) => {
+                if (drag.hasUrls) {
+                    islandWindow.isDragHovered = true;
+                    islandWindow.currentPage = "stash";
+                    islandWindow.expanded = true;
+                    drag.accept();
+                }
+            }
+
+            onExited: {
+                islandWindow.isDragHovered = false;
+                if (!_justDropped) {
+                    islandWindow.expanded = false;
+                }
+                _justDropped = false;
+            }
+
+            onDropped: (drop) => {
+                islandWindow.isDragHovered = false;
+                if (drop.hasUrls) {
+                    _justDropped = true;
+                    islandWindow.handleImageDrop(drop.urls);
+                    islandWindow.expanded = true;
+                    drop.accept();
+                }
+            }
+        }
+
         // ============================================================
         // COLLAPSED CONTENT — one component per page, crossfade
         // ============================================================
@@ -920,6 +1043,15 @@ PanelWindow {
                 Behavior on opacity { SequentialAnimation {
                     PauseAnimation { duration: islandWindow.currentPage === "notifs" && !islandWindow.osdActive ? 60 : 0 }
                     NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
+                }}
+            }
+            StashCollapsed {
+                id: stashCollapsed; island: islandWindow; anchors.centerIn: parent
+                opacity: (!islandWindow.osdActive && !islandWindow.volDragging && islandWindow.currentPage === "stash" && islandWindow.stashModel.count > 0) ? 1.0 : 0.0
+                visible: opacity > 0.001
+                Behavior on opacity { SequentialAnimation {
+                    PauseAnimation { duration: islandWindow.currentPage === "stash" && !islandWindow.osdActive && islandWindow.stashModel.count > 0 ? 60 : 0 }
+                    NumberAnimation { duration: islandWindow.stashModel.count > 0 ? 200 : 0; easing.type: Easing.InOutCubic }
                 }}
             }
             RecordingCollapsed {
@@ -1030,7 +1162,7 @@ PanelWindow {
             anchors.bottom: parent.bottom; anchors.bottomMargin: s(14)
             anchors.horizontalCenter: parent.horizontalCenter
             height: s(28); width: navRow.width + s(16)
-            opacity: islandWindow.expanded && !islandWindow.notifActive && islandWindow.availablePages.length > 1 ? 1.0 : 0.0
+            opacity: islandWindow.expanded && !islandWindow.notifActive && islandWindow.currentPage !== "stash" && islandWindow.availablePages.length > 1 ? 1.0 : 0.0
             visible: opacity > 0.001
             Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.InOutCubic } }
             z: 10
