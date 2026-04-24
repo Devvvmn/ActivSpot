@@ -6,51 +6,48 @@ Item {
     property string bubbleId: ""
     property real homeX: 0
     property real homeY: 0
-    property bool pinned: false
-    property real offsetX: 0  // pixels from homeX when pinned
-    property real offsetY: 0  // pixels from homeY when pinned
+    property bool snapSpring: false
+    property bool initialized: false
 
     signal tapped()
 
-    // Track home shifts while pinned — bubble orbits the island, not the screen
-    onHomeXChanged: if (!dragger.active) x = homeX + (pinned ? offsetX : 0)
-    onHomeYChanged: if (!dragger.active) y = homeY + (pinned ? offsetY : 0)
-
-    Connections {
-        target: island
-        function onBubblePositionsChanged() {
-            let saved = island.bubblePositions[root.bubbleId]
-            if (saved && saved.ox !== undefined) {
-                root.offsetX = saved.ox * Screen.width
-                root.offsetY = saved.oy * Screen.height
-                root.pinned  = true
-                root.x = root.homeX + root.offsetX
-                root.y = root.homeY + root.offsetY
-            }
-        }
-    }
-
     Component.onCompleted: {
-        let saved = island && island.bubblePositions ? island.bubblePositions[bubbleId] : null
-        if (saved && saved.ox !== undefined) {
-            offsetX = saved.ox * Screen.width
-            offsetY = saved.oy * Screen.height
-            pinned  = true
-            x = homeX + offsetX
-            y = homeY + offsetY
-        } else {
-            x = homeX
-            y = homeY
-        }
-    }
-
-    function resetPosition() {
-        pinned  = false
-        offsetX = 0
-        offsetY = 0
         x = homeX
         y = homeY
-        island.clearBubblePos(bubbleId)
+        // Enable animations only after initial placement to avoid fly-in on startup
+        Qt.callLater(function() { root.initialized = true })
+    }
+
+    Timer { id: snapTimer; interval: 700; onTriggered: root.snapSpring = false }
+
+    // Assign x/y when home shifts — triggers Behavior below (fast tracking)
+    // Skipped while dragging (DragHandler owns x) or during spring snap
+    onHomeXChanged: if (initialized && !dragger.active && !snapSpring) x = homeX
+    onHomeYChanged: if (initialized && !dragger.active && !snapSpring) y = homeY
+
+    // Fast tracking for slot reposition and island width changes.
+    // OutExpo (160 ms) keeps bubbles ahead of the island edge — no overlap.
+    Behavior on x {
+        enabled: root.initialized && !dragger.active && !root.snapSpring
+        NumberAnimation { duration: 160; easing.type: Easing.OutExpo }
+    }
+    Behavior on y {
+        enabled: root.initialized && !dragger.active && !root.snapSpring
+        NumberAnimation { duration: 160; easing.type: Easing.OutExpo }
+    }
+
+    // Spring snap used only right after drag ends — gives the "click into slot" bounce
+    SpringAnimation {
+        target: root; property: "x"
+        to: root.homeX
+        spring: 4.5; damping: 0.6
+        running: root.snapSpring
+    }
+    SpringAnimation {
+        target: root; property: "y"
+        to: root.homeY
+        spring: 4.5; damping: 0.6
+        running: root.snapSpring
     }
 
     DragHandler {
@@ -58,23 +55,37 @@ Item {
         target: root
         xAxis.minimum: 0
         xAxis.maximum: Screen.width - root.width
-        // Keep bubbles in the top strip so the input mask can cover them
         yAxis.minimum: 0
         yAxis.maximum: island ? island.s(100) : 80
         onActiveChanged: {
-            if (!active) {
-                root.offsetX = root.x - root.homeX
-                root.offsetY = root.y - root.homeY
-                root.pinned  = true
-                island.setBubblePos(root.bubbleId,
-                    root.offsetX / Screen.width,
-                    root.offsetY / Screen.height)
+            if (!active && island) {
+                let dropCenterX = root.x + root.width / 2
+
+                // Assign slot first so homeX updates before spring starts
+                island.snapBubble(bubbleId, dropCenterX)
+
+                // If the bubble was dropped inside the island body, eject it to the
+                // near edge so the spring never animates through the island.
+                let halfW    = island.islandCollapsedW / 2
+                let iLeft    = Screen.width / 2 - halfW
+                let iRight   = Screen.width / 2 + halfW
+                let gap      = island.s(10)
+                let bRight   = root.x + root.width
+                let bLeft    = root.x
+                if (bRight > iLeft && bLeft < iRight) {
+                    if (dropCenterX <= Screen.width / 2)
+                        root.x = iLeft - root.width - gap
+                    else
+                        root.x = iRight + gap
+                }
+
+                root.snapSpring = true
+                snapTimer.restart()
             }
         }
     }
 
     TapHandler {
         onTapped: root.tapped()
-        onDoubleTapped: root.resetPosition()
     }
 }

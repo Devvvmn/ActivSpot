@@ -15,11 +15,11 @@ BaseBubble {
 
     opacity: shouldShow ? 1.0 : 0.0
     visible: opacity > 0.001
-    scale:   shouldShow ? 1.0 : 0.5
+    scale:   shouldShow ? 1.0 : 0.05
     transformOrigin: Item.Left
 
-    Behavior on opacity { NumberAnimation { duration: 360; easing.type: Easing.OutCubic } }
-    Behavior on scale   { NumberAnimation { duration: 420; easing.type: Easing.OutBack  } }
+    Behavior on opacity { NumberAnimation { duration: island.expanded ? 0 : 360; easing.type: Easing.OutCubic } }
+    Behavior on scale   { SpringAnimation { spring: 5.5; damping: 0.7 } }
 
     Rectangle {
         anchors.fill: parent

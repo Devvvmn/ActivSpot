@@ -197,8 +197,12 @@ PanelWindow {
     readonly property real volRightExtra: volStretch > 0 ? islandShape.collapsedW * 0.92 * volStretch * 0.26 : 0
     readonly property real volLeftExtra:  volStretch < 0 ? islandShape.collapsedW * 0.92 * (-volStretch) * 0.26 : 0
 
-    // Bubble drag positions — persisted as screen-ratio fractions
-    property var bubblePositions: ({})
+    // Expose collapsed width so BaseBubble can clamp against the island boundary
+    readonly property int islandCollapsedW: islandShape.collapsedW
+
+    // Bubble slot ordering — inner index = closest to island
+    property var leftSlots:  ["vpn", "music", "discord"]
+    property var rightSlots: ["rec", "notif", "clock"]
 
     // Clock / Weather
     property string timeStr:     ""
@@ -221,25 +225,93 @@ PanelWindow {
         if (f) exec("[ -f \"" + f + "\" ] && paplay \"" + f + "\" 2>/dev/null &");
     }
 
-    function saveBubblePositions() {
+    // --- Slot-based bubble positioning ---
+
+    function bubbleFor(id) {
+        if (id === "music")   return musicBubble
+        if (id === "discord") return discordBubble
+        if (id === "vpn")     return vpnBadge
+        if (id === "rec")     return recBubble
+        if (id === "notif")   return badgeBubble
+        if (id === "clock")   return clockBubble
+        return null
+    }
+
+    // Returns homeX for a bubble id based on its slot position.
+    // Uses islandShape.collapsedW so positions are stable relative to the collapsed
+    // island edge; bubbles track via fast Behavior animation (160 ms OutExpo) which
+    // is quick enough to stay ahead of the island width animation (540 ms OutExpo).
+    function homeXFor(id) {
+        let half = islandShape.collapsedW / 2
+        let ri = rightSlots.indexOf(id)
+        if (ri >= 0) {
+            let x = Math.floor(Screen.width / 2) + half + s(14) + volRightExtra
+            for (let i = 0; i < ri; i++) {
+                let b = bubbleFor(rightSlots[i])
+                if (b && b.shouldShow) x += b.width + s(8)
+            }
+            return x
+        }
+        let li = leftSlots.indexOf(id)
+        if (li >= 0) {
+            let bub = bubbleFor(id)
+            let x = Math.floor(Screen.width / 2) - half - s(14)
+                    - (bub ? bub.width : 0) - volLeftExtra
+            for (let i = 0; i < li; i++) {
+                let b = bubbleFor(leftSlots[i])
+                if (b && b.shouldShow) x -= b.width + s(8)
+            }
+            return x
+        }
+        return 0
+    }
+
+    // Called by BaseBubble on drag release — places bubble into nearest slot.
+    // Uses collapsedW for slot positions (snap always happens while collapsed).
+    // Uses shouldShow (not visible) to avoid counting fading-out bubbles as occupying space.
+    function snapBubble(id, dropCenterX) {
+        let newLeft  = leftSlots.filter(v => v !== id)
+        let newRight = rightSlots.filter(v => v !== id)
+        let iCenter  = Screen.width / 2
+        let halfW    = islandShape.collapsedW / 2
+
+        if (dropCenterX <= iCenter) {
+            let insertIdx = newLeft.length
+            let x = iCenter - halfW - s(12)
+            for (let i = 0; i < newLeft.length; i++) {
+                let b  = bubbleFor(newLeft[i])
+                let bw = (b && b.shouldShow) ? b.width : 0
+                if (bw > 0) {
+                    x -= bw
+                    if (dropCenterX >= x) { insertIdx = i; break }
+                    x -= s(8)
+                }
+            }
+            newLeft.splice(insertIdx, 0, id)
+        } else {
+            let insertIdx = newRight.length
+            let x = iCenter + halfW + s(12)
+            for (let i = 0; i < newRight.length; i++) {
+                let b  = bubbleFor(newRight[i])
+                let bw = (b && b.shouldShow) ? b.width : 0
+                if (bw > 0) {
+                    if (dropCenterX <= x + bw) { insertIdx = i; break }
+                    x += bw + s(8)
+                }
+            }
+            newRight.splice(insertIdx, 0, id)
+        }
+
+        leftSlots  = newLeft
+        rightSlots = newRight
+        saveSlots()
+    }
+
+    function saveSlots() {
         Quickshell.execDetached(["bash", "-c",
-            "mkdir -p ~/.cache/quickshell && printf '%s' \"$1\" > ~/.cache/quickshell/bubble_positions.json",
-            "qs_save", JSON.stringify(bubblePositions)
-        ]);
-    }
-
-    function setBubblePos(id, fx, fy) {
-        let p = Object.assign({}, bubblePositions);
-        p[id] = { x: fx, y: fy };
-        bubblePositions = p;
-        saveBubblePositions();
-    }
-
-    function clearBubblePos(id) {
-        let p = Object.assign({}, bubblePositions);
-        delete p[id];
-        bubblePositions = p;
-        saveBubblePositions();
+            "mkdir -p ~/.cache/quickshell && printf '%s' \"$1\" > ~/.cache/quickshell/bubble_slots.json",
+            "qs_save", JSON.stringify({ left: leftSlots, right: rightSlots })
+        ])
     }
 
     function saveNotifHistory() {
@@ -590,15 +662,16 @@ PanelWindow {
         }
     }
 
-    // Bubble positions from disk (load once on startup)
+    // Slot order from disk (load once on startup)
     Process {
-        id: bubblePosLoader; running: true
-        command: ["bash", "-c", "cat ~/.cache/quickshell/bubble_positions.json 2>/dev/null || echo '{}'"]
+        id: slotsLoader; running: true
+        command: ["bash", "-c", "cat ~/.cache/quickshell/bubble_slots.json 2>/dev/null || echo '{}'"]
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
-                    let data = JSON.parse(this.text.trim());
-                    if (data && typeof data === "object") islandWindow.bubblePositions = data;
+                    let d = JSON.parse(this.text.trim())
+                    if (d.left  && Array.isArray(d.left))  islandWindow.leftSlots  = d.left
+                    if (d.right && Array.isArray(d.right)) islandWindow.rightSlots = d.right
                 } catch(e) { console.warn(e) }
             }
         }
@@ -1153,9 +1226,7 @@ PanelWindow {
         id: badgeBubble
         island: islandWindow
         z: 10
-        homeX: Math.floor(Screen.width / 2) + islandShape.collapsedW / 2 + s(12)
-               + (recBubble.shouldShow ? recBubble.width + s(8) : 0)
-               + islandWindow.volRightExtra
+        homeX: homeXFor("notif")
         homeY: s(8) + (islandShape.collapsedH - height) / 2
     }
 
@@ -1163,7 +1234,7 @@ PanelWindow {
         id: vpnBadge
         island: islandWindow
         z: 10
-        homeX: Math.floor(Screen.width / 2) - islandShape.collapsedW / 2 - width - s(12) - islandWindow.volLeftExtra
+        homeX: homeXFor("vpn")
         homeY: s(8) + (islandShape.collapsedH - height) / 2
     }
 
@@ -1171,7 +1242,7 @@ PanelWindow {
         id: musicBubble
         island: islandWindow
         z: 10
-        homeX: Math.floor(Screen.width / 2) - islandShape.collapsedW / 2 - width - s(10) - islandWindow.volLeftExtra
+        homeX: homeXFor("music")
         homeY: s(8) + (islandShape.collapsedH - height) / 2
     }
 
@@ -1179,8 +1250,7 @@ PanelWindow {
         id: discordBubble
         island: islandWindow
         z: 10
-        homeX: Math.floor(Screen.width / 2) - islandShape.collapsedW / 2 - width - s(10) - islandWindow.volLeftExtra
-               - (musicBubble.shouldShow ? musicBubble.width + s(8) : 0)
+        homeX: homeXFor("discord")
         homeY: s(8) + (islandShape.collapsedH - height) / 2
     }
 
@@ -1188,7 +1258,7 @@ PanelWindow {
         id: recBubble
         island: islandWindow
         z: 10
-        homeX: Math.floor(Screen.width / 2) + islandShape.collapsedW / 2 + s(12) + islandWindow.volRightExtra
+        homeX: homeXFor("rec")
         homeY: s(8) + (islandShape.collapsedH - height) / 2
     }
 
@@ -1196,8 +1266,7 @@ PanelWindow {
         id: clockBubble
         island: islandWindow
         z: 10
-        homeX: Math.floor(Screen.width / 2) + islandShape.collapsedW / 2 + s(12) + islandWindow.volRightExtra
-               + (recBubble.shouldShow ? recBubble.width + s(8) : 0)
+        homeX: homeXFor("clock")
         homeY: s(8) + (islandShape.collapsedH - height) / 2
     }
 
