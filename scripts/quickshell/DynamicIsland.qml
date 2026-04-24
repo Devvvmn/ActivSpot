@@ -9,6 +9,7 @@ import "."
 import "./pet"
 import "./pages"
 import "./collapsed"
+import "./minibubbles"
 
 PanelWindow {
     id: islandWindow
@@ -98,6 +99,8 @@ PanelWindow {
     property real cavaBar1: 0.1
     property real cavaBar2: 0.1
     property real cavaBar3: 0.1
+    property real cavaBar4: 0.1
+    property real cavaBar5: 0.1
     property real cavaMax:  0.1  // loudest bar, drives glow
 
     // Notifications
@@ -194,6 +197,9 @@ PanelWindow {
     readonly property real volRightExtra: volStretch > 0 ? islandShape.collapsedW * 0.92 * volStretch * 0.26 : 0
     readonly property real volLeftExtra:  volStretch < 0 ? islandShape.collapsedW * 0.92 * (-volStretch) * 0.26 : 0
 
+    // Bubble drag positions — persisted as screen-ratio fractions
+    property var bubblePositions: ({})
+
     // Clock / Weather
     property string timeStr:     ""
     property string timeStrSec:  ""
@@ -213,6 +219,27 @@ PanelWindow {
         };
         let f = map[type] || "";
         if (f) exec("[ -f \"" + f + "\" ] && paplay \"" + f + "\" 2>/dev/null &");
+    }
+
+    function saveBubblePositions() {
+        Quickshell.execDetached(["bash", "-c",
+            "mkdir -p ~/.cache/quickshell && printf '%s' \"$1\" > ~/.cache/quickshell/bubble_positions.json",
+            "qs_save", JSON.stringify(bubblePositions)
+        ]);
+    }
+
+    function setBubblePos(id, fx, fy) {
+        let p = Object.assign({}, bubblePositions);
+        p[id] = { x: fx, y: fy };
+        bubblePositions = p;
+        saveBubblePositions();
+    }
+
+    function clearBubblePos(id) {
+        let p = Object.assign({}, bubblePositions);
+        delete p[id];
+        bubblePositions = p;
+        saveBubblePositions();
     }
 
     function saveNotifHistory() {
@@ -317,25 +344,29 @@ PanelWindow {
             splitMarker: "\n"
             onRead: (line) => {
                 let parts = line.trim().split(" ");
-                if (parts.length < 4) return;
+                if (parts.length < 6) return;
                 function norm(s) {
                     let v = parseInt(s);
                     // autosens calibrates to ~210 peak; headroom prevents hard clip
                     return isNaN(v) ? 0.05 : Math.max(0.05, Math.min(1.0, v / 600.0));
                 }
                 let b0 = norm(parts[0]), b1 = norm(parts[1]),
-                    b2 = norm(parts[2]), b3 = norm(parts[3]);
+                    b2 = norm(parts[2]), b3 = norm(parts[3]),
+                    b4 = norm(parts[4]), b5 = norm(parts[5]);
                 islandWindow.cavaBar0 = b0;
                 islandWindow.cavaBar1 = b1;
                 islandWindow.cavaBar2 = b2;
                 islandWindow.cavaBar3 = b3;
-                islandWindow.cavaMax  = Math.max(b0, b1, b2, b3);
+                islandWindow.cavaBar4 = b4;
+                islandWindow.cavaBar5 = b5;
+                islandWindow.cavaMax  = Math.max(b0, b1, b2, b3, b4, b5);
             }
         }
         onRunningChanged: {
             if (!running) {
                 islandWindow.cavaBar0 = 0.1; islandWindow.cavaBar1 = 0.1;
                 islandWindow.cavaBar2 = 0.1; islandWindow.cavaBar3 = 0.1;
+                islandWindow.cavaBar4 = 0.1; islandWindow.cavaBar5 = 0.1;
                 islandWindow.cavaMax  = 0.1;
             }
         }
@@ -559,6 +590,20 @@ PanelWindow {
         }
     }
 
+    // Bubble positions from disk (load once on startup)
+    Process {
+        id: bubblePosLoader; running: true
+        command: ["bash", "-c", "cat ~/.cache/quickshell/bubble_positions.json 2>/dev/null || echo '{}'"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    let data = JSON.parse(this.text.trim());
+                    if (data && typeof data === "object") islandWindow.bubblePositions = data;
+                } catch(e) { console.warn(e) }
+            }
+        }
+    }
+
     // --- Reactive state ---
     onMusicDataChanged: {
         let should = isMediaActive && musicData.status === "Playing";
@@ -605,12 +650,37 @@ PanelWindow {
 
     Item {
         id: maskBounds
-        x: Math.floor((Screen.width - islandShape.width) / 2) - s(14)
-        y: s(8)
-        width:  islandShape.width + s(28)
-                + (recBubble.shouldShow ? recBubble.width + s(8) : 0)
-                + (islandWindow.notifBadgeVisible ? s(60) : 0)
-        height: Math.max(islandShape.height, s(48)) + s(8)
+
+        // Bounding box of island + all visible bubbles at their actual (possibly dragged) positions
+        readonly property real _il: Math.floor((Screen.width - islandShape.width) / 2)
+
+        readonly property real _minX: {
+            let m = _il;
+            if (musicBubble.visible)   m = Math.min(m, musicBubble.x);
+            if (discordBubble.visible) m = Math.min(m, discordBubble.x);
+            if (vpnBadge.visible)      m = Math.min(m, vpnBadge.x);
+            if (badgeBubble.visible)   m = Math.min(m, badgeBubble.x);
+            if (recBubble.visible)     m = Math.min(m, recBubble.x);
+            if (clockBubble.visible)   m = Math.min(m, clockBubble.x);
+            return Math.max(0, m - s(8));
+        }
+
+        readonly property real _maxX: {
+            let m = _il + islandShape.width;
+            if (musicBubble.visible)   m = Math.max(m, musicBubble.x + musicBubble.width);
+            if (discordBubble.visible) m = Math.max(m, discordBubble.x + discordBubble.width);
+            if (vpnBadge.visible)      m = Math.max(m, vpnBadge.x + vpnBadge.width);
+            if (badgeBubble.visible)   m = Math.max(m, badgeBubble.x + badgeBubble.width);
+            if (recBubble.visible)     m = Math.max(m, recBubble.x + recBubble.width);
+            if (clockBubble.visible)   m = Math.max(m, clockBubble.x + clockBubble.width);
+            return Math.min(Screen.width, m + s(8));
+        }
+
+        x: _minX
+        y: 0
+        width:  _maxX - _minX
+        // Covers island + full vertical drag range (yAxis.maximum = s(100) + bubble height)
+        height: s(130)
     }
     Region { id: maskedRegion; item: maskBounds }
 
@@ -1076,281 +1146,59 @@ PanelWindow {
     }
 
     // =========================================================
-    // NOTIFICATION BADGE BUBBLE
-    // Fixed position to the right of the collapsed pill.
-    // Shows unread count; scales in from left with spring bounce.
+    // MINI-BUBBLES — satellite pills around the main island
     // =========================================================
-    Item {
+
+    NotifMiniBubble {
         id: badgeBubble
+        island: islandWindow
         z: 10
-
-        property int sz: s(36)
-        x: Math.floor(Screen.width / 2) + islandShape.collapsedW / 2 + s(12)
-           + (recBubble.shouldShow ? recBubble.width + s(8) : 0)
-           + islandWindow.volRightExtra
-        y: s(8) + (islandShape.collapsedH - sz) / 2
-        width: sz; height: sz
-
-        opacity: islandWindow.notifBadgeVisible && !islandWindow.expanded ? 1.0 : 0.0
-        visible: opacity > 0.001
-        scale:   islandWindow.notifBadgeVisible && !islandWindow.expanded ? 1.0 : 0.5
-        transformOrigin: Item.Left
-
-        Behavior on opacity { NumberAnimation { duration: 360; easing.type: Easing.OutCubic } }
-        Behavior on scale   { NumberAnimation { duration: 420; easing.type: Easing.OutBack  } }
-
-        Rectangle {
-            anchors.fill: parent; radius: parent.width / 2
-            color: Qt.rgba(islandWindow.base.r, islandWindow.base.g, islandWindow.base.b, 0.94)
-            border.width: 1.5
-
-            // Slow peach pulse on border
-            SequentialAnimation on border.color {
-                running: islandWindow.notifBadgeVisible; loops: Animation.Infinite
-                ColorAnimation { to: Qt.rgba(islandWindow.peach.r, islandWindow.peach.g, islandWindow.peach.b, 0.65); duration: 1100; easing.type: Easing.InOutSine }
-                ColorAnimation { to: Qt.rgba(islandWindow.peach.r, islandWindow.peach.g, islandWindow.peach.b, 0.25); duration: 1100; easing.type: Easing.InOutSine }
-            }
-
-            // Bell icon or numeric count
-            Text {
-                anchors.centerIn: parent
-                text: notifHistory.count > 9 ? "9+" : (notifHistory.count > 1 ? notifHistory.count.toString() : "󰂚")
-                font.family:  notifHistory.count > 1 ? "JetBrains Mono" : "Iosevka Nerd Font"
-                font.weight:  notifHistory.count > 1 ? Font.Black : Font.Normal
-                font.pixelSize: notifHistory.count > 1 ? badgeBubble.sz * 0.40 : badgeBubble.sz * 0.48
-                color: islandWindow.peach
-                Behavior on text { }
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent; hoverEnabled: true
-            onClicked: {
-                islandWindow.notifBadgeVisible = false;
-                islandWindow.currentPage = "notifs";
-                islandWindow.expanded    = true;
-            }
-        }
+        homeX: Math.floor(Screen.width / 2) + islandShape.collapsedW / 2 + s(12)
+               + (recBubble.shouldShow ? recBubble.width + s(8) : 0)
+               + islandWindow.volRightExtra
+        homeY: s(8) + (islandShape.collapsedH - height) / 2
     }
 
-    // =========================================================
-    // VPN BADGE BUBBLE
-    // Fixed position to the LEFT of the collapsed pill.
-    // Shows interface name + lock icon; springs from right.
-    // =========================================================
-    Item {
+    VpnMiniBubble {
         id: vpnBadge
+        island: islandWindow
         z: 10
-
-        property int badgeH: s(36)
-        height: badgeH
-
-        // Pill width = row content + padding
-        width: vpnBadgeRow.implicitWidth + s(28)
-
-        x: Math.floor(Screen.width / 2) - islandShape.collapsedW / 2 - width - s(12) - islandWindow.volLeftExtra
-        y: s(8) + (islandShape.collapsedH - badgeH) / 2
-
-        opacity: islandWindow.vpnBadgeVisible && !islandWindow.expanded ? 1.0 : 0.0
-        visible: opacity > 0.001
-        scale:   islandWindow.vpnBadgeVisible && !islandWindow.expanded ? 1.0 : 0.5
-        transformOrigin: Item.Right
-
-        Behavior on opacity { NumberAnimation { duration: 360; easing.type: Easing.OutCubic } }
-        Behavior on scale   { NumberAnimation { duration: 420; easing.type: Easing.OutBack  } }
-
-        Rectangle {
-            anchors.fill: parent; radius: parent.height / 2
-            color: Qt.rgba(islandWindow.base.r, islandWindow.base.g, islandWindow.base.b, 0.94)
-            border.width: 1.5
-            border.color: islandWindow.vpnBadgeConnect
-                ? Qt.rgba(islandWindow.green.r, islandWindow.green.g, islandWindow.green.b, 0.65)
-                : Qt.rgba(islandWindow.red.r,   islandWindow.red.g,   islandWindow.red.b,   0.65)
-
-            Behavior on border.color { ColorAnimation { duration: 250 } }
-        }
-
-        Row {
-            id: vpnBadgeRow
-            anchors.centerIn: parent
-            spacing: s(6)
-
-            Text {
-                text: islandWindow.vpnBadgeConnect ? "󰒃" : "󰒄"
-                font.family: "Iosevka Nerd Font"; font.pixelSize: vpnBadge.badgeH * 0.42
-                color: islandWindow.vpnBadgeConnect ? islandWindow.green : islandWindow.red
-                anchors.verticalCenter: parent.verticalCenter
-                Behavior on color { ColorAnimation { duration: 250 } }
-            }
-            Text {
-                text: islandWindow.vpnInterface || "VPN"
-                font.family: "JetBrains Mono"; font.pixelSize: vpnBadge.badgeH * 0.35; font.weight: Font.Bold
-                color: islandWindow.vpnBadgeConnect ? islandWindow.green : islandWindow.red
-                anchors.verticalCenter: parent.verticalCenter
-                Behavior on color { ColorAnimation { duration: 250 } }
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: islandWindow.vpnBadgeVisible = false
-        }
+        homeX: Math.floor(Screen.width / 2) - islandShape.collapsedW / 2 - width - s(12) - islandWindow.volLeftExtra
+        homeY: s(8) + (islandShape.collapsedH - height) / 2
     }
 
-    // =========================================================
-    // DISCORD DUAL BUBBLE
-    // Appears to the LEFT when in a Discord call while another
-    // activity (music/recording) occupies the main pill.
-    // =========================================================
-    Item {
+    MusicMiniBubble {
+        id: musicBubble
+        island: islandWindow
+        z: 10
+        homeX: Math.floor(Screen.width / 2) - islandShape.collapsedW / 2 - width - s(10) - islandWindow.volLeftExtra
+        homeY: s(8) + (islandShape.collapsedH - height) / 2
+    }
+
+    DiscordMiniBubble {
         id: discordBubble
+        island: islandWindow
         z: 10
-
-        property int bubbleH: s(36)
-        height: bubbleH
-        width:  discordBubbleRow.implicitWidth + s(24)
-
-        // Show when in call AND main pill is showing something else
-        property bool shouldShow: islandWindow.discordInCall
-            && islandWindow.currentPage !== "discord"
-            && !islandWindow.expanded
-
-        x: Math.floor(Screen.width / 2) - islandShape.collapsedW / 2 - width - s(10) - islandWindow.volLeftExtra
-        y: s(8) + (islandShape.collapsedH - bubbleH) / 2
-
-        opacity: shouldShow ? 1.0 : 0.0
-        visible: opacity > 0.001
-        scale:   shouldShow ? 1.0 : 0.5
-        transformOrigin: Item.Right
-
-        Behavior on opacity { NumberAnimation { duration: 360; easing.type: Easing.OutCubic } }
-        Behavior on scale   { NumberAnimation { duration: 420; easing.type: Easing.OutBack  } }
-
-        Rectangle {
-            anchors.fill: parent; radius: parent.height / 2
-            color: Qt.rgba(islandWindow.base.r, islandWindow.base.g, islandWindow.base.b, 0.94)
-            border.width: 1.5
-            SequentialAnimation on border.color {
-                running: discordBubble.shouldShow; loops: Animation.Infinite
-                ColorAnimation { to: Qt.rgba(islandWindow.green.r, islandWindow.green.g, islandWindow.green.b, 0.7); duration: 900; easing.type: Easing.InOutSine }
-                ColorAnimation { to: Qt.rgba(islandWindow.green.r, islandWindow.green.g, islandWindow.green.b, 0.25); duration: 900; easing.type: Easing.InOutSine }
-            }
-        }
-
-        Row {
-            id: discordBubbleRow
-            anchors.centerIn: parent
-            spacing: s(6)
-
-            Text {
-                text: "󰙯"; font.family: "Iosevka Nerd Font"
-                font.pixelSize: discordBubble.bubbleH * 0.44
-                color: islandWindow.green; anchors.verticalCenter: parent.verticalCenter
-            }
-            Text {
-                text: {
-                    let t = islandWindow.discordCallSeconds
-                    let m = Math.floor(t / 60), s2 = t % 60
-                    return (m < 10 ? "0"+m : m) + ":" + (s2 < 10 ? "0"+s2 : s2)
-                }
-                font.family: "JetBrains Mono"; font.pixelSize: discordBubble.bubbleH * 0.36
-                font.weight: Font.Bold; color: islandWindow.green
-                anchors.verticalCenter: parent.verticalCenter
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                islandWindow.currentPage = "discord"
-                islandWindow.expanded    = true
-            }
-        }
+        homeX: Math.floor(Screen.width / 2) - islandShape.collapsedW / 2 - width - s(10) - islandWindow.volLeftExtra
+               - (musicBubble.shouldShow ? musicBubble.width + s(8) : 0)
+        homeY: s(8) + (islandShape.collapsedH - height) / 2
     }
 
-    // =========================================================
-    // RECORDING BUBBLE
-    // Appears to the RIGHT when recording while another page is active.
-    // Low priority — never steals focus from current page.
-    // =========================================================
-    Item {
+    RecordingMiniBubble {
         id: recBubble
+        island: islandWindow
         z: 10
+        homeX: Math.floor(Screen.width / 2) + islandShape.collapsedW / 2 + s(12) + islandWindow.volRightExtra
+        homeY: s(8) + (islandShape.collapsedH - height) / 2
+    }
 
-        property int bubbleH: s(36)
-        height: bubbleH
-        width:  recBubbleRow.implicitWidth + s(24)
-
-        property bool shouldShow: islandWindow.isRecording
-            && islandWindow.currentPage !== "recording"
-            && !islandWindow.expanded
-
-        x: Math.floor(Screen.width / 2) + islandShape.collapsedW / 2 + s(12) + islandWindow.volRightExtra
-        y: s(8) + (islandShape.collapsedH - bubbleH) / 2
-
-        opacity: shouldShow ? 1.0 : 0.0
-        visible: opacity > 0.001
-        scale:   shouldShow ? 1.0 : 0.5
-        transformOrigin: Item.Left
-
-        Behavior on opacity { NumberAnimation { duration: 360; easing.type: Easing.OutCubic } }
-        Behavior on scale   { NumberAnimation { duration: 420; easing.type: Easing.OutBack  } }
-
-        Rectangle {
-            anchors.fill: parent; radius: parent.height / 2
-            color: Qt.rgba(islandWindow.base.r, islandWindow.base.g, islandWindow.base.b, 0.94)
-            border.width: 1.5
-            border.color: Qt.rgba(islandWindow.red.r, islandWindow.red.g, islandWindow.red.b,
-                                  islandWindow.recordingDotOpacity * 0.85)
-            Behavior on border.color { ColorAnimation { duration: 80 } }
-        }
-
-        Row {
-            id: recBubbleRow
-            anchors.centerIn: parent
-            spacing: s(6)
-
-            // Pulsing dot
-            Rectangle {
-                width: s(10); height: s(10); radius: s(5)
-                color: islandWindow.red
-                opacity: islandWindow.isRecordingPaused ? 0.38 : islandWindow.recordingDotOpacity
-                Behavior on opacity { NumberAnimation { duration: 80 } }
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            Text {
-                text: islandWindow.isRecordingPaused ? "PAUSED" : "REC"
-                font.family: "JetBrains Mono"
-                font.pixelSize: recBubble.bubbleH * 0.34
-                font.weight: Font.Black
-                font.letterSpacing: s(1.5)
-                color: islandWindow.isRecordingPaused ? islandWindow.subtext0 : islandWindow.red
-                anchors.verticalCenter: parent.verticalCenter
-                Behavior on color { ColorAnimation { duration: 200 } }
-            }
-
-            Text {
-                text: {
-                    let t = islandWindow.recordingSeconds
-                    let m = Math.floor(t / 60), s2 = t % 60
-                    return (m < 10 ? "0"+m : m) + ":" + (s2 < 10 ? "0"+s2 : s2)
-                }
-                font.family: "JetBrains Mono"
-                font.pixelSize: recBubble.bubbleH * 0.32
-                font.weight: Font.Bold
-                color: islandWindow.subtext0
-                anchors.verticalCenter: parent.verticalCenter
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                islandWindow.currentPage = "recording"
-                islandWindow.expanded    = true
-            }
-        }
+    ClockMiniBubble {
+        id: clockBubble
+        island: islandWindow
+        z: 10
+        homeX: Math.floor(Screen.width / 2) + islandShape.collapsedW / 2 + s(12) + islandWindow.volRightExtra
+               + (recBubble.shouldShow ? recBubble.width + s(8) : 0)
+        homeY: s(8) + (islandShape.collapsedH - height) / 2
     }
 
     // =========================================================

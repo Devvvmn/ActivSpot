@@ -58,21 +58,35 @@ Row {
 
     // Cava bars
     Item {
-        width: island.s(20); height: island.s(18); anchors.verticalCenter: parent.verticalCenter
+        width: island.s(36); height: island.s(18); anchors.verticalCenter: parent.verticalCenter
         Repeater {
-            model: 4
+            model: 6
             Rectangle {
-                x: index * island.s(5); width: island.s(3); anchors.bottom: parent.bottom
-                property real barVal: [island.cavaBar0, island.cavaBar1, island.cavaBar2, island.cavaBar3][index]
-                height: island.musicData.status !== "Playing" ? island.s(18) * 0.15 : island.s(18) * barVal
-                Behavior on height { NumberAnimation { duration: 60; easing.type: Easing.OutCubic } }
-                radius: island.s(1)
-                opacity: island.musicData.status === "Playing" ? 0.95 : 0.35
+                property color barColor: index === 0 ? island.blue
+                    : index === 1 ? island.mauve
+                    : index === 2 ? island.pink
+                    : index === 3 ? island.peach
+                    : index === 4 ? island.pink
+                    : island.blue
+                property real barVal: index === 0 ? island.cavaBar0
+                    : index === 1 ? island.cavaBar1
+                    : index === 2 ? island.cavaBar2
+                    : index === 3 ? island.cavaBar3
+                    : index === 4 ? island.cavaBar4
+                    : island.cavaBar5
+                x: index * island.s(6); width: island.s(4); anchors.bottom: parent.bottom
+                height: island.musicData.status !== "Playing"
+                    ? island.s(18) * 0.12
+                    : Math.max(island.s(18) * 0.12, island.s(18) * barVal)
+                Behavior on height { NumberAnimation { duration: 60; easing.type: Easing.Linear } }
+                radius: island.s(2)
+                opacity: island.musicData.status === "Playing" ? 1.0 : 0.3
                 Behavior on opacity { NumberAnimation { duration: 300 } }
                 gradient: Gradient {
                     orientation: Gradient.Vertical
-                    GradientStop { position: 0.0; color: island.blue }
-                    GradientStop { position: 1.0; color: island.mauve }
+                    GradientStop { position: 0.0; color: Qt.lighter(barColor, 1.3) }
+                    GradientStop { position: 0.5; color: barColor }
+                    GradientStop { position: 1.0; color: Qt.darker(barColor, 1.15) }
                 }
             }
         }
