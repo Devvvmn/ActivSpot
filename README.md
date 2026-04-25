@@ -8,7 +8,8 @@ My vision of a dynamic island for Hyprland. Originally developed for personal us
 > Based on [nixos-configuration](https://github.com/ilyamiro/nixos-configuration) by ilyamiro
 
 ---
-
+If you'd like to support me, join my Patreon, [join my Patreon](https://patreon.com/dxvmxn)
+---
 ## Features
 
 **Contextual content** — automatically switches based on system state:
