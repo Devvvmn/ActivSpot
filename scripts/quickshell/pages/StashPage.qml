@@ -9,7 +9,7 @@ Item {
 
     // Ensure the stash directory exists
     Component.onCompleted: {
-        island.exec("mkdir -p ~/.cache/qs_stash")
+        island.exec("mkdir -p ~/Downloads/qs_stash")
     }
 
     // The model is now hosted in DynamicIsland.qml as island.stashModel
@@ -93,7 +93,7 @@ Item {
                                 anchors.centerIn: parent
                                 text: {
                                     if (isDir) {
-                                        if (filePath.indexOf("/group_") !== -1) return "󰏰"; // box icon
+                                        if (filePath.indexOf("/group_") !== -1) return ""; // box icon
                                         return "󰉋";
                                     }
                                     if (imgPreview.status === Image.Ready) return "";
@@ -144,7 +144,7 @@ Item {
 
                                     Text {
                                         anchors.centerIn: parent
-                                        text: "󰓎" // star icon
+                                        text: isFav ? "󰓎" : "󰓒"
                                         color: isFav ? island.yellow : island.text
                                         font.family: "Iosevka Nerd Font"
                                         font.pixelSize: island.s(14)

@@ -11,7 +11,7 @@ Row {
         spacing: island.s(8)
 
         Text {
-            text: "󰏰 " // box icon
+            text: " " // box icon
             font.family: "Iosevka Nerd Font"
             font.pixelSize: island.s(22)
             color: island.mauve

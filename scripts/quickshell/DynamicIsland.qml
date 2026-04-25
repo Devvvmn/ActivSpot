@@ -158,7 +158,7 @@ PanelWindow {
 
     Process {
         id: stashScanner
-        command: ["bash", "-c", "mkdir -p ~/.cache/qs_stash && ls -1p ~/.cache/qs_stash/ 2>/dev/null | grep -v 'drop_debug.txt' | grep -v 'drop_log.txt'"]
+        command: ["bash", "-c", "mkdir -p \"$HOME/Downloads/qs_stash\" && ls -1p \"$HOME/Downloads/qs_stash/\" 2>/dev/null | grep -v 'drop_debug.txt' | grep -v 'drop_log.txt' | sed \"s|^|$HOME/Downloads/qs_stash/|\""]
         stdout: StdioCollector {
             onStreamFinished: {
                 islandWindow._isRefreshingStash = true;
@@ -167,10 +167,10 @@ PanelWindow {
                 for (let i = 0; i < files.length; i++) {
                     if (files[i]) {
                         var isDirectory = files[i].endsWith('/');
-                        var rawName = isDirectory ? files[i].slice(0, -1) : files[i];
+                        var fullPath = isDirectory ? files[i].slice(0, -1) : files[i];
                         islandWindow.stashModel.append({
-                            fileURL: "file:///home/jaya/.cache/qs_stash/" + rawName,
-                            filePath: "/home/jaya/.cache/qs_stash/" + rawName,
+                            fileURL: "file://" + fullPath,
+                            filePath: fullPath,
                             isFav: false,
                             isDir: isDirectory
                         });
@@ -240,7 +240,7 @@ PanelWindow {
 
     // Bubble slot ordering — inner index = closest to island
     property var leftSlots:  ["vpn", "music", "discord"]
-    property var rightSlots: ["rec", "notif", "clock"]
+    property var rightSlots: ["rec", "notif", "stash", "clock"]
 
     // Clock / Weather
     property string timeStr:     ""
@@ -271,6 +271,7 @@ PanelWindow {
         if (id === "vpn")     return vpnBadge
         if (id === "rec")     return recBubble
         if (id === "notif")   return badgeBubble
+        if (id === "stash")   return stashBubble
         if (id === "clock")   return clockBubble
         return null
     }
@@ -410,31 +411,31 @@ PanelWindow {
     }
 
     function handleImageDrop(urls) {
-        islandWindow.exec("echo 'drop received: " + urls + "' >> ~/.cache/qs_stash/drop_debug.txt");
+        islandWindow.exec("echo 'drop received: " + urls + "' >> ~/Downloads/qs_stash/drop_debug.txt");
         var hasImage = false;
         
-        var targetDir = "~/.cache/qs_stash/";
+        var targetDir = "~/Downloads/qs_stash/";
         if (urls.length > 1) {
             var groupName = "group_" + Date.now();
-            targetDir = "~/.cache/qs_stash/" + groupName + "/";
+            targetDir = "~/Downloads/qs_stash/" + groupName + "/";
             islandWindow.exec("mkdir -p " + targetDir);
         }
         
         for (var i = 0; i < urls.length; i++) {
             var url = urls[i].toString().trim();
-            islandWindow.exec("echo 'processing url: " + url + "' >> ~/.cache/qs_stash/drop_debug.txt");
+            islandWindow.exec("echo 'processing url: " + url + "' >> ~/Downloads/qs_stash/drop_debug.txt");
             // We now support ALL file types, not just images!
             if (url.startsWith("http://") || url.startsWith("https://")) {
-                islandWindow.exec("mkdir -p ~/.cache/qs_stash && wget -q -P " + targetDir + " '" + url + "' &");
+                islandWindow.exec("mkdir -p ~/Downloads/qs_stash && wget -q -P " + targetDir + " '" + url + "' &");
                 hasImage = true;
             } else if (url.startsWith("file://")) {
                 var filePath = decodeURIComponent(url.replace('file://', ''));
-                islandWindow.exec("mkdir -p ~/.cache/qs_stash && cp -r '" + filePath + "' " + targetDir + " >> ~/.cache/qs_stash/drop_log.txt 2>&1 &");
+                islandWindow.exec("mkdir -p ~/Downloads/qs_stash && cp -r '" + filePath + "' " + targetDir + " >> ~/Downloads/qs_stash/drop_log.txt 2>&1 &");
                 hasImage = true;
             } else if (url.startsWith("data:image/")) {
                 // Complex to parse inline
             } else {
-                islandWindow.exec("mkdir -p ~/.cache/qs_stash && cp -r '" + url + "' " + targetDir + " >> ~/.cache/qs_stash/drop_log.txt 2>&1 &");
+                islandWindow.exec("mkdir -p ~/Downloads/qs_stash && cp -r '" + url + "' " + targetDir + " >> ~/Downloads/qs_stash/drop_log.txt 2>&1 &");
                 hasImage = true;
             }
         }
@@ -754,6 +755,18 @@ PanelWindow {
                     let d = JSON.parse(this.text.trim())
                     if (d.left  && Array.isArray(d.left))  islandWindow.leftSlots  = d.left
                     if (d.right && Array.isArray(d.right)) islandWindow.rightSlots = d.right
+                    // Merge any new bubble IDs not present in saved slots
+                    let all = islandWindow.leftSlots.concat(islandWindow.rightSlots)
+                    let r = islandWindow.rightSlots.slice()
+                    let l = islandWindow.leftSlots.slice()
+                    for (let id of ["rec", "notif", "stash", "clock"]) {
+                        if (all.indexOf(id) < 0) r.push(id)
+                    }
+                    for (let id of ["vpn", "music", "discord"]) {
+                        if (all.indexOf(id) < 0) l.push(id)
+                    }
+                    islandWindow.rightSlots = r
+                    islandWindow.leftSlots  = l
                 } catch(e) { console.warn(e) }
             }
         }
@@ -816,6 +829,7 @@ PanelWindow {
             if (vpnBadge.visible)      m = Math.min(m, vpnBadge.x);
             if (badgeBubble.visible)   m = Math.min(m, badgeBubble.x);
             if (recBubble.visible)     m = Math.min(m, recBubble.x);
+            if (stashBubble.visible)   m = Math.min(m, stashBubble.x);
             if (clockBubble.visible)   m = Math.min(m, clockBubble.x);
             return Math.max(0, m - s(8));
         }
@@ -827,6 +841,7 @@ PanelWindow {
             if (vpnBadge.visible)      m = Math.max(m, vpnBadge.x + vpnBadge.width);
             if (badgeBubble.visible)   m = Math.max(m, badgeBubble.x + badgeBubble.width);
             if (recBubble.visible)     m = Math.max(m, recBubble.x + recBubble.width);
+            if (stashBubble.visible)   m = Math.max(m, stashBubble.x + stashBubble.width);
             if (clockBubble.visible)   m = Math.max(m, clockBubble.x + clockBubble.width);
             return Math.min(Screen.width, m + s(8));
         }
@@ -1391,6 +1406,14 @@ PanelWindow {
         island: islandWindow
         z: 10
         homeX: homeXFor("rec")
+        homeY: s(8) + (islandShape.collapsedH - height) / 2
+    }
+
+    StashMiniBubble {
+        id: stashBubble
+        island: islandWindow
+        z: 10
+        homeX: homeXFor("stash")
         homeY: s(8) + (islandShape.collapsedH - height) / 2
     }
 
