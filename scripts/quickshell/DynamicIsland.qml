@@ -51,6 +51,7 @@ PanelWindow {
     property bool expanded:      false
     property bool hovered:       false
     property bool isDragHovered: false
+    property bool _dropJustOccurred: false
     onIsDragHoveredChanged: {
         if (!isDragHovered) dragHoverCollapseTimer.restart()
         else dragHoverCollapseTimer.stop()
@@ -59,7 +60,9 @@ PanelWindow {
         id: dragHoverCollapseTimer
         interval: 100
         onTriggered: {
-            if (!islandWindow.isDragHovered) islandWindow.expanded = false;
+            if (!islandWindow.isDragHovered && !islandWindow._dropJustOccurred)
+                islandWindow.expanded = false;
+            islandWindow._dropJustOccurred = false;
         }
     }
     property bool userIsSeeking: false
@@ -82,7 +85,7 @@ PanelWindow {
         if (notifHistory.count > 0 || islandWindow.notifActive) p.push("notifs");
         return p;
     }
-    property int stashExpandedHeight: 160
+    property int stashExpandedHeight: 260
     property bool _isRefreshingStash: false
     onAvailablePagesChanged: {
         if (!_isRefreshingStash && availablePages.indexOf(currentPage) < 0)
@@ -1167,11 +1170,11 @@ PanelWindow {
             }
 
             onDropped: (drop) => {
-                islandWindow.isDragHovered = false;
                 if (drop.hasUrls) {
                     _justDropped = true;
+                    islandWindow._dropJustOccurred = true;
                     islandWindow.handleImageDrop(drop.urls);
-                    islandWindow.expanded = false;
+                    islandWindow.isDragHovered = false;
                     drop.accept();
                 }
             }
