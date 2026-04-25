@@ -51,6 +51,17 @@ PanelWindow {
     property bool expanded:      false
     property bool hovered:       false
     property bool isDragHovered: false
+    onIsDragHoveredChanged: {
+        if (!isDragHovered) dragHoverCollapseTimer.restart()
+        else dragHoverCollapseTimer.stop()
+    }
+    Timer {
+        id: dragHoverCollapseTimer
+        interval: 100
+        onTriggered: {
+            if (!islandWindow.isDragHovered) islandWindow.expanded = false;
+        }
+    }
     property bool userIsSeeking: false
 
     // Page navigation: "clock" | "music" | "notifs"
@@ -71,6 +82,7 @@ PanelWindow {
         if (notifHistory.count > 0 || islandWindow.notifActive) p.push("notifs");
         return p;
     }
+    property int stashExpandedHeight: 160
     property bool _isRefreshingStash: false
     onAvailablePagesChanged: {
         if (!_isRefreshingStash && availablePages.indexOf(currentPage) < 0)
@@ -900,12 +912,13 @@ PanelWindow {
         property int collapsedH: s(48)
         property int expandedW: {
             if (islandWindow.currentPage === "stash") {
-                return Math.min(s(700), Screen.width - s(32));
+                return Math.min(s(750), Screen.width - s(32));
             }
             return Math.min(s(760), Screen.width - s(32));
         }
         property int expandedH: {
             if (islandWindow.notifActive) return s(88);
+            if (islandWindow.currentPage === "stash") return s(islandWindow.stashExpandedHeight);
             let page = islandWindow.pageRegistry.find(p => p.name === islandWindow.currentPage);
             return page ? s(page.expandedH) : s(350);
         }
@@ -1150,9 +1163,6 @@ PanelWindow {
 
             onExited: {
                 islandWindow.isDragHovered = false;
-                if (!_justDropped) {
-                    islandWindow.expanded = false;
-                }
                 _justDropped = false;
             }
 
@@ -1161,7 +1171,7 @@ PanelWindow {
                 if (drop.hasUrls) {
                     _justDropped = true;
                     islandWindow.handleImageDrop(drop.urls);
-                    islandWindow.expanded = true;
+                    islandWindow.expanded = false;
                     drop.accept();
                 }
             }
