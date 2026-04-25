@@ -427,31 +427,30 @@ PanelWindow {
     }
 
     function handleImageDrop(urls) {
-        islandWindow.exec("echo 'drop received: " + urls + "' >> ~/Downloads/qs_stash/drop_debug.txt");
+        islandWindow.exec("echo 'drop received: " + urls + "' >> $HOME/Downloads/qs_stash/drop_debug.txt");
         var hasImage = false;
-        
-        var targetDir = "~/Downloads/qs_stash/";
+
+        var targetDir = "$HOME/Downloads/qs_stash/";
         if (urls.length > 1) {
             var groupName = "group_" + Date.now();
-            targetDir = "~/Downloads/qs_stash/" + groupName + "/";
+            targetDir = "$HOME/Downloads/qs_stash/" + groupName + "/";
             islandWindow.exec("mkdir -p " + targetDir);
         }
-        
+
         for (var i = 0; i < urls.length; i++) {
             var url = urls[i].toString().trim();
-            islandWindow.exec("echo 'processing url: " + url + "' >> ~/Downloads/qs_stash/drop_debug.txt");
-            // We now support ALL file types, not just images!
+            islandWindow.exec("echo 'processing url: " + url + "' >> $HOME/Downloads/qs_stash/drop_debug.txt");
             if (url.startsWith("http://") || url.startsWith("https://")) {
-                islandWindow.exec("mkdir -p ~/Downloads/qs_stash && wget -q -P ~/Downloads/qs_stash/ " + islandWindow.shellEsc(url) + " &");
+                islandWindow.exec("mkdir -p $HOME/Downloads/qs_stash && wget -q -P $HOME/Downloads/qs_stash/ " + islandWindow.shellEsc(url) + " &");
                 hasImage = true;
             } else if (url.startsWith("file://")) {
                 var filePath = decodeURIComponent(url.replace('file://', ''));
-                islandWindow.exec("mkdir -p ~/Downloads/qs_stash && cp -r " + islandWindow.shellEsc(filePath) + " " + islandWindow.shellEsc(targetDir) + " >> ~/Downloads/qs_stash/drop_log.txt 2>&1 &");
+                islandWindow.exec("mkdir -p $HOME/Downloads/qs_stash && cp -r " + islandWindow.shellEsc(filePath) + " " + targetDir + " >> $HOME/Downloads/qs_stash/drop_log.txt 2>&1 &");
                 hasImage = true;
             } else if (url.startsWith("data:image/")) {
                 // Complex to parse inline
             } else {
-                islandWindow.exec("mkdir -p ~/Downloads/qs_stash && cp -r " + islandWindow.shellEsc(url) + " " + islandWindow.shellEsc(targetDir) + " >> ~/Downloads/qs_stash/drop_log.txt 2>&1 &");
+                islandWindow.exec("mkdir -p $HOME/Downloads/qs_stash && cp -r " + islandWindow.shellEsc(url) + " " + targetDir + " >> $HOME/Downloads/qs_stash/drop_log.txt 2>&1 &");
                 hasImage = true;
             }
         }
