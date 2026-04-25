@@ -50,15 +50,16 @@ Item {
         property string originalPath: ""
         property string outPath: ""
         command: ["bash", "-c",
-            "size=$(stat -c%s \"" + originalPath + "\" 2>/dev/null || echo 0); echo \"SIZE|$size\";" +
-            "f=\"" + originalPath + "\"; out=\"" + outPath + "\"; q=5; step=0;" +
+            "size=$(stat -c%s \"$1\" 2>/dev/null || echo 0); echo \"SIZE|$size\";" +
+            "f=\"$1\"; out=\"$2\"; q=5; step=0;" +
             "while true; do" +
             "  ffmpeg -y -i \"$f\" -q:v $q -loglevel error \"$out\";" +
             "  size=$(stat -c%s \"$out\" 2>/dev/null || echo 0);" +
             "  step=$((step+1)); echo \"STEP|$step\";" +
             "  if [ \"$size\" -lt 1048576 ] || [ $q -ge 31 ]; then break; fi;" +
             "  q=$((q+4));" +
-            "done; echo \"CSIZE|$size\""
+            "done; echo \"CSIZE|$size\"",
+            "--", originalPath, outPath
         ]
         stdout: SplitParser {
             splitMarker: "\n"
@@ -87,8 +88,9 @@ Item {
         property string inPath: ""
         property string outPath: ""
         command: ["bash", "-c",
-            "ffmpeg -y -i \"" + inPath + "\" -vf scale=iw/2:ih/2 -q:v 31 -loglevel error \"" + outPath + "\";" +
-            "size=$(stat -c%s \"" + outPath + "\" 2>/dev/null || echo 0); echo \"CSIZE|$size\""
+            "ffmpeg -y -i \"$1\" -vf scale=iw/2:ih/2 -q:v 31 -loglevel error \"$2\";" +
+            "size=$(stat -c%s \"$2\" 2>/dev/null || echo 0); echo \"CSIZE|$size\"",
+            "--", inPath, outPath
         ]
         stdout: SplitParser {
             splitMarker: "\n"
@@ -118,8 +120,9 @@ Item {
             var lines = discoverOut.text.trim().split('\n')
             for (var i = 0; i < lines.length; i++) {
                 var parts = lines[i].split('\t')
-                if (parts.length >= 2)
-                    deviceModel.append({ alias: parts[0].trim(), ip: parts[1].trim() })
+                var ip = parts[1].trim()
+                if (parts.length >= 2 && /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ip))
+                    deviceModel.append({ alias: parts[0].trim(), ip: ip })
             }
             root.lsState = "ready"
         }
