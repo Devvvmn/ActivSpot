@@ -2,10 +2,94 @@ import QtQuick
 import QtQuick.Layouts
 import Qt.labs.folderlistmodel
 import QtCore
-
+import QtQuick.Effects
+import Quickshell
+import Quickshell.Io
 Item {
     id: root
+    width: parent ? parent.width : 0
+    height: parent ? parent.height : 0
     property var island
+
+    property bool isCompressingMode: false
+    property int modelCount: island && island.stashModel ? island.stashModel.count : 0
+    onModelCountChanged: updateHeight()
+    onIsCompressingModeChanged: updateHeight()
+    onIslandChanged: updateHeight()
+
+    function updateHeight() {
+        if (!island) return;
+        if (isCompressingMode) {
+            island.stashExpandedHeight = 180;
+        } else {
+            var count = modelCount;
+            var rows = Math.ceil(Math.max(1, count) / 4.0);
+            if (rows > 3) rows = 3;
+            island.stashExpandedHeight = (128 * rows) + 32;
+        }
+    }
+    property string activeCompressFile: ""
+    property string activeCompressOutPath: ""
+    property string activeCompressName: ""
+    property string activeCompressType: ""
+    property string activeCompressSize: ""
+    property string compressedFileSize: ""
+    property real compressProgress: 0.0
+    property bool compressFinished: false
+
+    Process {
+        id: compressProcess
+        property string originalPath: ""
+        property string outPath: ""
+        command: ["bash", "-c", "size=$(stat -c%s \"" + originalPath + "\" 2>/dev/null || echo 0); echo \"SIZE|$size\"; f=\"" + originalPath + "\"; out=\"" + outPath + "\"; q=5; step=0; while true; do ffmpeg -y -i \"$f\" -q:v $q -loglevel error \"$out\"; size=$(stat -c%s \"$out\" 2>/dev/null || echo 0); step=$((step+1)); echo \"STEP|$step\"; if [ \"$size\" -lt 1048576 ] || [ $q -ge 31 ]; then break; fi; q=$((q+4)); done; echo \"CSIZE|$size\""]
+        stdout: SplitParser {
+            splitMarker: "\n"
+            onRead: (line) => {
+                let text = line.trim();
+                if (text.startsWith("SIZE|")) {
+                    let s = parseInt(text.split("|")[1]);
+                    if (s > 1048576) root.activeCompressSize = (s / 1048576).toFixed(1) + " MB";
+                    else root.activeCompressSize = (s / 1024).toFixed(0) + " KB";
+                } else if (text.startsWith("CSIZE|")) {
+                    let s = parseInt(text.split("|")[1]);
+                    if (s > 1048576) root.compressedFileSize = (s / 1048576).toFixed(1) + " MB";
+                    else root.compressedFileSize = (s / 1024).toFixed(0) + " KB";
+                } else if (text.startsWith("STEP|")) {
+                    let step = parseInt(text.split("|")[1]);
+                    root.compressProgress = Math.min(0.99, step / 7.0);
+                }
+            }
+        }
+        onExited: {
+            root.compressProgress = 1.0;
+            root.compressFinished = true;
+            island.stashModel.insert(0, { fileURL: "file://" + outPath, filePath: outPath, isFav: false, isDir: false });
+        }
+    }
+
+    Process {
+        id: moreCompressProcess
+        property string inPath: ""
+        property string outPath: ""
+        command: ["bash", "-c", "ffmpeg -y -i \"" + inPath + "\" -vf scale=iw/2:ih/2 -q:v 31 -loglevel error \"" + outPath + "\"; size=$(stat -c%s \"" + outPath + "\" 2>/dev/null || echo 0); echo \"CSIZE|$size\""]
+        stdout: SplitParser {
+            splitMarker: "\n"
+            onRead: (line) => {
+                let text = line.trim();
+                if (text.startsWith("CSIZE|")) {
+                    let s = parseInt(text.split("|")[1]);
+                    if (s > 1048576) root.compressedFileSize = (s / 1048576).toFixed(1) + " MB";
+                    else root.compressedFileSize = (s / 1024).toFixed(0) + " KB";
+                }
+            }
+        }
+        onExited: {
+            root.compressProgress = 1.0;
+            root.compressFinished = true;
+            island.stashModel.insert(0, { fileURL: "file://" + outPath, filePath: outPath, isFav: false, isDir: false });
+            root.activeCompressOutPath = outPath;
+        }
+    }
 
     // Ensure the stash directory exists
     Component.onCompleted: {
@@ -14,15 +98,27 @@ Item {
 
     // The model is now hosted in DynamicIsland.qml as island.stashModel
 
-    Item {
+    HoverHandler {
+        id: pageHover
+    }
+
+    RowLayout {
         anchors.fill: parent
         anchors.margins: island.s(12)
+        spacing: island.s(12)
 
         Rectangle {
             id: dropZone
-            anchors.fill: parent
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.preferredWidth: parent.width * 0.80 - island.s(6)
             color: island.isDragHovered ? Qt.rgba(island.mauve.r, island.mauve.g, island.mauve.b, 0.2) : "transparent"
             radius: island.s(16)
+
+            Item {
+                id: gridViewContainer
+                anchors.fill: parent
+                visible: !root.isCompressingMode
 
             ColumnLayout {
                 anchors.centerIn: parent
@@ -57,11 +153,15 @@ Item {
 
             GridView {
                 id: imageGrid
-                anchors.fill: parent
-                anchors.margins: 0
+                anchors.left: parent.left
+                anchors.leftMargin: island.s(16)
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.topMargin: island.s(4)
+                width: cellWidth * 4
                 model: island.stashModel
-                cellWidth: island.s(110)
-                cellHeight: island.s(110)
+                cellWidth: island.s(128)
+                cellHeight: island.s(128)
                 clip: true
 
                 delegate: Item {
@@ -71,9 +171,11 @@ Item {
                     MouseArea {
                         id: delegateMouse
                         anchors.fill: parent
-                        anchors.margins: island.s(5)
+                        anchors.margins: island.s(4)
                         drag.target: dragItem
                         hoverEnabled: true
+
+                        // Drag bounds checking moved to dragItem
 
                         Rectangle {
                             anchors.fill: parent
@@ -87,6 +189,18 @@ Item {
                                 source: isDir ? "" : fileURL
                                 fillMode: Image.PreserveAspectCrop
                                 visible: !isDir && status === Image.Ready
+                                layer.enabled: true
+                                layer.effect: MultiEffect {
+                                    maskEnabled: true
+                                    maskSource: ShaderEffectSource {
+                                        sourceItem: Rectangle {
+                                            width: imgPreview.width
+                                            height: imgPreview.height
+                                            radius: island.s(8)
+                                        }
+                                        hideSource: true
+                                    }
+                                }
                             }
 
                             Text {
@@ -119,9 +233,24 @@ Item {
                                 Drag.dragType: Drag.Automatic
                                 Drag.supportedActions: Qt.CopyAction
                                 Drag.mimeData: { "text/uri-list": fileURL }
+                                
                                 Drag.onActiveChanged: {
                                     if (Drag.active) {
+                                        outOfBoundsTimer.start()
+                                    } else {
+                                        outOfBoundsTimer.stop()
                                         island.expanded = false;
+                                    }
+                                }
+
+                                Timer {
+                                    id: outOfBoundsTimer
+                                    interval: 200
+                                    repeat: true
+                                    onTriggered: {
+                                        if (dragItem.Drag.active && !pageHover.hovered) {
+                                            island.expanded = false;
+                                        }
                                     }
                                 }
                             }
@@ -193,6 +322,320 @@ Item {
                                 }
                             }
                         }
+                    }
+                }
+            }
+            }
+
+            Item {
+                id: detailViewContainer
+                anchors.fill: parent
+                visible: root.isCompressingMode
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.margins: island.s(12)
+                    spacing: island.s(16)
+
+                    Rectangle {
+                        Layout.preferredWidth: island.s(120)
+                        Layout.preferredHeight: island.s(120)
+                        Layout.alignment: Qt.AlignVCenter
+                        color: island.surface1
+                        radius: island.s(12)
+                        clip: true
+
+                        Image {
+                            id: stashImg
+                            anchors.fill: parent
+                            source: root.activeCompressFile !== "" ? "file://" + root.activeCompressFile : ""
+                            fillMode: Image.PreserveAspectCrop
+                            layer.enabled: true
+                            layer.effect: MultiEffect {
+                                maskEnabled: true
+                                maskSource: ShaderEffectSource {
+                                    sourceItem: Rectangle {
+                                        width: stashImg.width
+                                        height: stashImg.height
+                                        radius: island.s(12)
+                                    }
+                                    hideSource: true
+                                }
+                            }
+                        }
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        spacing: island.s(4)
+
+                        Text {
+                            text: root.activeCompressName
+                            font.family: "JetBrains Mono"
+                            font.pixelSize: island.s(16)
+                            font.bold: true
+                            color: "white"
+                            Layout.fillWidth: true
+                            elide: Text.ElideRight
+                        }
+
+                        RowLayout {
+                            spacing: island.s(8)
+                            Text {
+                                text: "󰈔 " + root.activeCompressType
+                                color: island.subtext0
+                                font.family: "JetBrains Mono"
+                                font.pixelSize: island.s(10)
+                            }
+                            Text { text: "|"; color: island.surface2; font.pixelSize: island.s(10) }
+                            Text {
+                                text: "󰋊 " + root.activeCompressSize + (root.compressFinished && root.compressedFileSize !== "" ? "  " + root.compressedFileSize : "")
+                                color: island.subtext0
+                                font.family: "JetBrains Mono"
+                                font.pixelSize: island.s(10)
+                            }
+                        }
+
+                        Item { Layout.fillHeight: true } // Spacer
+
+                        // Status Pill
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: island.s(26)
+                            color: "transparent"
+                            border.color: island.surface2
+                            border.width: island.s(1)
+                            radius: island.s(16)
+                            clip: true
+
+                            RowLayout {
+                                anchors.centerIn: parent
+                                spacing: island.s(8)
+                                visible: root.compressFinished || !root.isCompressingMode || root.compressProgress === 0.0
+
+                                Text {
+                                    text: root.compressFinished ? "󰄬" : "󰆚"
+                                    color: "white"
+                                    font.family: "Iosevka Nerd Font"
+                                    font.pixelSize: island.s(12)
+                                }
+                                Text {
+                                    text: root.compressFinished ? "Compressed successfully" : "Ready to compress"
+                                    color: "white"
+                                    font.family: "JetBrains Mono"
+                                    font.pixelSize: island.s(10)
+                                }
+                            }
+
+                            Rectangle {
+                                anchors.left: parent.left
+                                anchors.top: parent.top
+                                anchors.bottom: parent.bottom
+                                width: parent.width * root.compressProgress
+                                color: Qt.rgba(island.mauve.r, island.mauve.g, island.mauve.b, 0.3)
+                                visible: root.compressProgress > 0.0 && !root.compressFinished
+                            }
+                            RowLayout {
+                                anchors.centerIn: parent
+                                spacing: island.s(8)
+                                visible: root.compressProgress > 0.0 && !root.compressFinished
+
+                                Text {
+                                    text: "󱑀"
+                                    color: island.mauve
+                                    font.family: "Iosevka Nerd Font"
+                                    font.pixelSize: island.s(12)
+                                    RotationAnimator on rotation {
+                                        running: root.compressProgress > 0.0 && !root.compressFinished
+                                        from: 0; to: 360; duration: 1000; loops: Animation.Infinite
+                                    }
+                                }
+                                Text {
+                                    text: "Compressing " + Math.round(root.compressProgress * 100) + "%"
+                                    color: "white"
+                                    font.family: "JetBrains Mono"
+                                    font.pixelSize: island.s(10)
+                                }
+                            }
+                        }
+
+                        Item { Layout.fillHeight: true } // Spacer
+
+                        // Buttons
+                        RowLayout {
+                            spacing: island.s(12)
+                            Layout.fillWidth: true
+
+                            Rectangle {
+                                Layout.preferredWidth: island.s(72)
+                                Layout.preferredHeight: island.s(32)
+                                radius: island.s(10)
+                                color: copyMouse.containsMouse ? island.surface1 : "transparent"
+                                border.color: island.surface2
+                                border.width: island.s(1)
+                                RowLayout {
+                                    anchors.centerIn: parent
+                                    spacing: island.s(6)
+                                    Text { text: "󰆏"; color: "white"; font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(14) }
+                                    Text { text: "Copy"; color: island.subtext0; font.family: "JetBrains Mono"; font.pixelSize: island.s(10) }
+                                }
+                                MouseArea {
+                                    id: copyMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    onClicked: {
+                                        if (root.activeCompressOutPath !== "") {
+                                            island.exec("wl-copy -t image/jpeg < '" + root.activeCompressOutPath + "'")
+                                            island.playSound("notification")
+                                        }
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.preferredWidth: island.s(72)
+                                Layout.preferredHeight: island.s(32)
+                                radius: island.s(10)
+                                color: closeMouse.containsMouse ? island.surface1 : "transparent"
+                                border.color: island.surface2
+                                border.width: island.s(1)
+                                RowLayout {
+                                    anchors.centerIn: parent
+                                    spacing: island.s(6)
+                                    Text { text: "󰅖"; color: "white"; font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(14) }
+                                    Text { text: "Close"; color: island.subtext0; font.family: "JetBrains Mono"; font.pixelSize: island.s(10) }
+                                }
+                                MouseArea {
+                                    id: closeMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    onClicked: root.isCompressingMode = false;
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.preferredWidth: island.s(72)
+                                Layout.preferredHeight: island.s(32)
+                                radius: island.s(10)
+                                color: moreMouse.containsMouse ? island.surface1 : "transparent"
+                                border.color: island.surface2
+                                border.width: island.s(1)
+                                visible: root.compressFinished
+                                RowLayout {
+                                    anchors.centerIn: parent
+                                    spacing: island.s(6)
+                                    Text { text: "󰩨"; color: "white"; font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(14) }
+                                    Text { text: "Resize"; color: island.subtext0; font.family: "JetBrains Mono"; font.pixelSize: island.s(10) }
+                                }
+                                MouseArea {
+                                    id: moreMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    onClicked: {
+                                        if (root.activeCompressOutPath !== "") {
+                                            root.compressFinished = false;
+                                            root.compressProgress = 0.5;
+                                            var newOutPath = root.activeCompressOutPath.replace(".jpg", "_min.jpg");
+                                            moreCompressProcess.inPath = root.activeCompressOutPath;
+                                            moreCompressProcess.outPath = newOutPath;
+                                            moreCompressProcess.running = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            id: compressZone
+            Layout.fillHeight: true
+            Layout.preferredWidth: parent.width * 0.20 - island.s(6)
+            color: island.surface0
+            radius: island.s(16)
+            
+            Image {
+                anchors.fill: parent
+                source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><rect width='100%' height='100%' fill='none' rx='" + island.s(16) + "' stroke='%23585b70' stroke-width='" + island.s(2) + "' stroke-dasharray='" + island.s(8) + "'/></svg>"
+                fillMode: Image.Stretch
+            }
+
+            ColumnLayout {
+                anchors.centerIn: parent
+                spacing: island.s(8)
+
+                Text {
+                    text: "󱇤" // compress icon
+                    font.family: "Iosevka Nerd Font"
+                    font.pixelSize: island.s(28)
+                    color: island.text
+                    Layout.alignment: Qt.AlignHCenter
+                }
+
+                Text {
+                    text: "Compressor"
+                    font.family: "JetBrains Mono"
+                    font.pixelSize: island.s(14)
+                    font.bold: true
+                    color: island.text
+                    Layout.alignment: Qt.AlignHCenter
+                }
+
+                Text {
+                    text: "Drop to compress"
+                    font.family: "JetBrains Mono"
+                    font.pixelSize: island.s(11)
+                    color: island.subtext0
+                    Layout.alignment: Qt.AlignHCenter
+                }
+            }
+
+            DropArea {
+                anchors.fill: parent
+                keys: ["text/uri-list"]
+                
+                property bool isHovered: false
+                onEntered: {
+                    isHovered = true
+                    island.isDragHovered = true
+                }
+                onExited: {
+                    isHovered = false
+                    island.isDragHovered = false
+                }
+                
+                Rectangle {
+                    anchors.fill: parent
+                    radius: island.s(16)
+                    color: parent.isHovered ? Qt.rgba(island.green.r, island.green.g, island.green.b, 0.2) : "transparent"
+                }
+
+                onDropped: (drop) => {
+                    isHovered = false
+                    if (drop.hasUrls) {
+                        var url = drop.urls[0].toString().trim();
+                        if (url.startsWith("file://")) {
+                            var filePath = decodeURIComponent(url.replace('file://', ''));
+                            var fileName = filePath.split('/').pop();
+                            var baseName = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+                            var outPath = "/home/jaya/Downloads/qs_stash/" + baseName + "_compressed.jpg";
+                            
+                            root.activeCompressFile = filePath;
+                            root.activeCompressOutPath = outPath;
+                            root.activeCompressName = fileName;
+                            root.activeCompressType = fileName.split('.').pop().toUpperCase() + " Image";
+                            root.compressProgress = 0.0;
+                            root.compressFinished = false;
+                            root.isCompressingMode = true;
+                            
+                            compressProcess.originalPath = filePath;
+                            compressProcess.outPath = outPath;
+                            compressProcess.running = true;
+                        }
+                        drop.accept();
                     }
                 }
             }
