@@ -179,6 +179,45 @@ Variants {
             property var leftAppletOrder:  ["help", "ws"]
             property var rightAppletOrder: ["tray", "spacer", "kb", "wifi", "bt", "battery"]
 
+            // ── Edit mode — toggled by double-tap on island ───────────
+            property bool barEditMode: false
+
+            // IPC: island writes "1"/"0" to /tmp/qs_bar_edit
+            Process {
+                id: editModeWatcher; running: true
+                command: ["bash", "-c",
+                    "inotifywait -qq -e close_write,moved_to --include 'qs_bar_edit$' /tmp/ 2>/dev/null; " +
+                    "[ -f /tmp/qs_bar_edit ] && cat /tmp/qs_bar_edit && rm -f /tmp/qs_bar_edit"
+                ]
+                stdout: StdioCollector {
+                    onStreamFinished: {
+                        barWindow.barEditMode = (this.text.trim() === "1");
+                        editModeWatcher.running = false;
+                        editModeWatcher.running = true;
+                    }
+                }
+            }
+
+            // IPC: AppletPickerPage writes /tmp/qs_bar_reload after updating layout JSON
+            Process {
+                id: layoutReloadWatcher; running: true
+                command: ["bash", "-c",
+                    "inotifywait -qq -e close_write,moved_to --include 'qs_bar_reload$' /tmp/ 2>/dev/null; " +
+                    "rm -f /tmp/qs_bar_reload; cat ~/.cache/quickshell/topbar_layout.json 2>/dev/null || echo '{}'"
+                ]
+                stdout: StdioCollector {
+                    onStreamFinished: {
+                        try {
+                            let d = JSON.parse(this.text.trim());
+                            if (d.left  && Array.isArray(d.left))  barWindow.leftAppletOrder  = d.left;
+                            if (d.right && Array.isArray(d.right)) barWindow.rightAppletOrder = d.right;
+                        } catch(e) {}
+                        layoutReloadWatcher.running = false;
+                        layoutReloadWatcher.running = true;
+                    }
+                }
+            }
+
             Process {
                 id: layoutLoader
                 running: true
@@ -212,6 +251,13 @@ Variants {
                     "qs_save",
                     JSON.stringify({ left: barWindow.leftAppletOrder, right: barWindow.rightAppletOrder })
                 ]);
+            }
+
+            // Called by BarZone.snapApplet — single write point, no circular binding
+            function updateAppletOrder(zoneSide, newOrder) {
+                if (zoneSide === "left")  barWindow.leftAppletOrder  = newOrder;
+                else                      barWindow.rightAppletOrder = newOrder;
+                barWindow.saveLayout();
             }
 
             onLeftAppletOrderChanged:  Qt.callLater(saveLayout)
@@ -494,11 +540,12 @@ Variants {
                     side: "left"
                     bar:  barWindow
                     appletOrder: barWindow.leftAppletOrder
-                    anchors.left:           parent.left
-                    anchors.right:          centerBox.left
-                    anchors.rightMargin:    barWindow.s(12)
-                    anchors.top:            parent.top
-                    anchors.bottom:         parent.bottom
+                    editMode:    barWindow.barEditMode
+                    anchors.left:        parent.left
+                    anchors.right:       centerBox.left
+                    anchors.rightMargin: barWindow.s(12)
+                    anchors.top:         parent.top
+                    anchors.bottom:      parent.bottom
                 }
 
                 // ── RIGHT ZONE ─────────────────────────────────────────
@@ -507,11 +554,12 @@ Variants {
                     side: "right"
                     bar:  barWindow
                     appletOrder: barWindow.rightAppletOrder
-                    anchors.right:          parent.right
-                    anchors.left:           centerBox.right
-                    anchors.leftMargin:     barWindow.s(12)
-                    anchors.top:            parent.top
-                    anchors.bottom:         parent.bottom
+                    editMode:    barWindow.barEditMode
+                    anchors.right:      parent.right
+                    anchors.left:       centerBox.right
+                    anchors.leftMargin: barWindow.s(12)
+                    anchors.top:        parent.top
+                    anchors.bottom:     parent.bottom
                 }
             }
         }

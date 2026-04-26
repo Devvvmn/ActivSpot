@@ -88,7 +88,8 @@ PanelWindow {
     property int stashExpandedHeight: 260
     property bool _isRefreshingStash: false
     onAvailablePagesChanged: {
-        if (!_isRefreshingStash && availablePages.indexOf(currentPage) < 0)
+        // Don't redirect away from appletPicker — it lives outside availablePages by design
+        if (!_isRefreshingStash && !islandWindow.editBarMode && availablePages.indexOf(currentPage) < 0)
             currentPage = availablePages.length > 0 ? availablePages[0] : "clock";
     }
     function navigateNext() {
@@ -396,22 +397,42 @@ PanelWindow {
     // To add a new page: create pages/YourPage.qml with `property var island`,
     // then add one entry below — everything else (loading, transitions, nav) is automatic.
     // =========================================================
+    // Edit-bar mode: double-tap collapsed island → AppletPickerPage
+    property bool editBarMode: false
+
+    function enterEditBarMode() {
+        editBarMode   = true
+        currentPage   = "appletPicker"
+        expanded      = true
+        Quickshell.execDetached(["bash", "-c", "printf '1' > /tmp/qs_bar_edit"])
+    }
+
+    function exitEditBarMode() {
+        if (!editBarMode) return
+        editBarMode = false
+        currentPage = (prevPage && prevPage !== "appletPicker") ? prevPage : "clock"
+        expanded    = false
+        Quickshell.execDetached(["bash", "-c", "printf '0' > /tmp/qs_bar_edit"])
+    }
+
     property var pageRegistry: [
-        { name: "clock",     expandedH: 350, comp: clockPageComp     },
-        { name: "recording", expandedH: 320, comp: recordingPageComp },
-        { name: "discord",   expandedH: 270, comp: discordPageComp   },
-        { name: "music",     expandedH: 630, comp: musicPageComp     },
-        { name: "notifs",    expandedH: 450, comp: notifsPageComp    },
-        { name: "stash",     expandedH: 260, comp: stashPageComp     },
+        { name: "clock",        expandedH: 350, comp: clockPageComp        },
+        { name: "recording",    expandedH: 320, comp: recordingPageComp    },
+        { name: "discord",      expandedH: 270, comp: discordPageComp      },
+        { name: "music",        expandedH: 630, comp: musicPageComp        },
+        { name: "notifs",       expandedH: 450, comp: notifsPageComp       },
+        { name: "stash",        expandedH: 260, comp: stashPageComp        },
+        { name: "appletPicker", expandedH: 380, comp: appletPickerPageComp },
     ]
 
-    Component { id: clockPageComp;     ClockPage     { island: islandWindow } }
-    Component { id: recordingPageComp; RecordingPage { island: islandWindow } }
-    Component { id: discordPageComp;   DiscordPage   { island: islandWindow } }
-    Component { id: musicPageComp;     MusicPage     { island: islandWindow } }
-    Component { id: notifsPageComp;    NotifsPage    { island: islandWindow } }
-    Component { id: notifExpandedComp; NotifExpandedPage { island: islandWindow } }
-    Component { id: stashPageComp;     StashPage     { island: islandWindow } }
+    Component { id: clockPageComp;        ClockPage        { island: islandWindow } }
+    Component { id: recordingPageComp;    RecordingPage    { island: islandWindow } }
+    Component { id: discordPageComp;      DiscordPage      { island: islandWindow } }
+    Component { id: musicPageComp;        MusicPage        { island: islandWindow } }
+    Component { id: notifsPageComp;       NotifsPage       { island: islandWindow } }
+    Component { id: notifExpandedComp;    NotifExpandedPage{ island: islandWindow } }
+    Component { id: stashPageComp;        StashPage        { island: islandWindow } }
+    Component { id: appletPickerPageComp; AppletPickerPage { island: islandWindow } }
 
     function dismissNotif() {
         notifHideTimer.stop();
@@ -819,7 +840,11 @@ PanelWindow {
             if (notifBadgeVisible) notifBadgeVisible = false;
             notifPageRevertTimer.stop();
         }
-        if (!expanded && currentPage === "notifs") notifPageRevertTimer.restart();
+        if (!expanded) {
+            if (currentPage === "notifs") notifPageRevertTimer.restart();
+            // Collapse from appletPicker also exits bar edit mode cleanly
+            if (editBarMode) exitEditBarMode();
+        }
     }
     onNotifActiveChanged: {
         if (notifActive) notifBadgeVisible = false;
@@ -1130,6 +1155,16 @@ PanelWindow {
             }
         }
 
+        // ── Double-tap → bar edit mode ────────────────────────────
+        TapHandler {
+            enabled: !islandWindow.expanded
+            acceptedButtons: Qt.LeftButton
+            // longPressThreshold kept at default; double-tap window = 300 ms
+            onDoubleTapped: {
+                if (!islandWindow.editBarMode) islandWindow.enterEditBarMode()
+            }
+        }
+
         // ── Scroll to switch pages (hover collapsed or expanded) ──
         // To add a new screen: 1) push its name into availablePages
         //                       2) create an Item with matching opacity condition
@@ -1386,7 +1421,10 @@ PanelWindow {
         }
 
         focus: islandWindow.expanded
-        Keys.onEscapePressed: { if (islandWindow.expanded) { islandWindow.expanded = false; event.accepted = true; } }
+        Keys.onEscapePressed: {
+            if (islandWindow.editBarMode) { islandWindow.exitEditBarMode(); event.accepted = true; }
+            else if (islandWindow.expanded) { islandWindow.expanded = false; event.accepted = true; }
+        }
     }
 
     // =========================================================

@@ -8,7 +8,7 @@ Rectangle {
 
     property bool isHovered: batMouse.containsMouse
 
-    radius: bar.s(14)
+    radius: bar.s(16)
     border.width: 1
     border.color: Qt.rgba(bar.text.r, bar.text.g, bar.text.b, 0.05)
     color: "transparent"
