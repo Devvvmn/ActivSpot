@@ -854,7 +854,20 @@ PanelWindow {
     // --- INPUT MASK ---
     // Covers island + badge bubble (no overlap with top bar)
     // =========================================================
-    mask: expanded ? null : maskedRegion
+    // In editBarMode: mask to island pill column only — bar applets on the
+    // sides are outside this region and receive drag events normally.
+    mask: editBarMode   ? editBarMaskedRegion
+        : expanded      ? null
+        : maskedRegion
+
+    Item {
+        id: editBarMaskBounds
+        x: islandShape.x - s(8)
+        y: 0
+        width:  islandShape.width + s(16)
+        height: islandShape.y + islandShape.expandedH + s(20)
+    }
+    Region { id: editBarMaskedRegion; item: editBarMaskBounds }
 
     Item {
         id: maskBounds
