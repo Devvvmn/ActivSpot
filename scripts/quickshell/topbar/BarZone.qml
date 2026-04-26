@@ -238,12 +238,13 @@ Item {
 
                 // Gentle wiggle in edit mode (iOS-style)
                 SequentialAnimation on rotation {
+                    id: wiggleAnim
                     running: barZone.editMode && !dragger.active && slotItem.modelData !== "spacer"
                     loops: Animation.Infinite
                     NumberAnimation { to:  1.2; duration: 180 + (slotItem.index * 37) % 80; easing.type: Easing.InOutSine }
                     NumberAnimation { to: -1.2; duration: 180 + (slotItem.index * 37) % 80; easing.type: Easing.InOutSine }
+                    onRunningChanged: if (!running) editOverlay.rotation = 0
                 }
-                onRunningChanged: if (!running) rotation = 0
             }
 
             // Scale up slightly when dragged
