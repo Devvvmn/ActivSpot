@@ -176,9 +176,11 @@ Item {
         delegate: Rectangle {
             required property var modelData
 
-            x: modelData.gx
+            property real _pad: barZone.bar ? barZone.bar.s(10) : 10
+
+            x: modelData.gx - _pad
             y: (barZone.height - height) / 2
-            width:  modelData.gw
+            width:  modelData.gw + _pad * 2
             height: barZone.bar ? barZone.bar.barHeight : 48
 
             radius: barZone.bar ? barZone.bar.s(16) : 16
