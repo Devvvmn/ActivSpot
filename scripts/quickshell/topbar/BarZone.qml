@@ -205,16 +205,19 @@ Item {
             DragHandler {
                 id: dragger
                 enabled: barZone.editMode && slotItem.modelData !== "spacer"
-                xAxis.minimum: 0
-                xAxis.maximum: barZone.width - slotItem.width
                 yAxis.minimum: slotItem.homeY
                 yAxis.maximum: slotItem.homeY
                 target: slotItem
 
                 onActiveChanged: {
                     if (!active) {
-                        let dropCenter = slotItem.x + slotItem.width / 2
-                        barZone.snapApplet(slotItem.modelData, dropCenter)
+                        let isCross = (barZone.side === "left"  && slotItem.x + slotItem.width > barZone.width) ||
+                                      (barZone.side === "right" && slotItem.x < 0)
+                        if (isCross) {
+                            barZone.bar.crossZoneDrop(slotItem.modelData, barZone.side)
+                        } else {
+                            barZone.snapApplet(slotItem.modelData, slotItem.x + slotItem.width / 2)
+                        }
                         slotItem.snapSpring = true
                         snapTimer.restart()
                     }

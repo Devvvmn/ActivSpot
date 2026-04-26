@@ -260,6 +260,24 @@ Variants {
                 barWindow.saveLayout();
             }
 
+            // Called when an applet is dragged across the center into the other zone.
+            // fromSide: "left" | "right" — zone the applet was dragged FROM.
+            // The applet is appended to the near end of the destination zone.
+            function crossZoneDrop(appletId, fromSide) {
+                let newLeft  = barWindow.leftAppletOrder.slice();
+                let newRight = barWindow.rightAppletOrder.slice();
+                if (fromSide === "left") {
+                    newLeft  = newLeft.filter(id => id !== appletId);
+                    newRight.unshift(appletId);   // insert at left edge of right zone
+                } else {
+                    newRight = newRight.filter(id => id !== appletId);
+                    newLeft.push(appletId);        // append at right edge of left zone
+                }
+                barWindow.leftAppletOrder  = newLeft;
+                barWindow.rightAppletOrder = newRight;
+                barWindow.saveLayout();
+            }
+
             onLeftAppletOrderChanged:  Qt.callLater(saveLayout)
             onRightAppletOrderChanged: Qt.callLater(saveLayout)
 
