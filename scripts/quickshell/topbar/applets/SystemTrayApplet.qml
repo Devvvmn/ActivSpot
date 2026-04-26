@@ -60,6 +60,7 @@ Rectangle {
                     id: trayMouse
                     anchors.fill: parent
                     hoverEnabled: true
+                    enabled: !root.editMode
                     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
                     onClicked: mouse => {
                         if (mouse.button === Qt.LeftButton) {

@@ -70,6 +70,7 @@ Rectangle {
         id: btMouse
         anchors.fill: parent
         hoverEnabled: true
+        enabled: !root.editMode
         onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle network bt"])
     }
 }

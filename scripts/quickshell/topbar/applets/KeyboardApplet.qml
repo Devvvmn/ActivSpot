@@ -51,6 +51,7 @@ Rectangle {
         id: kbMouse
         anchors.fill: parent
         hoverEnabled: true
+        enabled: !root.editMode
         onClicked: Quickshell.execDetached(["hyprctl", "switchxkblayout", "main", "next"])
     }
 }
