@@ -905,10 +905,10 @@ PanelWindow {
     }
     Region { id: maskedRegion; item: maskBounds }
 
-    // Click-outside-to-close
+    // Click-outside-to-close (disabled in editBarMode — clicks land on the bar)
     MouseArea {
         anchors.fill: parent
-        enabled: islandWindow.expanded
+        enabled: islandWindow.expanded && !islandWindow.editBarMode
         visible: islandWindow.expanded
         z: 0
         onClicked: {
