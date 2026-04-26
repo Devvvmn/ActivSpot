@@ -539,6 +539,47 @@ Variants {
             Item {
                 anchors.fill: parent
 
+                // ── Edit mode: unified background frame ───────────────
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.margins: -barWindow.s(4)
+                    radius: barWindow.s(20)
+                    color: Qt.rgba(barWindow.surface0.r, barWindow.surface0.g, barWindow.surface0.b, 0.55)
+                    border.width: 1
+                    border.color: Qt.rgba(barWindow.mauve.r, barWindow.mauve.g, barWindow.mauve.b, 0.38)
+                    opacity: barWindow.barEditMode ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
+                    z: -1
+                }
+
+                // ── Edit mode: center separator ───────────────────────
+                Item {
+                    x: centerBox.x
+                    width: centerBox.width
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    opacity: barWindow.barEditMode ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
+                    z: 5
+
+                    // vertical dashed line
+                    Rectangle {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 1
+                        height: parent.height * 0.55
+                        color: Qt.rgba(barWindow.mauve.r, barWindow.mauve.g, barWindow.mauve.b, 0.35)
+                    }
+
+                    // ⇄ icon
+                    Text {
+                        anchors.centerIn: parent
+                        text: "⇄"
+                        font.pixelSize: barWindow.s(14)
+                        color: Qt.rgba(barWindow.mauve.r, barWindow.mauve.g, barWindow.mauve.b, 0.6)
+                    }
+                }
+
                 // CENTER placeholder — reserves space so zones never overlap the island
                 Item {
                     id: centerBox

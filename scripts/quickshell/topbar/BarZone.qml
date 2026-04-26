@@ -142,18 +142,6 @@ Item {
         onTriggered: barZone._showZone = true
     }
 
-    // ── Edit mode: animated background ring behind zone ────────────────
-    Rectangle {
-        anchors.fill: parent
-        anchors.margins: -barZone.bar.s(4)
-        radius: barZone.bar.s(18)
-        color: "transparent"
-        border.width: 1
-        border.color: Qt.rgba(barZone.bar.mauve.r, barZone.bar.mauve.g, barZone.bar.mauve.b, 0.22)
-        opacity: barZone.editMode ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: 300 } }
-    }
-
     // ── Slot delegates ─────────────────────────────────────────────────
     Repeater {
         id: slotRepeater
