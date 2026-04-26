@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 
 // AppletPickerPage — shown inside the island on double-tap.
 // Lets the user add/remove topbar applets and exit edit mode.
