@@ -55,6 +55,34 @@ Item {
         _widths = ww
     }
 
+    // Group bounding boxes — appletOrder split by "spacer", each group gets a frame.
+    // Re-evaluates whenever appletOrder or _widths change.
+    property var _groupBounds: {
+        let sp     = bar ? bar.s(4) : 4
+        let _w     = _widths          // capture dependency
+        let bounds = []
+        let cur    = []
+
+        for (let i = 0; i <= appletOrder.length; i++) {
+            let id = appletOrder[i]
+            if (id === "spacer" || i === appletOrder.length) {
+                if (cur.length > 0) {
+                    let gx = homeXFor(cur[0])
+                    let gw = 0
+                    for (let j = 0; j < cur.length; j++) {
+                        gw += (_w[cur[j]] || 0)
+                        if (j < cur.length - 1) gw += sp
+                    }
+                    if (gw > 0) bounds.push({ gx: gx, gw: gw })
+                    cur = []
+                }
+            } else if (id !== undefined) {
+                cur.push(id)
+            }
+        }
+        return bounds
+    }
+
     // Total rendered width of all applets in this zone (for right-alignment)
     property real _totalW: {
         let sp = bar ? bar.s(4) : 4
@@ -140,6 +168,30 @@ Item {
             && (barZone.side === "left" || barZone.bar.isDataReady)
             && !barZone._showZone
         onTriggered: barZone._showZone = true
+    }
+
+    // ── Group background frames (always visible, split by spacer) ─────
+    Repeater {
+        model: barZone._groupBounds
+        delegate: Rectangle {
+            required property var modelData
+
+            x: modelData.gx
+            y: (barZone.height - height) / 2
+            width:  modelData.gw
+            height: barZone.bar ? barZone.bar.barHeight : 48
+
+            radius: barZone.bar ? barZone.bar.s(16) : 16
+            color: Qt.rgba(barZone.bar.surface0.r, barZone.bar.surface0.g, barZone.bar.surface0.b, 0.85)
+            border.width: 1
+            border.color: Qt.rgba(barZone.bar.text.r, barZone.bar.text.g, barZone.bar.text.b, 0.07)
+            z: -1
+
+            opacity: barZone._showZone ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
+            Behavior on x     { NumberAnimation { duration: 160; easing.type: Easing.OutExpo } }
+            Behavior on width { NumberAnimation { duration: 160; easing.type: Easing.OutExpo } }
+        }
     }
 
     // ── Slot delegates ─────────────────────────────────────────────────
