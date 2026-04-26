@@ -9,13 +9,8 @@ Rectangle {
     property bool isHovered: btMouse.containsMouse
 
     radius: bar.s(14)
-    border.width: 1
-    border.color: Qt.rgba(bar.text.r, bar.text.g, bar.text.b, 0.05)
-    color: bar.isBtOn
-        ? "transparent"
-        : (isHovered
-            ? Qt.rgba(bar.surface1.r, bar.surface1.g, bar.surface1.b, 0.9)
-            : Qt.rgba(bar.base.r,     bar.base.g,     bar.base.b,     0.75))
+    border.width: 0
+    color: "transparent"
 
     // Hidden on desktop (no BT indicator needed)
     property real targetW: bar.isDesktop ? 0 : (btRow.width + bar.s(24))

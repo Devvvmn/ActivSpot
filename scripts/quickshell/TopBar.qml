@@ -35,7 +35,7 @@ Variants {
                 return scaler.s(val);
             }
 
-            property int barHeight: s(48)
+            property int barHeight: s(36)
 
             height: barHeight
             margins { top: s(8); bottom: 0; left: s(120); right: s(120) }
@@ -598,8 +598,9 @@ Variants {
                     id: leftZone
                     side: "left"
                     bar:  barWindow
-                    appletOrder: barWindow.leftAppletOrder
-                    editMode:    barWindow.barEditMode
+                    appletOrder:     barWindow.leftAppletOrder
+                    editMode:        barWindow.barEditMode
+                    showGroupFrames: false
                     anchors.left:        parent.left
                     anchors.right:       centerBox.left
                     anchors.rightMargin: barWindow.s(12)

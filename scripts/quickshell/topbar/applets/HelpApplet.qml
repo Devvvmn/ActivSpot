@@ -9,11 +9,8 @@ Rectangle {
     property bool isHovered: helpMouse.containsMouse
 
     radius: bar.s(14)
-    border.width: 1
-    border.color: Qt.rgba(bar.text.r, bar.text.g, bar.text.b, isHovered ? 0.15 : 0.05)
-    color: isHovered
-        ? Qt.rgba(bar.surface1.r, bar.surface1.g, bar.surface1.b, 0.95)
-        : Qt.rgba(bar.base.r,     bar.base.g,     bar.base.b,     0.75)
+    border.width: 0
+    color: "transparent"
 
     implicitWidth:  targetW
     implicitHeight: bar.barHeight

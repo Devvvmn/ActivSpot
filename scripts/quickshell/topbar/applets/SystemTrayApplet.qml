@@ -8,9 +8,8 @@ Rectangle {
     property bool editMode: false
 
     radius: bar.s(14)
-    border.color: Qt.rgba(bar.text.r, bar.text.g, bar.text.b, 0.08)
-    border.width: 1
-    color: Qt.rgba(bar.base.r, bar.base.g, bar.base.b, 0.75)
+    border.width: 0
+    color: "transparent"
 
     property real targetW: trayRepeater.count > 0 ? (trayRow.width + bar.s(24)) : 0
     implicitWidth:  targetW

@@ -15,9 +15,10 @@ Item {
     id: barZone
 
     property var    bar
-    property string side:        "left"
-    property var    appletOrder: []
-    property bool   editMode:    false
+    property string side:             "left"
+    property var    appletOrder:      []
+    property bool   editMode:         false
+    property bool   showGroupFrames:  true
 
     // ── Applet component registry ──────────────────────────────────────
     Component { id: helpComp;    HelpApplet       { bar: barZone.bar; editMode: barZone.editMode } }
@@ -170,24 +171,23 @@ Item {
         onTriggered: barZone._showZone = true
     }
 
-    // ── Group background frames (always visible, split by spacer) ─────
+    // ── Group background frames (split by spacer, right zone only) ────
     Repeater {
-        model: barZone._groupBounds
+        model: barZone.showGroupFrames ? barZone._groupBounds : []
         delegate: Rectangle {
             required property var modelData
 
-            property real _pad: barZone.bar ? barZone.bar.s(10) : 10
+            property real _pad: barZone.bar ? barZone.bar.s(12) : 12
 
             x: modelData.gx - _pad
             y: (barZone.height - height) / 2
             width:  modelData.gw + _pad * 2
-            height: barZone.bar ? barZone.bar.barHeight : 48
+            height: barZone.bar ? barZone.bar.barHeight : 36
 
             radius: barZone.bar ? barZone.bar.s(16) : 16
-            color: Qt.rgba(barZone.bar.surface0.r, barZone.bar.surface0.g, barZone.bar.surface0.b, 0.85)
+            color: Qt.rgba(barZone.bar.surface1.r, barZone.bar.surface1.g, barZone.bar.surface1.b, 0.55)
             border.width: 1
-            border.color: Qt.rgba(barZone.bar.text.r, barZone.bar.text.g, barZone.bar.text.b, 0.07)
-            z: -1
+            border.color: Qt.rgba(barZone.bar.text.r, barZone.bar.text.g, barZone.bar.text.b, 0.10)
 
             opacity: barZone._showZone ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }

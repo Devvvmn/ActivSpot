@@ -10,13 +10,8 @@ Rectangle {
     property bool isActive:  bar.showEthernet ? (bar.ethStatus === "Connected") : bar.isWifiOn
 
     radius: bar.s(14)
-    border.width: 1
-    border.color: Qt.rgba(bar.text.r, bar.text.g, bar.text.b, 0.05)
-    color: isActive
-        ? "transparent"
-        : (isHovered
-            ? Qt.rgba(bar.surface1.r, bar.surface1.g, bar.surface1.b, 0.9)
-            : Qt.rgba(bar.base.r,     bar.base.g,     bar.base.b,     0.75))
+    border.width: 0
+    color: "transparent"
 
     implicitHeight: bar.barHeight
     implicitWidth:  wifiRow.width + bar.s(24)

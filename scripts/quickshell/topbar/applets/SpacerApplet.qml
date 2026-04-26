@@ -7,5 +7,5 @@ Item {
     property var bar
     property bool editMode: false
     implicitWidth:  bar ? bar.s(4) : 4
-    implicitHeight: bar ? bar.s(34) : 34
+    implicitHeight: bar ? bar.barHeight : 36
 }
