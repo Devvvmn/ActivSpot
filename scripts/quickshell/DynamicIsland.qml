@@ -1611,9 +1611,10 @@ PanelWindow {
         stdout: StdioCollector {
             onStreamFinished: {
                 let cmd = this.text.trim();
-                if (cmd === "toggle")   islandWindow.expanded = !islandWindow.expanded;
+                if (cmd === "toggle")        islandWindow.expanded = !islandWindow.expanded;
                 else if (cmd === "expand")   islandWindow.expanded = true;
                 else if (cmd === "collapse") islandWindow.expanded = false;
+                else if (cmd === "edit")     islandWindow.editBarMode ? islandWindow.exitEditBarMode() : islandWindow.enterEditBarMode();
                 ipcWatcher.running = false;
                 ipcWatcher.running = true;
             }
