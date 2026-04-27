@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--base); font-family: var(--font-mono); padding: 16px; }
+  .row { display: flex; gap: 6px; }
+  .swatch { flex: 1; height: 64px; border-radius: 10px; display: flex; flex-direction: column; justify-content: flex-end; padding: 6px 8px; position: relative; }
+  .swatch-label { font-size: 10px; font-weight: 700; color: rgba(0,0,0,0.6); }
+  .swatch-hex   { font-size: 9px; color: rgba(0,0,0,0.4); margin-top: 1px; }
+  .primary-tag { position: absolute; top: 6px; right: 6px; font-size: 8px; background: rgba(0,0,0,0.2); color: rgba(0,0,0,0.5); padding: 2px 5px; border-radius: 4px; font-weight: 700; }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="swatch" style="background:#cba6f7"><span class="primary-tag">PRIMARY</span><div class="swatch-label">mauve</div><div class="swatch-hex">#cba6f7</div></div>
+    <div class="swatch" style="background:#89b4fa"><div class="swatch-label">blue</div><div class="swatch-hex">#89b4fa</div></div>
+    <div class="swatch" style="background:#74c7ec"><div class="swatch-label">sapphire</div><div class="swatch-hex">#74c7ec</div></div>
+    <div class="swatch" style="background:#94e2d5"><div class="swatch-label">teal</div><div class="swatch-hex">#94e2d5</div></div>
+    <div class="swatch" style="background:#a6e3a1"><div class="swatch-label">green</div><div class="swatch-hex">#a6e3a1</div></div>
+    <div class="swatch" style="background:#f9e2af"><div class="swatch-label">yellow</div><div class="swatch-hex">#f9e2af</div></div>
+    <div class="swatch" style="background:#fab387"><div class="swatch-label">peach</div><div class="swatch-hex">#fab387</div></div>
+    <div class="swatch" style="background:#eba0ac"><div class="swatch-label">maroon</div><div class="swatch-hex">#eba0ac</div></div>
+    <div class="swatch" style="background:#f38ba8"><div class="swatch-label">red</div><div class="swatch-hex">#f38ba8</div></div>
+    <div class="swatch" style="background:#f5c2e7"><div class="swatch-label">pink</div><div class="swatch-hex">#f5c2e7</div></div>
+  </div>
+</body>
+</html>

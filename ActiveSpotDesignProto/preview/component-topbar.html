@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0c0c18; font-family: var(--font-mono); padding: 14px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .topbar { display: flex; align-items: center; gap: 5px; background: transparent; }
+  .applet { height: 32px; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 12px; border: 1px solid rgba(205,214,244,0.05); font-size: 12px; font-weight: 900; white-space: nowrap; }
+  .ws { width: 26px; height: 26px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+  .section-label { font-size: 9px; color: var(--overlay0); text-transform: uppercase; letter-spacing: 0.12em; }
+</style>
+</head>
+<body>
+
+  <div class="section-label">Full top bar layout</div>
+  <div class="topbar">
+    <!-- workspaces -->
+    <div class="applet" style="background:rgba(49,50,68,0.5);gap:3px;padding:0 8px">
+      <div class="ws" style="background:rgba(205,214,244,0.08);color:var(--subtext0)">1</div>
+      <div class="ws" style="background:rgba(205,214,244,0.08);color:var(--subtext0)">2</div>
+      <div class="ws" style="background:rgba(203,166,247,0.2);color:var(--mauve)">5</div>
+      <div class="ws" style="background:rgba(205,214,244,0.08);color:var(--subtext0)">6</div>
+      <div class="ws" style="background:rgba(205,214,244,0.08);color:var(--subtext0)">7</div>
+    </div>
+    <!-- keyboard -->
+    <div class="applet" style="background:rgba(49,50,68,0.5);color:var(--text);font-size:11px;font-weight:700">EN</div>
+    <!-- spacer -->
+    <div style="flex:1"></div>
+    <!-- wifi -->
+    <div class="applet" style="background:rgba(49,50,68,0.5);color:var(--text)">
+      <span style="font-size:13px">&#9608;</span>
+      <span style="font-size:11px">Fibernet-IA...</span>
+    </div>
+    <!-- bluetooth disconnected -->
+    <div class="applet" style="background:rgba(49,50,68,0.5);color:var(--subtext0)">
+      <span style="font-size:12px">&#11096;</span>
+      <span style="font-size:11px">Disconnected</span>
+    </div>
+    <!-- battery — gradient, text on dark base -->
+    <div class="applet" style="background:linear-gradient(90deg,#a6e3a1,#b9f0b5);color:#1e1e2e;border:none">
+      <span style="font-size:13px">&#9646;</span>
+      <span>54%</span>
+    </div>
+    <!-- battery low -->
+    <div class="applet" style="background:linear-gradient(90deg,#f38ba8,#ffb4ab);color:#1e1e2e;border:none">
+      <span style="font-size:13px">&#9648;</span>
+      <span>12%</span>
+    </div>
+  </div>
+
+  <div class="section-label">Applet states</div>
+  <div class="topbar">
+    <div class="applet" style="background:rgba(49,50,68,0.5);color:var(--subtext0)">default</div>
+    <div class="applet" style="background:var(--surface1);color:var(--text);transform:scale(1.05)">hover ×1.05</div>
+    <div class="applet" style="background:rgba(203,166,247,0.18);color:var(--mauve);border-color:rgba(203,166,247,0.3)">active</div>
+    <div class="applet" style="background:rgba(49,50,68,0.3);color:var(--overlay0);opacity:0.5">disabled</div>
+  </div>
+
+  <div class="section-label">Edit mode — draggable with wiggle + mauve ring</div>
+  <div class="topbar" style="border:1px solid rgba(203,166,247,0.22);border-radius:18px;padding:4px 8px">
+    <div class="applet" style="background:rgba(49,50,68,0.5);color:var(--text);border:1px solid rgba(203,166,247,0.35);animation:wiggle 360ms infinite alternate ease-in-out">EN</div>
+    <div class="applet" style="background:rgba(203,166,247,0.18);color:var(--mauve);border:1px solid rgba(203,166,247,0.7);transform:scale(1.08)">&#10021; dragging</div>
+    <div class="applet" style="background:rgba(49,50,68,0.5);color:var(--text);border:1px solid rgba(203,166,247,0.35);animation:wiggle 400ms 40ms infinite alternate ease-in-out">Wifi</div>
+  </div>
+</body>
+<style>
+@keyframes wiggle {
+  from { transform: rotate(-1.2deg); }
+  to   { transform: rotate(1.2deg); }
+}
+</style>
+</html>

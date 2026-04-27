@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--base); font-family: var(--font-mono); padding: 16px; }
+  .row { display: flex; gap: 6px; margin-bottom: 8px; }
+  .swatch { flex: 1; height: 52px; border-radius: 10px; display: flex; flex-direction: column; justify-content: flex-end; padding: 6px 8px; }
+  .swatch-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.55); }
+  .swatch-hex   { font-size: 9px; color: rgba(255,255,255,0.35); margin-top: 1px; }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="swatch" style="background:#11111b"><div class="swatch-label">crust</div><div class="swatch-hex">#11111b</div></div>
+    <div class="swatch" style="background:#181825"><div class="swatch-label">mantle</div><div class="swatch-hex">#181825</div></div>
+    <div class="swatch" style="background:#1e1e2e"><div class="swatch-label">base</div><div class="swatch-hex">#1e1e2e</div></div>
+    <div class="swatch" style="background:#313244"><div class="swatch-label">surface0</div><div class="swatch-hex">#313244</div></div>
+    <div class="swatch" style="background:#45475a"><div class="swatch-label">surface1</div><div class="swatch-hex">#45475a</div></div>
+    <div class="swatch" style="background:#585b70"><div class="swatch-label">surface2</div><div class="swatch-hex">#585b70</div></div>
+  </div>
+  <div class="row">
+    <div class="swatch" style="background:#6c7086"><div class="swatch-label">overlay0</div><div class="swatch-hex">#6c7086</div></div>
+    <div class="swatch" style="background:#7f849c"><div class="swatch-label">overlay1</div><div class="swatch-hex">#7f849c</div></div>
+    <div class="swatch" style="background:#9399b2"><div class="swatch-label">overlay2</div><div class="swatch-hex">#9399b2</div></div>
+    <div class="swatch" style="background:#a6adc8"><div class="swatch-label">subtext0</div><div class="swatch-hex">#a6adc8</div></div>
+    <div class="swatch" style="background:#bac2de"><div class="swatch-label">subtext1</div><div class="swatch-hex">#bac2de</div></div>
+    <div class="swatch" style="background:#cdd6f4"><div class="swatch-label">text</div><div class="swatch-hex">#cdd6f4</div></div>
+  </div>
+</body>
+</html>

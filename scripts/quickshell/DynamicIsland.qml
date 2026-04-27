@@ -950,7 +950,7 @@ PanelWindow {
             if (islandWindow.currentPage === "stash")                                   return stashCollapsed.preferredWidth;
             return clockCollapsed.preferredWidth;
         }
-        property int collapsedH: s(48)
+        property int collapsedH: s(36)
         property int expandedW: {
             if (islandWindow.currentPage === "stash") {
                 return Math.min(s(750), Screen.width - s(32));
@@ -967,7 +967,7 @@ PanelWindow {
         width:  islandWindow.expanded ? expandedW  : collapsedW
         height: islandWindow.expanded ? expandedH  : collapsedH
         x: Math.floor((Screen.width - width) / 2)
-        y: s(8)
+        y: s(4)
 
         opacity: islandWindow.launcherActive ? 0.0 : 1.0
         Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
@@ -1049,8 +1049,11 @@ PanelWindow {
                     return Qt.rgba(islandWindow.red.r, islandWindow.red.g, islandWindow.red.b, islandWindow.recordingDotOpacity * 0.85);
                 if (islandWindow.notifActive)
                     return Qt.rgba(islandWindow.peach.r, islandWindow.peach.g, islandWindow.peach.b, islandWindow.notifPulse);
-                if (islandWindow.isMediaActive && islandWindow.musicData.status === "Playing" && !islandWindow.expanded)
-                    return Qt.rgba(islandWindow.mauve.r, islandWindow.mauve.g, islandWindow.mauve.b, islandWindow.musicPulse);
+                if (islandWindow.isMediaActive && islandWindow.musicData.status === "Playing" && !islandWindow.expanded) {
+                    // Tighten musicPulse (0.22→0.72) into a calmer 0.22→0.36 band — premium breath, no neon flash
+                    let p = 0.22 + (islandWindow.musicPulse - 0.22) * 0.28;
+                    return Qt.rgba(islandWindow.mauve.r, islandWindow.mauve.g, islandWindow.mauve.b, p);
+                }
                 if (islandWindow.isMediaActive)
                     return Qt.rgba(islandWindow.mauve.r, islandWindow.mauve.g, islandWindow.mauve.b,
                                    islandWindow.hovered || islandWindow.expanded ? 0.45 : 0.22);
@@ -1088,23 +1091,24 @@ PanelWindow {
         }
 
         // ── Music playing outer glow — beat-reactive, matches island stretch ──
+        // Toned down: thin rim, low max opacity, slow attack — reads as gentle breath, not strobe.
         Rectangle {
             anchors.fill: parent
-            anchors.margins: -s(3)
-            radius: bg.radius + s(3)
+            anchors.margins: -s(2)
+            radius: bg.radius + s(2)
             Behavior on radius { NumberAnimation { duration: 540; easing.type: Easing.OutExpo } }
             color: "transparent"
-            border.width: s(2)
-            border.color: Qt.rgba(islandWindow.mauve.r, islandWindow.mauve.g, islandWindow.mauve.b, 0.85)
-            // opacity drives the beat punch — fast attack, fades only when music stops
+            border.width: s(1)
+            border.color: Qt.rgba(islandWindow.mauve.r, islandWindow.mauve.g, islandWindow.mauve.b, 0.55)
+            // Compressed beat reactivity — caps around 0.30 instead of ~1.0
             opacity: {
                 if (!islandWindow.isMediaActive || islandWindow.musicData.status !== "Playing" || islandWindow.expanded)
                     return 0.0;
-                return 0.08 + islandWindow.cavaMax * 0.92;
+                return 0.06 + islandWindow.cavaMax * 0.22;
             }
             Behavior on opacity {
                 NumberAnimation {
-                    duration: islandWindow.cavaMax > 0.5 ? 35 : 200
+                    duration: islandWindow.cavaMax > 0.5 ? 90 : 260
                     easing.type: Easing.OutCubic
                 }
             }
@@ -1304,33 +1308,6 @@ PanelWindow {
                 }}
             }
 
-            // Music progress bar — inset from sides to clear pill rounded corners
-            Rectangle {
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: s(4)
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.leftMargin: s(14)
-                anchors.rightMargin: s(14)
-                height: s(2); radius: s(1)
-                color: Qt.rgba(islandWindow.surface1.r, islandWindow.surface1.g, islandWindow.surface1.b, 0.4)
-                opacity: (!islandWindow.volDragging && islandWindow.isMediaActive && islandWindow.currentPage === "music") ? 1.0 : 0.0
-                visible: opacity > 0.001
-                Behavior on opacity { NumberAnimation { duration: 350 } }
-
-                Rectangle {
-                    anchors.left: parent.left; anchors.top: parent.top; anchors.bottom: parent.bottom
-                    radius: s(1)
-                    width: parent.width * Math.max(0, Math.min(1, (islandWindow.musicData.percent || 0) / 100))
-                    gradient: Gradient {
-                        orientation: Gradient.Horizontal
-                        GradientStop { position: 0.0; color: islandWindow.mauve }
-                        GradientStop { position: 1.0; color: islandWindow.blue }
-                    }
-                    Behavior on width { NumberAnimation { duration: 800; easing.type: Easing.Linear } }
-                }
-            }
-
             // Volume text — sibling of liquidOverlay, no transform inheritance
             Row {
                 anchors.centerIn: parent; spacing: s(8)
@@ -1449,7 +1426,7 @@ PanelWindow {
         island: islandWindow
         z: 10
         homeX: homeXFor("notif")
-        homeY: s(8) + (islandShape.collapsedH - height) / 2
+        homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
 
     VpnMiniBubble {
@@ -1457,7 +1434,7 @@ PanelWindow {
         island: islandWindow
         z: 10
         homeX: homeXFor("vpn")
-        homeY: s(8) + (islandShape.collapsedH - height) / 2
+        homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
 
     MusicMiniBubble {
@@ -1465,7 +1442,7 @@ PanelWindow {
         island: islandWindow
         z: 10
         homeX: homeXFor("music")
-        homeY: s(8) + (islandShape.collapsedH - height) / 2
+        homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
 
     DiscordMiniBubble {
@@ -1473,7 +1450,7 @@ PanelWindow {
         island: islandWindow
         z: 10
         homeX: homeXFor("discord")
-        homeY: s(8) + (islandShape.collapsedH - height) / 2
+        homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
 
     RecordingMiniBubble {
@@ -1481,7 +1458,7 @@ PanelWindow {
         island: islandWindow
         z: 10
         homeX: homeXFor("rec")
-        homeY: s(8) + (islandShape.collapsedH - height) / 2
+        homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
 
     StashMiniBubble {
@@ -1489,7 +1466,7 @@ PanelWindow {
         island: islandWindow
         z: 10
         homeX: homeXFor("stash")
-        homeY: s(8) + (islandShape.collapsedH - height) / 2
+        homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
 
     ClockMiniBubble {
@@ -1497,7 +1474,7 @@ PanelWindow {
         island: islandWindow
         z: 10
         homeX: homeXFor("clock")
-        homeY: s(8) + (islandShape.collapsedH - height) / 2
+        homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
 
     // =========================================================

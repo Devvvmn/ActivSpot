@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #13131f; font-family: var(--font-mono); padding: 24px 20px; display: flex; gap: 24px; align-items: center; }
+  .item { display: flex; flex-direction: column; align-items: center; gap: 12px; flex: 1; }
+  .box { background: var(--base); border-radius: 16px; display: flex; align-items: center; justify-content: center; }
+  .name { font-size: 10px; font-weight: 700; color: var(--subtext0); }
+  .desc { font-size: 9px; color: var(--overlay0); text-align: center; }
+</style>
+</head>
+<body>
+  <div class="item">
+    <div class="box" style="width:100px;height:48px;box-shadow:0 10px 34px rgba(0,0,0,0.38)">
+      <span style="font-size:10px;color:var(--subtext0)">island</span>
+    </div>
+    <div class="name">shadow-island</div>
+    <div class="desc">0 10px 34px<br>rgba(0,0,0,0.38)</div>
+  </div>
+  <div class="item">
+    <div class="box" style="width:100px;height:48px;box-shadow:0 4px 16px rgba(0,0,0,0.28)">
+      <span style="font-size:10px;color:var(--subtext0)">card</span>
+    </div>
+    <div class="name">shadow-card</div>
+    <div class="desc">0 4px 16px<br>rgba(0,0,0,0.28)</div>
+  </div>
+  <div class="item">
+    <div class="box" style="width:64px;height:64px;border-radius:32px;background:var(--mauve);box-shadow:0 0 16px rgba(203,166,247,0.5)">
+      <span style="font-size:18px;color:var(--base)">▶</span>
+    </div>
+    <div class="name">shadow-glow</div>
+    <div class="desc">0 0 16px<br>rgba(mauve, 0.40)</div>
+  </div>
+  <div class="item">
+    <div style="width:100px;height:48px;border-radius:16px;background:var(--surface0);border:1px solid rgba(205,214,244,0.07);display:flex;align-items:center;justify-content:center">
+      <span style="font-size:10px;color:var(--subtext0)">card border</span>
+    </div>
+    <div class="name">border-default</div>
+    <div class="desc">1px solid<br>rgba(text, 0.07)</div>
+  </div>
+  <div class="item">
+    <div style="width:100px;height:48px;border-radius:16px;background:rgba(49,50,68,0.55);border:1px solid rgba(203,166,247,0.4);display:flex;align-items:center;justify-content:center">
+      <span style="font-size:10px;color:var(--mauve)">active chip</span>
+    </div>
+    <div class="name">border-accent</div>
+    <div class="desc">1px solid<br>rgba(mauve, 0.40)</div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ActivSpot UI Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body, #root { height: 100%; }
+  body { font-family: 'JetBrains Mono', monospace; overflow: hidden; background: #0a0a14; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="DynamicIsland.jsx"></script>
+<script type="text/babel" src="TopBar.jsx"></script>
+<script type="text/babel" src="Panels.jsx"></script>
+
+<script type="text/babel">
+
+// ── Wallpaper ──────────────────────────────────────────────────────────────
+function Wallpaper() {
+  return React.createElement('div', { style:{
+    position:'fixed', inset:0, zIndex:0,
+    background:'radial-gradient(ellipse 80% 60% at 65% 55%, #4a6080 0%, transparent 60%), radial-gradient(ellipse 50% 80% at 30% 70%, #2a3a50 0%, transparent 55%), linear-gradient(160deg,#1a2535 0%,#0d1520 40%,#080e18 100%)',
+  }},
+    React.createElement('svg', { viewBox:'0 0 1440 500', preserveAspectRatio:'xMidYMax slice',
+      style:{position:'absolute',bottom:0,left:0,right:0,width:'100%',height:'60%'} },
+      React.createElement('polygon', { points:'0,500 280,140 440,280 620,80 820,260 1050,60 1280,200 1440,120 1440,500', fill:'rgba(15,22,35,0.9)' }),
+      React.createElement('polygon', { points:'0,500 180,220 350,340 520,160 700,300 900,100 1100,240 1300,150 1440,200 1440,500', fill:'rgba(10,16,28,0.95)' }),
+    ),
+  );
+}
+
+// ── Mini Bubble — positioned absolutely relative to island center ──────────
+// side: 'left'|'right', offset: distance from island edge (px), index: slot (0=closest)
+function MiniBubble({ label, sub, dot, side, offset, onClick }) {
+  const [hov, setHov] = React.useState(false);
+  return React.createElement('div', {
+    onClick,
+    onMouseEnter: ()=>setHov(true),
+    onMouseLeave: ()=>setHov(false),
+    style: {
+      position: 'absolute',
+      top: 13,                           // same vertical center as collapsed island
+      [side]: offset,
+      height: 28, padding:'0 11px', borderRadius:9999,
+      background: hov ? '#45475a' : '#1e1e2e',
+      boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
+      display:'flex', alignItems:'center', gap:6,
+      cursor:'pointer', userSelect:'none', whiteSpace:'nowrap',
+      transition:'background 180ms ease, transform 160ms cubic-bezier(0.16,1,0.3,1)',
+      transform: hov ? 'scale(1.05)' : 'scale(1)',
+      zIndex:150,
+    }
+  },
+    dot && React.createElement('div', { style:{width:7,height:7,borderRadius:'50%',background:dot,flexShrink:0} }),
+    React.createElement('span', { style:{fontSize:11,fontWeight:700,color:'#cdd6f4'} }, label),
+    sub && React.createElement('span', { style:{fontSize:10,color:'#a6adc8'} }, sub),
+  );
+}
+
+// ── Bubble layer — all bubbles, island-aware ───────────────────────────────
+// islandW: current collapsed width of island (0 when expanded → bubbles hidden)
+function BubbleLayer({ islandW, onBubbleClick }) {
+  const screenW = window.innerWidth;
+  const cx = screenW / 2;              // screen center
+  const half = islandW / 2;           // half island width
+  const gap = 14;                      // gap between island edge and first bubble
+  const bw  = 80;                      // approximate bubble width (for stacking)
+  const sp  = 8;                       // space between bubbles
+
+  // Each bubble: { id, label, sub?, dot?, side, slotIndex, page? }
+  const LEFT_BUBBLES  = [
+    { id:'music',   label:'♪', sub:'Playing', dot:'#cba6f7', page:'music'  },  // slot 0 = closest
+    { id:'discord', label:'Call', sub:'04:12', dot:'#89b4fa' },
+  ];
+  const RIGHT_BUBBLES = [
+    { id:'rec',     label:'REC', sub:'02:14', dot:'#f38ba8' },                 // slot 0 = closest
+    { id:'notifs',  label:'3',   dot:'#fab387', page:'notifs' },
+    { id:'clock',   label:'11:17', sub:null, dot:null },
+  ];
+
+  if (islandW === 0) return null;   // island is expanded — hide bubbles
+
+  // Compute absolute `left` and `right` pixel positions from screen edges
+  function leftPos(slotIndex) {
+    // right edge of island = cx - half; go left by gap + accumulated widths
+    const fromIslandEdge = gap + slotIndex * (bw + sp);
+    const fromScreenEdge = cx - half - fromIslandEdge - bw;
+    return Math.max(4, fromScreenEdge);
+  }
+  function rightPos(slotIndex) {
+    const fromIslandEdge = gap + slotIndex * (bw + sp);
+    const fromScreenEdge = cx + half + fromIslandEdge;
+    // convert to `right: X` value
+    return Math.max(4, screenW - fromScreenEdge - bw);
+  }
+
+  return React.createElement('div', { style:{position:'fixed',inset:0,zIndex:150,pointerEvents:'none'} },
+    ...LEFT_BUBBLES.map((b,i) => React.createElement('div', { key:b.id, style:{pointerEvents:'auto',position:'absolute',top:0,left:leftPos(i)} },
+      React.createElement(MiniBubble, { label:b.label, sub:b.sub, dot:b.dot, side:'left', offset:0,
+        onClick: ()=>b.page && onBubbleClick(b.page) })
+    )),
+    ...RIGHT_BUBBLES.map((b,i) => React.createElement('div', { key:b.id, style:{pointerEvents:'auto',position:'absolute',top:0,right:rightPos(i)} },
+      React.createElement(MiniBubble, { label:b.label, sub:b.sub, dot:b.dot, side:'right', offset:0,
+        onClick: ()=>b.page && onBubbleClick(b.page) })
+    )),
+  );
+}
+
+// ── Panel overlay ──────────────────────────────────────────────────────────
+function PanelOverlay({ panel, onClose }) {
+  if (!panel) return null;
+  const pos = {
+    music:   { top:60, left:'50%', transform:'translateX(-50%)' },
+    battery: { top:60, right:16 },
+    notifs:  { top:60, left:'50%', transform:'translateX(-50%)' },
+  };
+  return React.createElement('div', { style:{position:'fixed',inset:0,zIndex:300,pointerEvents:'none'} },
+    React.createElement('div', { style:{position:'absolute',pointerEvents:'auto',...(pos[panel]||{})} },
+      panel==='music'   && React.createElement(MusicPanel,   { onClose }),
+      panel==='battery' && React.createElement(BatteryPanel, { onClose }),
+      panel==='notifs'  && React.createElement(NotifsPanel,  { onClose }),
+    )
+  );
+}
+
+// ── Page switcher tabs (bottom center) ────────────────────────────────────
+function PageTabs({ page, setPage }) {
+  const tabs = [{id:'clock',label:'Clock'},{id:'music',label:'Music'},{id:'notifs',label:'Notifs'}];
+  return React.createElement('div', { style:{
+    position:'fixed', bottom:20, left:'50%', transform:'translateX(-50%)',
+    display:'flex', gap:5, alignItems:'center',
+    background:'rgba(30,30,46,0.9)', border:'1px solid rgba(205,214,244,0.08)',
+    borderRadius:9999, padding:'4px 6px', backdropFilter:'blur(16px)', zIndex:400,
+  }},
+    React.createElement('span', { style:{fontSize:9,color:'#6c7086',paddingLeft:4,paddingRight:2,letterSpacing:'0.1em'} }, 'ISLAND'),
+    tabs.map(t => React.createElement('div', { key:t.id, onClick:()=>setPage(t.id),
+      style:{height:24,padding:'0 12px',borderRadius:9999,display:'flex',alignItems:'center',
+        fontSize:10,fontWeight:700,cursor:'pointer',
+        background:t.id===page?'#cba6f7':'transparent',
+        color:t.id===page?'#1e1e2e':'#a6adc8',
+        transition:'all 200ms'} }, t.label)),
+  );
+}
+
+// ── Root app ───────────────────────────────────────────────────────────────
+function App() {
+  const [page, setPage]       = React.useState('music');
+  const [panel, setPanel]     = React.useState(null);
+  const [islandW, setIslandW] = React.useState(COLLAPSED_W['music'] || 390);
+
+  React.useEffect(() => {
+    function handler() { setPanel(null); }
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, []);
+
+  return React.createElement('div', { style:{position:'relative',width:'100vw',height:'100vh',overflow:'hidden'} },
+    React.createElement(Wallpaper),
+    React.createElement(TopBar, { onAppletClick: name => setPanel(p => p===name ? null : name) }),
+    // bubbles sit behind island (z:150 < island z:200)
+    React.createElement(BubbleLayer, { islandW, onBubbleClick: setPage }),
+    React.createElement(DynamicIsland, { page, onPageChange: setPage, onWidthChange: setIslandW }),
+    React.createElement(PanelOverlay, { panel, onClose: ()=>setPanel(null) }),
+    React.createElement(PageTabs, { page, setPage }),
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--base); font-family: var(--font-mono); padding: 16px 20px; display: flex; gap: 14px; align-items: flex-end; }
+  .item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .box { background: var(--surface0); border: 1px solid rgba(205,214,244,0.08); }
+  .name { font-size: 9px; color: var(--overlay0); text-transform: uppercase; letter-spacing: 0.08em; }
+  .val  { font-size: 9px; color: var(--subtext0); }
+</style>
+</head>
+<body>
+  <div class="item"><div class="box" style="width:40px;height:40px;border-radius:4px"></div><div class="name">xs</div><div class="val">4px</div></div>
+  <div class="item"><div class="box" style="width:44px;height:44px;border-radius:8px"></div><div class="name">sm</div><div class="val">8px</div></div>
+  <div class="item"><div class="box" style="width:50px;height:50px;border-radius:12px"></div><div class="name">md</div><div class="val">12px</div></div>
+  <div class="item"><div class="box" style="width:56px;height:56px;border-radius:14px"></div><div class="name">lg</div><div class="val">14px</div></div>
+  <div class="item"><div class="box" style="width:60px;height:60px;border-radius:16px"></div><div class="name">xl</div><div class="val">16px</div></div>
+  <div class="item"><div class="box" style="width:68px;height:68px;border-radius:22px"></div><div class="name">2xl</div><div class="val">22px</div></div>
+  <div class="item"><div class="box" style="width:80px;height:36px;border-radius:9999px"></div><div class="name">pill</div><div class="val">∞</div></div>
+  <div style="flex:1"></div>
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <div style="font-size:9px;color:var(--overlay0);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">usage</div>
+    <div style="font-size:9px;color:var(--subtext0)">xs · cava bars, accent strip</div>
+    <div style="font-size:9px;color:var(--subtext0)">sm · album art thumb, chip</div>
+    <div style="font-size:9px;color:var(--subtext0)">md · notification card</div>
+    <div style="font-size:9px;color:var(--subtext0)">lg · album art large</div>
+    <div style="font-size:9px;color:var(--subtext0)">xl · applet bg, panel card</div>
+    <div style="font-size:9px;color:var(--subtext0)">2xl · popup panel corners</div>
+    <div style="font-size:9px;color:var(--subtext0)">pill · island, bubbles, chips</div>
+  </div>
+</body>
+</html>

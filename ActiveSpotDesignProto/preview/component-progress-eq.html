@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--base); font-family: var(--font-mono); padding: 18px 20px; display: flex; flex-direction: column; gap: 16px; }
+  .section-label { font-size: 9px; color: var(--overlay0); text-transform: uppercase; letter-spacing: 0.12em; }
+  .track { height: 4px; border-radius: 2px; background: var(--surface0); position: relative; overflow: hidden; }
+  .fill  { height: 100%; border-radius: 2px; }
+  .handle { width: 12px; height: 12px; border-radius: 6px; background: var(--text); border: 2px solid var(--mauve); position: absolute; top: 50%; transform: translate(-50%,-50%); }
+  .divider { height: 1px; background: rgba(205,214,244,0.06); }
+  .row { display: flex; gap: 8px; align-items: center; }
+</style>
+</head>
+<body>
+
+  <div class="section-label">Playback progress bar</div>
+  <div class="row">
+    <span style="font-size:10px;color:var(--subtext0);width:32px">00:27</span>
+    <div class="track" style="flex:1;position:relative">
+      <div class="fill" style="width:36%;background:linear-gradient(90deg,var(--mauve),var(--blue))"></div>
+      <div class="handle" style="left:36%"></div>
+    </div>
+    <span style="font-size:10px;color:var(--subtext0);width:32px;text-align:right">03:01</span>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-label">EQ — 10-band vertical sliders</div>
+  <div style="display:flex;gap:8px;height:100px;align-items:flex-end">
+    <!-- 10 EQ bands -->
+    <script>
+      // rendered via inline styles — values simulate a "Rock" preset
+      const vals = [4,-2,6,8,3,-1,2,5,3,1];
+      const labels = ['32','64','125','250','500','1K','2K','4K','8K','16K'];
+    </script>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;gap:3px">
+      <span style="font-size:8px;color:var(--mauve)">+4</span>
+      <div style="flex:1;width:5px;border-radius:2px;background:var(--surface0);position:relative;overflow:hidden">
+        <div style="position:absolute;bottom:50%;height:33%;width:100%;background:linear-gradient(180deg,var(--mauve),var(--blue));border-radius:2px"></div>
+      </div>
+      <span style="font-size:8px;color:var(--overlay0)">32</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;gap:3px">
+      <span style="font-size:8px;color:var(--subtext0)">-2</span>
+      <div style="flex:1;width:5px;border-radius:2px;background:var(--surface0);position:relative;overflow:hidden">
+        <div style="position:absolute;top:50%;height:17%;width:100%;background:linear-gradient(180deg,var(--mauve),var(--blue));border-radius:2px;opacity:0.9"></div>
+      </div>
+      <span style="font-size:8px;color:var(--overlay0)">64</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;gap:3px">
+      <span style="font-size:8px;color:var(--mauve)">+6</span>
+      <div style="flex:1;width:5px;border-radius:2px;background:var(--surface0);position:relative;overflow:hidden">
+        <div style="position:absolute;bottom:50%;height:50%;width:100%;background:linear-gradient(180deg,var(--mauve),var(--blue));border-radius:2px"></div>
+      </div>
+      <span style="font-size:8px;color:var(--overlay0)">125</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;gap:3px">
+      <span style="font-size:8px;color:var(--mauve)">+8</span>
+      <div style="flex:1;width:5px;border-radius:2px;background:var(--surface0);position:relative;overflow:hidden">
+        <div style="position:absolute;bottom:50%;height:67%;width:100%;background:linear-gradient(180deg,var(--mauve),var(--blue));border-radius:2px"></div>
+      </div>
+      <span style="font-size:8px;color:var(--overlay0)">250</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;gap:3px">
+      <span style="font-size:8px;color:var(--mauve)">+3</span>
+      <div style="flex:1;width:5px;border-radius:2px;background:var(--surface0);position:relative;overflow:hidden">
+        <div style="position:absolute;bottom:50%;height:25%;width:100%;background:linear-gradient(180deg,var(--mauve),var(--blue));border-radius:2px"></div>
+      </div>
+      <span style="font-size:8px;color:var(--overlay0)">500</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;gap:3px">
+      <span style="font-size:8px;color:var(--subtext0)">-1</span>
+      <div style="flex:1;width:5px;border-radius:2px;background:var(--surface0);position:relative;overflow:hidden">
+        <div style="position:absolute;top:50%;height:8%;width:100%;background:linear-gradient(180deg,var(--mauve),var(--blue));border-radius:2px;opacity:0.9"></div>
+      </div>
+      <span style="font-size:8px;color:var(--overlay0)">1K</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;gap:3px">
+      <span style="font-size:8px;color:var(--mauve)">+2</span>
+      <div style="flex:1;width:5px;border-radius:2px;background:var(--surface0);position:relative;overflow:hidden">
+        <div style="position:absolute;bottom:50%;height:17%;width:100%;background:linear-gradient(180deg,var(--mauve),var(--blue));border-radius:2px"></div>
+      </div>
+      <span style="font-size:8px;color:var(--overlay0)">2K</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;gap:3px">
+      <span style="font-size:8px;color:var(--mauve)">+5</span>
+      <div style="flex:1;width:5px;border-radius:2px;background:var(--surface0);position:relative;overflow:hidden">
+        <div style="position:absolute;bottom:50%;height:42%;width:100%;background:linear-gradient(180deg,var(--mauve),var(--blue));border-radius:2px"></div>
+      </div>
+      <span style="font-size:8px;color:var(--overlay0)">4K</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;gap:3px">
+      <span style="font-size:8px;color:var(--mauve)">+3</span>
+      <div style="flex:1;width:5px;border-radius:2px;background:var(--surface0);position:relative;overflow:hidden">
+        <div style="position:absolute;bottom:50%;height:25%;width:100%;background:linear-gradient(180deg,var(--mauve),var(--blue));border-radius:2px"></div>
+      </div>
+      <span style="font-size:8px;color:var(--overlay0)">8K</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;gap:3px">
+      <span style="font-size:8px;color:var(--mauve)">+1</span>
+      <div style="flex:1;width:5px;border-radius:2px;background:var(--surface0);position:relative;overflow:hidden">
+        <div style="position:absolute;bottom:50%;height:8%;width:100%;background:linear-gradient(180deg,var(--mauve),var(--blue));border-radius:2px"></div>
+      </div>
+      <span style="font-size:8px;color:var(--overlay0)">16K</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-label">Live CAVA bars</div>
+  <div style="display:flex;gap:3px;height:28px;align-items:flex-end" id="cava"></div>
+
+</body>
+<script>
+const cavaColors = ['#89b4fa','#cba6f7','#f5c2e7','#fab387','#f5c2e7','#89b4fa'];
+const cavaEl = document.getElementById('cava');
+const bars = cavaColors.map((c,i) => {
+  const d = document.createElement('div');
+  d.style.cssText = `width:8px;border-radius:3px;background:${c};transition:height 60ms linear`;
+  cavaEl.appendChild(d);
+  return d;
+});
+let ph = 0;
+const cavaWrap = document.getElementById('cava');
+cavaWrap.style.alignItems = 'center';
+setInterval(() => {
+  bars.forEach((b,i) => {
+    const v = 0.15 + 0.8 * Math.abs(Math.sin(ph * 0.09 + i * 1.2));
+    const half = Math.max(2, Math.round(14 * v));
+    b.style.height = (half * 2) + 'px';
+    b.style.background = cavaColors[i];
+  });
+  ph++;
+}, 80);
+</script>
+</html>

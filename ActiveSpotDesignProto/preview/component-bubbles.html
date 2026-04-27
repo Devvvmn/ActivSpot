@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0e0e1a; font-family: var(--font-mono); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+  .label { font-size: 9px; color: var(--overlay0); text-transform: uppercase; letter-spacing: 0.1em; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .bubble { background: var(--base); border-radius: 9999px; display: flex; align-items: center; gap: 6px; padding: 0 11px; height: 28px; box-shadow: 0 4px 14px rgba(0,0,0,0.35); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .btext { font-size: 11px; font-weight: 700; color: var(--text); }
+  .bsub  { font-size: 10px; color: var(--subtext0); }
+  .glyph { font-size: 12px; line-height: 1; }
+  .island-pill { background: var(--base); border-radius: 9999px; height: 36px; padding: 0 18px; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 28px rgba(0,0,0,0.4); }
+</style>
+</head>
+<body>
+  <div class="label">Full layout — island + surrounding bubbles</div>
+  <div class="row">
+    <!-- left side bubbles -->
+    <div class="bubble">
+      <div class="dot" style="background:var(--mauve)"></div>
+      <span class="btext">♪</span>
+      <span class="bsub" style="font-size:9px">Playing</span>
+    </div>
+    <div class="bubble">
+      <span class="glyph" style="color:var(--blue)">⬤</span>
+      <span class="btext">04:12</span>
+    </div>
+    <!-- island -->
+    <div class="island-pill">
+      <span style="font-size:12px;font-weight:900;color:var(--text)">11:17</span>
+      <span style="font-size:10px;color:var(--subtext0)">·  4.9°C</span>
+    </div>
+    <!-- right side bubbles -->
+    <div class="bubble">
+      <div class="dot" style="background:var(--red)"></div>
+      <span class="btext">REC</span>
+      <span class="bsub">02:14</span>
+    </div>
+    <div class="bubble">
+      <span class="glyph" style="color:var(--peach)">◉</span>
+      <span class="btext">3</span>
+    </div>
+    <div class="bubble">
+      <span class="glyph" style="color:var(--green);font-size:10px">⚿</span>
+      <span class="btext" style="color:var(--subtext0)">wg0</span>
+    </div>
+    <div class="bubble">
+      <span class="bsub">11:17:42</span>
+    </div>
+  </div>
+
+  <div class="label" style="margin-top:4px">Bubble states</div>
+  <div class="row">
+    <div class="bubble">
+      <span class="bsub">default</span>
+    </div>
+    <div class="bubble" style="background:var(--surface1)">
+      <span class="bsub">hover</span>
+    </div>
+    <div class="bubble" style="border:1px solid rgba(203,166,247,0.35)">
+      <span class="bsub" style="color:var(--mauve)">active</span>
+    </div>
+    <div class="bubble" style="opacity:0.35">
+      <span class="bsub">fading out</span>
+    </div>
+    <!-- drag state -->
+    <div class="bubble" style="transform:scale(1.08);background:var(--surface0);border:1px solid rgba(203,166,247,0.5)">
+      <span class="bsub" style="color:var(--mauve)">dragging ↕</span>
+    </div>
+  </div>
+
+  <div class="label" style="margin-top:4px">Slot ordering — left (inner→outer) · Island · right (inner→outer)</div>
+  <div class="row" style="font-size:9px;color:var(--overlay0);gap:6px;flex-wrap:nowrap">
+    <span style="color:var(--blue)">[vpn</span>
+    <span style="color:var(--blue)">music</span>
+    <span style="color:var(--blue)">discord]</span>
+    <div style="background:var(--surface0);border-radius:9999px;padding:2px 12px;color:var(--subtext0);border:1px solid rgba(205,214,244,0.07)">ISLAND</div>
+    <span style="color:var(--mauve)">[rec</span>
+    <span style="color:var(--mauve)">notif</span>
+    <span style="color:var(--mauve)">stash</span>
+    <span style="color:var(--mauve)">clock]</span>
+  </div>
+</body>
+</html>

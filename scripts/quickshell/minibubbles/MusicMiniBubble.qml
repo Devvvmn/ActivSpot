@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 
 BaseBubble {
     id: root
@@ -22,13 +23,33 @@ BaseBubble {
     Behavior on opacity { NumberAnimation { duration: island.expanded ? 0 : 360; easing.type: Easing.OutCubic } }
     Behavior on scale   { SpringAnimation { spring: 5.5; damping: 0.7 } }
 
+    // Soft mauve halo behind the pill — gently breathes opacity instead of
+    // pulsing the rim. Narrow amplitude + heavy blur reads as ambient glow.
     Rectangle {
+        anchors.centerIn: pillBg
+        width: pillBg.width + island.s(10)
+        height: pillBg.height + island.s(10)
+        radius: height / 2
+        color: "transparent"
+        border.width: island.s(2)
+        border.color: island.mauve
+        // musicPulse animates 0.22→0.72; remap to a tight 0.10→0.28 band
+        opacity: 0.10 + (island.musicPulse - 0.22) * 0.36
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            blurEnabled: true
+            blurMax: 24
+            blur: 1.0
+        }
+    }
+
+    Rectangle {
+        id: pillBg
         anchors.fill: parent
         radius: parent.height / 2
         color: Qt.rgba(island.base.r, island.base.g, island.base.b, 0.94)
-        border.width: 1.5
-        border.color: Qt.rgba(island.mauve.r, island.mauve.g, island.mauve.b, island.musicPulse)
-        Behavior on border.color { ColorAnimation { duration: 200 } }
+        border.width: 1
+        border.color: Qt.rgba(island.text.r, island.text.g, island.text.b, 0.06)
     }
 
     Row {
@@ -53,8 +74,9 @@ BaseBubble {
         }
 
         Item {
-            width: island.s(34)
-            height: root.bubbleH - island.s(14)
+            id: cavaBubble
+            width: island.s(28)
+            height: root.bubbleH - island.s(16)
             anchors.verticalCenter: parent.verticalCenter
 
             Repeater {
@@ -72,25 +94,23 @@ BaseBubble {
                         : index === 3 ? island.cavaBar3
                         : index === 4 ? island.cavaBar4
                         : island.cavaBar5
+                    property real halfMax: cavaBubble.height / 2
+                    property real halfH: island.musicData.status !== "Playing"
+                        ? Math.max(1, halfMax * 0.10)
+                        : Math.max(1, halfMax * barVal)
 
-                    x: index * island.s(6)
-                    width: island.s(4)
-                    radius: island.s(2)
-                    anchors.bottom: parent.bottom
-                    height: island.musicData.status !== "Playing"
-                        ? parent.height * 0.12
-                        : Math.max(parent.height * 0.12, parent.height * barVal)
+                    x: index * island.s(5)
+                    width: island.s(3)
+                    radius: island.s(1.5)
+                    y: cavaBubble.height / 2 - halfH
+                    height: halfH * 2
                     Behavior on height { NumberAnimation { duration: 60; easing.type: Easing.Linear } }
+                    Behavior on y      { NumberAnimation { duration: 60; easing.type: Easing.Linear } }
 
-                    opacity: island.musicData.status === "Playing" ? 1.0 : 0.3
+                    opacity: island.musicData.status === "Playing" ? 1.0 : 0.35
                     Behavior on opacity { NumberAnimation { duration: 300 } }
 
-                    gradient: Gradient {
-                        orientation: Gradient.Vertical
-                        GradientStop { position: 0.0; color: Qt.lighter(barColor, 1.3) }
-                        GradientStop { position: 0.5; color: barColor }
-                        GradientStop { position: 1.0; color: Qt.darker(barColor, 1.15) }
-                    }
+                    color: barColor
                 }
             }
         }

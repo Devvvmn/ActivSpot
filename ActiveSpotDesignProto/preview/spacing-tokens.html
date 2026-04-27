@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--base); font-family: var(--font-mono); padding: 16px 20px; }
+  .row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .bar-wrap { flex: 1; height: 20px; display: flex; align-items: center; }
+  .bar { height: 8px; background: linear-gradient(90deg,var(--mauve),var(--blue)); border-radius: 4px; }
+  .name { width: 60px; font-size: 10px; color: var(--overlay0); flex-shrink: 0; }
+  .val  { width: 36px; font-size: 10px; color: var(--subtext0); text-align: right; flex-shrink: 0; }
+  .usage { font-size: 9px; color: var(--overlay0); min-width: 180px; }
+</style>
+</head>
+<body>
+  <div class="row"><div class="name">space-1</div><div class="bar-wrap"><div class="bar" style="width:4px"></div></div><div class="val">4px</div><div class="usage">Applet gap, tiny offset</div></div>
+  <div class="row"><div class="name">space-2</div><div class="bar-wrap"><div class="bar" style="width:8px"></div></div><div class="val">8px</div><div class="usage">Bubble gap, icon spacing</div></div>
+  <div class="row"><div class="name">space-3</div><div class="bar-wrap"><div class="bar" style="width:12px"></div></div><div class="val">12px</div><div class="usage">Column spacing, clock layout</div></div>
+  <div class="row"><div class="name">space-4</div><div class="bar-wrap"><div class="bar" style="width:16px"></div></div><div class="val">16px</div><div class="usage">Card row spacing, music layout</div></div>
+  <div class="row"><div class="name">space-5</div><div class="bar-wrap"><div class="bar" style="width:20px"></div></div><div class="val">20px</div><div class="usage">Panel inner margin</div></div>
+  <div class="row"><div class="name">space-6</div><div class="bar-wrap"><div class="bar" style="width:24px"></div></div><div class="val">24px</div><div class="usage">Music page margin</div></div>
+  <div class="row"><div class="name">space-7</div><div class="bar-wrap"><div class="bar" style="width:28px"></div></div><div class="val">28px</div><div class="usage">Clock page margin</div></div>
+  <div class="row"><div class="name">bottom</div><div class="bar-wrap"><div class="bar" style="width:72px; opacity:0.4; border: 1px dashed rgba(203,166,247,0.4); background:transparent"></div></div><div class="val">68–72px</div><div class="usage">Navigation safe area (bottom)</div></div>
+</body>
+</html>

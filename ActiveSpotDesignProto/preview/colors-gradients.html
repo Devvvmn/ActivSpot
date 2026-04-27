@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--base); font-family: var(--font-mono); padding: 16px; display: flex; gap: 8px; }
+  .swatch { flex: 1; height: 56px; border-radius: 10px; display: flex; flex-direction: column; justify-content: flex-end; padding: 6px 10px; }
+  .label { font-size: 10px; font-weight: 700; color: rgba(0,0,0,0.55); }
+  .sub   { font-size: 9px; color: rgba(0,0,0,0.35); margin-top: 2px; }
+</style>
+</head>
+<body>
+  <div class="swatch" style="background: linear-gradient(90deg,#cba6f7,#89b4fa)">
+    <div class="label">accent</div><div class="sub">mauve → blue</div>
+  </div>
+  <div class="swatch" style="background: linear-gradient(90deg,#f38ba8,#fab387)">
+    <div class="label">warm</div><div class="sub">red → peach</div>
+  </div>
+  <div class="swatch" style="background: linear-gradient(90deg,#a6e3a1,#b9f0b5)">
+    <div class="label">battery ok</div><div class="sub">green</div>
+  </div>
+  <div class="swatch" style="background: linear-gradient(90deg,#fab387,#ffd0a8)">
+    <div class="label">battery med</div><div class="sub">peach</div>
+  </div>
+  <div class="swatch" style="background: linear-gradient(90deg,#f38ba8,#ffb4ab)">
+    <div class="label">battery low</div><div class="sub">red</div>
+  </div>
+  <div class="swatch" style="background: linear-gradient(180deg,#cba6f7,#a6e3a1,#fab387,#f5c2e7,#89b4fa,#cba6f7)">
+    <div class="label" style="color:rgba(0,0,0,0.5)">cava bars</div><div class="sub" style="color:rgba(0,0,0,0.35)">6 colors</div>
+  </div>
+</body>
+</html>

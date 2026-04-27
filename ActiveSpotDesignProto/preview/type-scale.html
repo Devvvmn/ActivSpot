@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--base); font-family: var(--font-mono); padding: 16px 20px; }
+  .row { display: flex; align-items: baseline; gap: 16px; padding: 6px 0; border-bottom: 1px solid rgba(205,214,244,0.05); }
+  .row:last-child { border-bottom: none; }
+  .meta { width: 120px; flex-shrink: 0; display: flex; flex-direction: column; gap: 2px; }
+  .meta-name { font-size: 9px; color: var(--overlay0); text-transform: uppercase; letter-spacing: 0.1em; }
+  .meta-size { font-size: 9px; color: var(--overlay0); }
+  .sample { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="meta"><div class="meta-name">display</div><div class="meta-size">50px · Black</div></div>
+    <div class="sample" style="font-size:50px;font-weight:900;line-height:1">11:17:53</div>
+  </div>
+  <div class="row">
+    <div class="meta"><div class="meta-name">heading</div><div class="meta-size">20px · Black</div></div>
+    <div class="sample" style="font-size:20px;font-weight:900">VIRA — I Don't Care</div>
+  </div>
+  <div class="row">
+    <div class="meta"><div class="meta-name">value</div><div class="meta-size">24px · Black</div></div>
+    <div class="sample" style="font-size:24px;font-weight:900;color:var(--peach)">4.9°C</div>
+  </div>
+  <div class="row">
+    <div class="meta"><div class="meta-name">section</div><div class="meta-size">11px · Black · CAPS</div></div>
+    <div class="sample" style="font-size:11px;font-weight:900;color:var(--mauve);letter-spacing:0.15em;text-transform:uppercase">EQUALIZER</div>
+  </div>
+  <div class="row">
+    <div class="meta"><div class="meta-name">body</div><div class="meta-size">13px · Regular</div></div>
+    <div class="sample" style="font-size:13px">Tuesday, April 07  ·  Clear Sky</div>
+  </div>
+  <div class="row">
+    <div class="meta"><div class="meta-name">muted</div><div class="meta-size">13px · Regular</div></div>
+    <div class="sample" style="font-size:13px;color:var(--subtext0)">BY · VIOLENT VIRA ·</div>
+  </div>
+  <div class="row">
+    <div class="meta"><div class="meta-name">caption</div><div class="meta-size">10px</div></div>
+    <div class="sample" style="font-size:10px;color:var(--subtext0)">00:27 / 03:01</div>
+  </div>
+  <div class="row">
+    <div class="meta"><div class="meta-name">tiny</div><div class="meta-size">8px</div></div>
+    <div class="sample" style="font-size:8px;color:var(--overlay0)">32  64  125  250  500  1K  2K  4K  8K  16K</div>
+  </div>
+</body>
+</html>

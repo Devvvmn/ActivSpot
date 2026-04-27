@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--base); font-family: var(--font-mono); padding: 18px 20px; display: flex; flex-direction: column; gap: 16px; }
+  .section-label { font-size: 9px; color: var(--overlay0); text-transform: uppercase; letter-spacing: 0.12em; }
+  .row { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+
+  /* preset chip */
+  .chip {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 28px; padding: 0 13px; border-radius: 9999px;
+    font-size: 10px; font-weight: 700; border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .chip-default { background: rgba(49,50,68,0.6); color: var(--text); border-color: rgba(205,214,244,0.08); }
+  .chip-hover   { background: var(--surface1); color: var(--text); border-color: rgba(205,214,244,0.08); }
+  .chip-active  { background: var(--mauve); color: var(--base); border-color: rgba(203,166,247,0.8); }
+
+  /* badge */
+  .badge {
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    height: 22px; padding: 0 10px; border-radius: 9999px;
+    font-size: 10px; font-weight: 700; border: 1px solid transparent;
+    white-space: nowrap;
+  }
+
+  /* icon button */
+  .btn-circle {
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 9999px; flex-shrink: 0;
+  }
+  .divider { height: 1px; background: rgba(205,214,244,0.06); }
+</style>
+</head>
+<body>
+
+  <!-- Preset chips -->
+  <div class="section-label">Preset chips — EQ / filter selector</div>
+  <div class="row">
+    <div class="chip chip-default">Flat</div>
+    <div class="chip chip-default">Bass</div>
+    <div class="chip chip-default">Treble</div>
+    <div class="chip chip-active">Rock</div>
+    <div class="chip chip-default">Vocal</div>
+    <div class="chip chip-default">Pop</div>
+    <div class="chip chip-hover">Jazz</div>
+    <div class="chip chip-default">Classic</div>
+    <div style="width:1px;height:18px;background:rgba(205,214,244,0.08)"></div>
+    <div style="display:inline-flex;align-items:center;justify-content:center;height:20px;padding:0 9px;border-radius:9999px;background:rgba(203,166,247,0.15);border:1px solid rgba(203,166,247,0.4);font-size:10px;font-weight:700;color:var(--mauve)">Rock</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Status badges -->
+  <div class="section-label">Status badges</div>
+  <div class="row">
+    <div class="badge" style="background:rgba(49,50,68,0.5);color:var(--subtext0);border-color:rgba(205,214,244,0.08)">
+      <span style="font-size:11px">&#9711;</span> DND
+    </div>
+    <div class="badge" style="background:rgba(203,166,247,0.22);color:var(--mauve);border-color:rgba(203,166,247,0.5)">
+      <span style="font-size:11px">&#9675;</span> DND
+    </div>
+    <div class="badge" style="background:rgba(49,50,68,0.5);color:var(--subtext0);border-color:rgba(205,214,244,0.08)">Clear</div>
+    <div class="badge" style="background:rgba(166,227,161,0.15);color:var(--green);border-color:rgba(166,227,161,0.4);gap:4px">
+      <span style="font-size:10px">&#9913;</span> wg0
+    </div>
+    <div class="badge" style="background:rgba(250,179,135,0.15);color:var(--peach);border-color:rgba(250,179,135,0.4)">
+      &#9675; 3 notifs
+    </div>
+    <div class="badge" style="background:rgba(243,139,168,0.15);color:var(--red);border-color:rgba(243,139,168,0.4)">
+      &#9679; REC
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Control buttons -->
+  <div class="section-label">Control buttons</div>
+  <div class="row" style="align-items:center">
+    <!-- secondary icon button -->
+    <div class="btn-circle" style="width:44px;height:44px;background:rgba(49,50,68,0.6);font-size:18px;color:var(--text)">&#9664;</div>
+    <!-- primary play (mauve glow) -->
+    <div class="btn-circle" style="width:60px;height:60px;background:var(--mauve);font-size:24px;color:var(--base);box-shadow:0 0 16px rgba(203,166,247,0.4)">&#9654;</div>
+    <!-- secondary -->
+    <div class="btn-circle" style="width:44px;height:44px;background:rgba(49,50,68,0.6);font-size:18px;color:var(--text)">&#9654;</div>
+
+    <div style="width:1px;height:24px;background:rgba(205,214,244,0.08)"></div>
+
+    <!-- small dismiss button -->
+    <div class="btn-circle" style="width:22px;height:22px;background:rgba(49,50,68,0.5);font-size:10px;color:var(--subtext0)">&#10005;</div>
+    <div class="btn-circle" style="width:22px;height:22px;background:var(--surface1);font-size:10px;color:var(--subtext0)">&#10005;</div>
+
+    <div style="width:1px;height:24px;background:rgba(205,214,244,0.08)"></div>
+
+    <!-- applet pill button (battery style) -->
+    <div style="height:32px;padding:0 14px;border-radius:9999px;background:linear-gradient(90deg,#a6e3a1,#b9f0b5);display:flex;align-items:center;justify-content:center;gap:6px">
+      <span style="font-size:13px;color:#1e1e2e;font-weight:900">&#9646;</span>
+      <span style="font-size:12px;font-weight:900;color:#1e1e2e">100%</span>
+    </div>
+    <div style="height:32px;padding:0 14px;border-radius:9999px;background:linear-gradient(90deg,#f38ba8,#ffb4ab);display:flex;align-items:center;justify-content:center;gap:6px">
+      <span style="font-size:13px;color:#1e1e2e;font-weight:900">&#9648;</span>
+      <span style="font-size:12px;font-weight:900;color:#1e1e2e">12%</span>
+    </div>
+  </div>
+
+</body>
+</html>

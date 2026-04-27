@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--base); font-family: var(--font-mono); padding: 16px 20px; display: flex; flex-direction: column; gap: 6px; }
+  .card { background: rgba(49,50,68,0.55); border: 1px solid rgba(205,214,244,0.07); border-radius: 12px; height: 54px; display: flex; align-items: center; padding: 0 8px; gap: 8px; }
+  .accent-strip { width: 3px; border-radius: 2px; align-self: stretch; margin: 10px 0; flex-shrink: 0; }
+  .icon-box { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+  .content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .title { font-size: 12px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .body  { font-size: 10px; color: var(--subtext0); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dismiss { width: 22px; height: 22px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--subtext0); flex-shrink: 0; }
+  .label { font-size: 9px; color: var(--overlay0); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 6px; }
+</style>
+</head>
+<body>
+  <div class="label">Notification history cards</div>
+  <div class="card">
+    <div class="accent-strip" style="background:#cba6f7; opacity:0.75"></div>
+    <div class="icon-box" style="background:rgba(203,166,247,0.12)"><span style="color:#cba6f7">💬</span></div>
+    <div class="content">
+      <div class="title">Discord  ·  New message in #general</div>
+      <div class="body">dxvmxn: hey are you free tonight?</div>
+    </div>
+    <div class="dismiss">✕</div>
+  </div>
+  <div class="card">
+    <div class="accent-strip" style="background:#89b4fa; opacity:0.75"></div>
+    <div class="icon-box" style="background:rgba(137,180,250,0.12)"><span style="color:#89b4fa">📦</span></div>
+    <div class="content">
+      <div class="title">System  ·  Package update available</div>
+      <div class="body">hyprland 0.45.0 is ready to install</div>
+    </div>
+    <div class="dismiss">✕</div>
+  </div>
+  <div class="card">
+    <div class="accent-strip" style="background:#a6e3a1; opacity:0.75"></div>
+    <div class="icon-box" style="background:rgba(166,227,161,0.12)"><span style="color:#a6e3a1">✓</span></div>
+    <div class="content">
+      <div class="title">Build succeeded  ·  quickshell</div>
+      <div class="body">Compiled in 4.2s</div>
+    </div>
+    <div class="dismiss" style="background:rgba(69,71,90,0.8)">✕</div>
+  </div>
+</body>
+</html>
