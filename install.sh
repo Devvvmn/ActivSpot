@@ -83,7 +83,7 @@ done
 
 if [[ ${#MISSING_PAC[@]} -gt 0 ]]; then
     info "Installing: ${MISSING_PAC[*]}"
-    sudo pacman -S --needed --noconfirm "${MISSING_PAC[@]}"
+    sudo pacman -S --needed "${MISSING_PAC[@]}"
 else
     success "All official packages already installed"
 fi
