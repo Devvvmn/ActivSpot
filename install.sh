@@ -38,9 +38,9 @@ else
     success "paru installed"
 fi
 
-# ── official packages ─────────────────────────────────────────────────────────
-header "Official packages (pacman)"
-PACMAN_PKGS=(
+# ── Packages ─────────────────────────────────────────────────────────────
+header "Installing packages ($AUR)"
+PKGS=(
     # Hyprland core
     hyprland hypridle
     xdg-desktop-portal-hyprland xdg-utils
@@ -71,26 +71,7 @@ PACMAN_PKGS=(
 
     # Python (for focus_daemon)
     python
-)
 
-info "Syncing package database…"
-sudo pacman -Sy --noconfirm
-
-MISSING_PAC=()
-for pkg in "${PACMAN_PKGS[@]}"; do
-    pacman -Qq "$pkg" &>/dev/null || MISSING_PAC+=("$pkg")
-done
-
-if [[ ${#MISSING_PAC[@]} -gt 0 ]]; then
-    info "Installing: ${MISSING_PAC[*]}"
-    sudo pacman -S --needed "${MISSING_PAC[@]}"
-else
-    success "All official packages already installed"
-fi
-
-# ── AUR packages ─────────────────────────────────────────────────────────────
-header "AUR packages ($AUR)"
-AUR_PKGS=(
     quickshell-git
     awww
     ttf-martian-mono-nerd
@@ -98,17 +79,10 @@ AUR_PKGS=(
     wl-screenrec
 )
 
-MISSING_AUR=()
-for pkg in "${AUR_PKGS[@]}"; do
-    pacman -Qq "$pkg" &>/dev/null || MISSING_AUR+=("$pkg")
-done
-
-if [[ ${#MISSING_AUR[@]} -gt 0 ]]; then
-    info "Installing from AUR: ${MISSING_AUR[*]}"
-    $AUR -S --needed "${MISSING_AUR[@]}"
-else
-    success "All AUR packages already installed"
-fi
+info "Installing/updating packages: ${PKGS[*]}"
+echo " "
+$AUR -Syu --needed "${PKGS[@]}"
+success "All AUR packages already installed"
 
 # ── copy dotfiles ─────────────────────────────────────────────────────────────
 header "Dotfiles"
