@@ -421,7 +421,7 @@ PanelWindow {
         let cmd = `bash ~/.config/hypr/scripts/screenshot.sh --geometry "${root.geometryString}"`
         if (isRecord) cmd += " --record"
         if (openEditor) cmd += " --edit"
-        Quickshell.execDetached(["bash", "-c", cmd])
-        Qt.quit() 
+        Qt.quit()
+        Quickshell.execDetached(["bash", "-c", `sleep 0.2 && ${cmd}`])
     }
 }
