@@ -6,3 +6,5 @@ SystemTrayApplet 1.0 SystemTrayApplet.qml
 WorkspacesApplet 1.0 WorkspacesApplet.qml
 HelpApplet 1.0 HelpApplet.qml
 SpacerApplet 1.0 SpacerApplet.qml
+SeparatorApplet 1.0 SeparatorApplet.qml
+PluginApplet 1.0 PluginApplet.qml

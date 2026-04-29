@@ -1,0 +1,6 @@
+module qs.Commons
+singleton Style 1.0 Style.qml
+singleton Color 1.0 Color.qml
+singleton IconsTabler 1.0 IconsTabler.qml
+IpcHandler 1.0 IpcHandler.qml
+singleton Logger 1.0 Logger.qml

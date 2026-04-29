@@ -1,0 +1,49 @@
+{
+  "id": "arch-updater",
+  "name": "Arch Updater",
+  "version": "2.0.1",
+  "minNoctaliaVersion": "3.6.0",
+  "author": "Ast",
+  "license": "MIT",
+  "repository": "https://github.com/noctalia-dev/noctalia-plugins",
+  "description": "A plugin to manage updates on Arch",
+  "tags": ["Bar", "Desktop", "Panel", "System", "Utility"],
+  "entryPoints": {
+    "main": "Main.qml",
+    "barWidget": "BarWidget.qml",
+    "panel": "Panel.qml",
+    "settings": "Settings.qml",
+    "launcherProvider": "LauncherProvider.qml",    
+    "controlCenterWidget": "ControlCenterWidget.qml",
+    "desktopWidget": "DesktopWidget.qml"
+  },
+  "dependencies": {
+    "plugins": []
+  },
+  "metadata": {
+    "defaultSettings": {
+      "systemCmd": "checkupdates 2>/dev/null",
+      "aurCmd": "paru -Qua 2>/dev/null",
+      "updateCmd": "ghostty -e bash -c 'echo \"Updating System...\";paru; flatpak update; read -n 1 -p \"Press any key to exit...\"'",
+      "flatpak": true,
+      "noctalia": true,
+      "toast": true,
+      "desktopTip": true,
+      "hideOnEmpty": false,
+      "refreshTimer": true,
+      "refreshInterval": 120,
+      "iconName": "arrow-big-down-lines",
+      "useDistroLogo": false,
+      "customIconPath": "",
+      "boldText": true,
+      "enableColorization": false,
+      "iconColor": "none",
+      "boldVer": true,
+      "tooltip": true,
+      "closeButton": false,
+      "boldVerPanel": true,
+      "boldVerDesktop": true,
+      "hoverTip": true
+    }
+  }
+}

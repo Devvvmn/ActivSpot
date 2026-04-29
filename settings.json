@@ -4,5 +4,10 @@
   "topbarHelpIcon": false,
   "wallpaperDir": "/home/dxvmxn/Pictures/Wallpapers/",
   "language": "us,ru",
-  "kbOptions": "grp:caps_toggle"
+  "kbOptions": "grp:caps_toggle",
+  "topbarTheme": "mocha",
+  "pinnedApps": [
+    "kitty",
+    "google-chrome"
+  ]
 }

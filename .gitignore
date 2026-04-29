@@ -5,3 +5,22 @@ scripts/quickshell/calendar/.env
 scripts/quickshell/qs_colors.json
 scripts/quickshell/colors.json
 hyprland.conf.save
+
+# Plugin compat — local plan doc
+PLUGIN_COMPAT_PLAN.md
+
+# Claude Code / AI tooling
+.claude/
+.codex
+PROJECT_ANALYSIS.md
+
+# Reference / external dotfiles
+ref_dots/
+techdock/
+ActiveSpotDesignProto/
+noctalia-plugins/
+noctalia-shell/
+
+# Quickshell runtime dirs (generated at runtime)
+scripts/quickshell/rmqs/
+

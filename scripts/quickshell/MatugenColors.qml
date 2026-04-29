@@ -1,32 +1,31 @@
 import QtQuick
+import "./themes"
 
-// Static Catppuccin Mocha palette. Matugen disabled — wallpaper-driven
-// recoloring made the UI feel plastic; sticking with a hand-picked palette.
+// Compatibility shim. All theme state lives in the Theme singleton; this
+// type just mirrors Theme's palette so existing consumers (popups, lock,
+// etc.) that instantiate `MatugenColors { id: _theme }` keep working
+// without edits. New code should import "themes" and read Theme.* directly.
 Item {
-    id: root
-
-    property color base: "#1e1e2e"
-    property color mantle: "#181825"
-    property color crust: "#11111b"
-    property color text: "#cdd6f4"
-    property color subtext0: "#a6adc8"
-    property color subtext1: "#bac2de"
-    property color surface0: "#313244"
-    property color surface1: "#45475a"
-    property color surface2: "#585b70"
-    property color overlay0: "#6c7086"
-    property color overlay1: "#7f849c"
-    property color overlay2: "#9399b2"
-    property color blue: "#89b4fa"
-    property color sapphire: "#74c7ec"
-    property color peach: "#fab387"
-    property color green: "#a6e3a1"
-    property color red: "#f38ba8"
-    property color mauve: "#cba6f7"
-    property color pink: "#f5c2e7"
-    property color yellow: "#f9e2af"
-    property color maroon: "#eba0ac"
-    property color teal: "#94e2d5"
-
-    property string rawJson: ""
+    readonly property color base: Theme.base
+    readonly property color mantle: Theme.mantle
+    readonly property color crust: Theme.crust
+    readonly property color text: Theme.text
+    readonly property color subtext0: Theme.subtext0
+    readonly property color subtext1: Theme.subtext1
+    readonly property color surface0: Theme.surface0
+    readonly property color surface1: Theme.surface1
+    readonly property color surface2: Theme.surface2
+    readonly property color overlay0: Theme.overlay0
+    readonly property color overlay1: Theme.overlay1
+    readonly property color overlay2: Theme.overlay2
+    readonly property color blue: Theme.blue
+    readonly property color sapphire: Theme.sapphire
+    readonly property color peach: Theme.peach
+    readonly property color green: Theme.green
+    readonly property color red: Theme.red
+    readonly property color mauve: Theme.mauve
+    readonly property color pink: Theme.pink
+    readonly property color yellow: Theme.yellow
+    readonly property color maroon: Theme.maroon
+    readonly property color teal: Theme.teal
 }

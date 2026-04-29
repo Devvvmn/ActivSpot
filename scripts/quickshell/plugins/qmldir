@@ -1,0 +1,3 @@
+module plugins
+singleton PluginLoader 1.0 PluginLoader.qml
+PluginApiShim 1.0 PluginApiShim.qml

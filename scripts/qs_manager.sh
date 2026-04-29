@@ -112,32 +112,33 @@ handle_network_prep() {
 # -----------------------------------------------------------------------------
 MAIN_QML_PATH="$HOME/.config/hypr/scripts/quickshell/Main.qml"
 BAR_QML_PATH="$HOME/.config/hypr/scripts/quickshell/TopBar.qml"
+DOCK_QML_PATH="$HOME/.config/hypr/scripts/quickshell/dock/Dock.qml"
 ISLAND_QML_PATH="$HOME/.config/hypr/scripts/quickshell/DynamicIsland.qml"
 LAUNCHER_QML_PATH="$HOME/.config/hypr/scripts/quickshell/AppLauncher.qml"
 CLIPBOARD_QML_PATH="$HOME/.config/hypr/scripts/quickshell/ClipboardViewer.qml"
 
 if ! pgrep -f "quickshell.*Main\.qml" >/dev/null; then
-    quickshell -p "$MAIN_QML_PATH" >/dev/null 2>&1 &
+    QML_IMPORT_PATH="$QS_DIR/quickshell" quickshell -p "$MAIN_QML_PATH" >/dev/null 2>&1 &
     disown
 fi
 
 if ! pgrep -f "quickshell.*TopBar\.qml" >/dev/null; then
-    quickshell -p "$BAR_QML_PATH" >/dev/null 2>&1 &
+    QML_IMPORT_PATH="$QS_DIR/quickshell" quickshell -p "$BAR_QML_PATH" >/dev/null 2>&1 &
     disown
 fi
 
 if ! pgrep -f "quickshell.*DynamicIsland\.qml" >/dev/null; then
-    quickshell -p "$ISLAND_QML_PATH" >/dev/null 2>&1 &
+    QML_IMPORT_PATH="$QS_DIR/quickshell" quickshell -p "$ISLAND_QML_PATH" >/dev/null 2>&1 &
     disown
 fi
 
 if ! pgrep -f "quickshell.*AppLauncher\.qml" >/dev/null; then
-    quickshell -p "$LAUNCHER_QML_PATH" >/dev/null 2>&1 &
+    QML_IMPORT_PATH="$QS_DIR/quickshell" quickshell -p "$LAUNCHER_QML_PATH" >/dev/null 2>&1 &
     disown
 fi
 
 if ! pgrep -f "quickshell.*ClipboardViewer\.qml" >/dev/null; then
-    quickshell -p "$CLIPBOARD_QML_PATH" >/dev/null 2>&1 &
+    QML_IMPORT_PATH="$QS_DIR/quickshell" quickshell -p "$CLIPBOARD_QML_PATH" >/dev/null 2>&1 &
     disown
 fi
 

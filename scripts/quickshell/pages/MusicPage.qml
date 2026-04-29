@@ -51,10 +51,15 @@ Item {
             onTriggered: bgLayer.t += frameTime / 24.0
         }
 
-        // Solid base in case art is missing or transparent
+        // Solid base in case art is missing or transparent.
+        // In glass mode keep it transparent so the island's glass shows through —
+        // album art / blobs still render on top when present.
         Rectangle {
             anchors.fill: parent
-            color: island.base
+            color: island.glassTheme
+                ? Qt.rgba(island.base.r, island.base.g, island.base.b, 0)
+                : Qt.rgba(island.base.r, island.base.g, island.base.b, 1)
+            Behavior on color { ColorAnimation { duration: 520; easing.type: Easing.InOutCubic } }
         }
 
         Image {
@@ -62,7 +67,8 @@ Item {
             source: island.musicData.artUrl || ""
             fillMode: Image.PreserveAspectCrop
             asynchronous: true
-            opacity: 0.65
+            opacity: island.glassTheme ? 0.32 : 0.65
+            Behavior on opacity { NumberAnimation { duration: 520; easing.type: Easing.InOutCubic } }
             visible: source != ""
             width: bgLayer.cw * 1.7
             height: bgLayer.ch * 1.7
@@ -83,7 +89,8 @@ Item {
             width: bgLayer.cw * 1.10; height: bgLayer.ch * 0.95
             radius: width / 2
             color: island.mauve
-            opacity: 0.32
+            opacity: island.glassTheme ? 0.16 : 0.32
+            Behavior on opacity { NumberAnimation { duration: 520; easing.type: Easing.InOutCubic } }
             x: bgLayer.cw * 0.50 - width / 2 + Math.cos(bgLayer.t * bgLayer.tau * 0.85)        * bgLayer.cw * 0.32
             y: bgLayer.ch * 0.50 - height / 2 + Math.sin(bgLayer.t * bgLayer.tau * 0.65 + 0.4) * bgLayer.ch * 0.42
             layer.enabled: true
@@ -94,7 +101,8 @@ Item {
             width: bgLayer.cw * 0.95; height: bgLayer.ch * 1.05
             radius: width / 2
             color: island.blue
-            opacity: 0.28
+            opacity: island.glassTheme ? 0.14 : 0.28
+            Behavior on opacity { NumberAnimation { duration: 520; easing.type: Easing.InOutCubic } }
             x: bgLayer.cw * 0.50 - width / 2 + Math.cos(bgLayer.t * bgLayer.tau * 1.10 + 2.1) * bgLayer.cw * 0.36
             y: bgLayer.ch * 0.50 - height / 2 + Math.sin(bgLayer.t * bgLayer.tau * 0.95 + 1.3) * bgLayer.ch * 0.35
             layer.enabled: true
@@ -105,7 +113,8 @@ Item {
             width: bgLayer.cw * 0.80; height: bgLayer.ch * 0.85
             radius: width / 2
             color: island.peach
-            opacity: 0.20
+            opacity: island.glassTheme ? 0.10 : 0.20
+            Behavior on opacity { NumberAnimation { duration: 520; easing.type: Easing.InOutCubic } }
             x: bgLayer.cw * 0.50 - width / 2 + Math.cos(bgLayer.t * bgLayer.tau * 0.55 + 4.2) * bgLayer.cw * 0.30
             y: bgLayer.ch * 0.50 - height / 2 + Math.sin(bgLayer.t * bgLayer.tau * 0.80 + 3.0) * bgLayer.ch * 0.40
             layer.enabled: true
@@ -117,8 +126,8 @@ Item {
             anchors.fill: parent
             gradient: Gradient {
                 orientation: Gradient.Vertical
-                GradientStop { position: 0.0; color: Qt.rgba(island.base.r, island.base.g, island.base.b, 0.30) }
-                GradientStop { position: 1.0; color: Qt.rgba(island.base.r, island.base.g, island.base.b, 0.55) }
+                GradientStop { position: 0.0; color: Qt.rgba(island.base.r, island.base.g, island.base.b, island.glassTheme ? 0.10 : 0.30) }
+                GradientStop { position: 1.0; color: Qt.rgba(island.base.r, island.base.g, island.base.b, island.glassTheme ? 0.25 : 0.55) }
             }
         }
 

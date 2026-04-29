@@ -8,8 +8,10 @@ Rectangle {
 
     radius: bar.s(16)
     border.width: 1
-    border.color: Qt.rgba(bar.text.r, bar.text.g, bar.text.b, 0.05)
-    color: Qt.rgba(bar.base.r, bar.base.g, bar.base.b, 0.94)
+    border.color: bar.pillBorderColor
+    color: bar.pillColor
+    Behavior on color        { ColorAnimation { duration: 520; easing.type: Easing.InOutCubic } }
+    Behavior on border.color { ColorAnimation { duration: 520; easing.type: Easing.InOutCubic } }
 
     property real targetW: bar.wsModel.count > 0 ? (wsRow.width + bar.s(16)) : 0
     implicitWidth:  targetW

@@ -158,6 +158,26 @@ for svc in pipewire pipewire-pulse wireplumber; do
     fi
 done
 
+# ── hyprpm plugins ────────────────────────────────────────────────────────────
+header "Hyprland plugins (hyprpm)"
+HYPRPM_REPOS=(
+    "https://github.com/yayuuu/hyprland-scroll-overview"
+    "https://github.com/hyprnux/hyprglass"
+)
+for repo in "${HYPRPM_REPOS[@]}"; do
+    name=$(basename "$repo")
+    if hyprpm list 2>/dev/null | grep -q "$name"; then
+        success "hyprpm: $name already added"
+    else
+        info "hyprpm: adding $repo"
+        hyprpm add "$repo"
+    fi
+done
+info "hyprpm: enabling plugins"
+hyprpm enable scrolloverview
+hyprpm enable hyprglass
+success "Plugins enabled (will load on next Hyprland start via hyprpm reload)"
+
 # ── done ──────────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${BOLD}${GREEN}Installation complete!${NC}"

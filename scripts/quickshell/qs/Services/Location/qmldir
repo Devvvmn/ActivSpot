@@ -1,0 +1,2 @@
+module qs.Services.Location
+singleton LocationService 1.0 LocationService.qml

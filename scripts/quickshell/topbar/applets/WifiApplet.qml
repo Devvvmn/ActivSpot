@@ -6,14 +6,16 @@ Rectangle {
     property var bar
     property bool editMode: false
 
+    height: bar.barHeight - bar.s(8)
+    implicitHeight: height
+
     property bool isHovered: wifiMouse.containsMouse
     property bool isActive:  bar.showEthernet ? (bar.ethStatus === "Connected") : bar.isWifiOn
 
-    radius: bar.s(14)
+    radius: bar.s(16)
     border.width: 0
-    color: "transparent"
+    color: bar.pillColor
 
-    implicitHeight: bar.barHeight
     implicitWidth:  wifiRow.width + bar.s(24)
     clip: true
 
@@ -25,11 +27,10 @@ Rectangle {
         radius: bar.s(14)
         opacity: root.isActive ? 1.0 : 0.0
         Behavior on opacity { NumberAnimation { duration: 300 } }
-        gradient: Gradient {
-            orientation: Gradient.Horizontal
-            GradientStop { position: 0.0; color: bar.blue }
-            GradientStop { position: 1.0; color: Qt.lighter(bar.blue, 1.3) }
-        }
+        color: bar.glassTheme
+            ? Qt.rgba(bar.mauve.r, bar.mauve.g, bar.mauve.b, 0.12)
+            : bar.base
+        Behavior on color { ColorAnimation { duration: 520; easing.type: Easing.InOutCubic } }
     }
 
     scale: isHovered ? 1.05 : 1.0
@@ -44,7 +45,7 @@ Rectangle {
             text: bar.showEthernet ? "󰈀" : bar.wifiIcon
             font.family: "Iosevka Nerd Font"
             font.pixelSize: bar.s(16)
-            color: root.isActive ? bar.base : bar.subtext0
+            color: root.isActive ? bar.text : bar.subtext0
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
@@ -55,7 +56,7 @@ Rectangle {
             font.family: "JetBrains Mono"
             font.pixelSize: bar.s(13)
             font.weight: Font.Black
-            color: root.isActive ? bar.base : bar.text
+            color: root.isActive ? bar.text : bar.text
             width: Math.min(implicitWidth, bar.s(100))
             elide: Text.ElideRight
         }

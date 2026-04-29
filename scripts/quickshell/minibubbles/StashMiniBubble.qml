@@ -28,7 +28,10 @@ BaseBubble {
     Rectangle {
         anchors.fill: parent
         radius: parent.height / 2
-        color: Qt.rgba(island.base.r, island.base.g, island.base.b, 0.94)
+        color: island.glassTheme
+            ? Qt.rgba(island.surface2.r, island.surface2.g, island.surface2.b, 0.45)
+            : Qt.rgba(island.base.r, island.base.g, island.base.b, 0.94)
+        Behavior on color { ColorAnimation { duration: 520; easing.type: Easing.InOutCubic } }
         border.width: 1.5
         border.color: Qt.rgba(island.mauve.r, island.mauve.g, island.mauve.b, 0.55)
     }

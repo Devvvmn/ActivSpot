@@ -1,0 +1,5 @@
+module themes
+singleton Theme 1.0 Theme.qml
+GlassSurface 1.0 GlassSurface.qml
+FakeGlassSurface 1.0 FakeGlassSurface.qml
+ThemeRegistry 1.0 ThemeRegistry.qml

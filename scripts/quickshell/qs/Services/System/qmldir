@@ -1,0 +1,4 @@
+module qs.Services.System
+singleton SystemService 1.0 SystemService.qml
+singleton SystemStatService 1.0 SystemStatService.qml
+singleton HostService 1.0 HostService.qml

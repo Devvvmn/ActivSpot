@@ -10,6 +10,7 @@ import "./pet"
 import "./pages"
 import "./collapsed"
 import "./minibubbles"
+import "./themes"
 
 PanelWindow {
     id: islandWindow
@@ -30,20 +31,25 @@ PanelWindow {
     // =========================================================
     // --- THEME ---
     // =========================================================
-    MatugenColors { id: mocha }
-    readonly property color base:     mocha.base
-    readonly property color surface0: mocha.surface0
-    readonly property color surface1: mocha.surface1
-    readonly property color surface2: mocha.surface2
-    readonly property color text:     mocha.text
-    readonly property color subtext0: mocha.subtext0
-    readonly property color mauve:    mocha.mauve
-    readonly property color blue:     mocha.blue
-    readonly property color peach:    mocha.peach
-    readonly property color green:    mocha.green
-    readonly property color pink:     mocha.pink
-    readonly property color teal:     mocha.teal
-    readonly property color red:      mocha.red
+    // All theme state lives in the Theme singleton; island.* aliases stay
+    // so pages / minibubbles can keep reading island.mauve / island.glassTheme.
+    readonly property color base:     Theme.base
+    readonly property color surface0: Theme.surface0
+    readonly property color surface1: Theme.surface1
+    readonly property color surface2: Theme.surface2
+    readonly property color text:     Theme.text
+    readonly property color subtext0: Theme.subtext0
+    readonly property color mauve:    Theme.mauve
+    readonly property color blue:     Theme.blue
+    readonly property color peach:    Theme.peach
+    readonly property color green:    Theme.green
+    readonly property color pink:     Theme.pink
+    readonly property color teal:     Theme.teal
+    readonly property color red:      Theme.red
+
+    readonly property string themeId: Theme.themeId
+    readonly property bool glassTheme: Theme.isGlass
+    readonly property string surfaceStyle: Theme.surfaceStyle
 
     // =========================================================
     // --- STATE ---
@@ -842,8 +848,8 @@ PanelWindow {
         }
         if (!expanded) {
             if (currentPage === "notifs") notifPageRevertTimer.restart();
-            // Collapse from appletPicker also exits bar edit mode cleanly
-            if (editBarMode) exitEditBarMode();
+            // Collapsing while in editBarMode keeps the mode active —
+            // the chip stays, single-tap re-expands the picker, double-tap exits.
         }
     }
     onNotifActiveChanged: {
@@ -943,6 +949,7 @@ PanelWindow {
 
         property int collapsedW: {
             if (islandWindow.osdActive)                                                return osdCollapsed.preferredWidth;
+            if (islandWindow.editBarMode || islandWindow.currentPage === "appletPicker") return editModeCollapsed.preferredWidth;
             if (islandWindow.currentPage === "recording" && islandWindow.isRecording) return recordingCollapsed.preferredWidth;
             if (islandWindow.currentPage === "discord"   && islandWindow.discordInCall) return discordCollapsed.preferredWidth;
             if (islandWindow.currentPage === "music"     && islandWindow.isMediaActive) return musicCollapsed.preferredWidth;
@@ -1024,6 +1031,13 @@ PanelWindow {
             }
 
             color: {
+                if (islandWindow.glassTheme) {
+                    let g  = islandWindow.surface2;
+                    let ga = islandWindow.expanded ? 0.62
+                           : islandWindow.hovered  ? 0.50
+                           : 0.40;
+                    return Qt.rgba(g.r, g.g, g.b, ga);
+                }
                 let a = islandWindow.expanded ? 0.93
                       : islandWindow.hovered  ? 0.95
                       : islandWindow.isMediaActive ? 0.88 : 0.78;
@@ -1083,8 +1097,8 @@ PanelWindow {
                 Behavior on opacity { NumberAnimation { duration: 400 } }
                 gradient: Gradient {
                     orientation: Gradient.Vertical
-                    GradientStop { position: 0.0; color: Qt.rgba(islandWindow.base.r, islandWindow.base.g, islandWindow.base.b, 0.55) }
-                    GradientStop { position: 1.0; color: Qt.rgba(islandWindow.base.r, islandWindow.base.g, islandWindow.base.b, 0.85) }
+                    GradientStop { position: 0.0; color: Qt.rgba(islandWindow.base.r, islandWindow.base.g, islandWindow.base.b, islandWindow.glassTheme ? 0.05 : 0.55) }
+                    GradientStop { position: 1.0; color: Qt.rgba(islandWindow.base.r, islandWindow.base.g, islandWindow.base.b, islandWindow.glassTheme ? 0.12 : 0.85) }
                 }
             }
 
@@ -1172,13 +1186,16 @@ PanelWindow {
             }
         }
 
-        // ── Double-tap → bar edit mode ────────────────────────────
+        // ── Double-tap → toggle bar edit mode ─────────────────────
+        // Collapsed + not editing  → enter edit mode (expands picker)
+        // Collapsed + editing      → exit edit mode entirely
         TapHandler {
             enabled: !islandWindow.expanded
             acceptedButtons: Qt.LeftButton
             // longPressThreshold kept at default; double-tap window = 300 ms
             onDoubleTapped: {
-                if (!islandWindow.editBarMode) islandWindow.enterEditBarMode()
+                if (islandWindow.editBarMode) islandWindow.exitEditBarMode()
+                else                          islandWindow.enterEditBarMode()
             }
         }
 
@@ -1190,7 +1207,8 @@ PanelWindow {
             acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
             target: null
             onWheel: (event) => {
-                if (scrollCooldown.running || islandWindow.notifActive) {
+                if (scrollCooldown.running || islandWindow.notifActive
+                    || (islandWindow.editBarMode && !islandWindow.expanded)) {
                     event.accepted = true; return;
                 }
                 if (event.angleDelta.y > 0) islandWindow.navigatePrev();
@@ -1304,6 +1322,17 @@ PanelWindow {
                 visible: opacity > 0.001
                 Behavior on opacity { SequentialAnimation {
                     PauseAnimation { duration: islandWindow.currentPage === "discord" ? 60 : 0 }
+                    NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
+                }}
+            }
+
+            EditModeCollapsed {
+                id: editModeCollapsed; island: islandWindow; anchors.centerIn: parent
+                opacity: (!islandWindow.osdActive && !islandWindow.volDragging
+                          && (islandWindow.editBarMode || islandWindow.currentPage === "appletPicker")) ? 1.0 : 0.0
+                visible: opacity > 0.001
+                Behavior on opacity { SequentialAnimation {
+                    PauseAnimation { duration: (islandWindow.editBarMode || islandWindow.currentPage === "appletPicker") && !islandWindow.osdActive ? 60 : 0 }
                     NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
                 }}
             }

@@ -1,0 +1,5 @@
+module qs.Widgets
+NIconButton 1.0 NIconButton.qml
+NText 1.0 NText.qml
+NIcon 1.0 NIcon.qml
+NPopupContextMenu 1.0 NPopupContextMenu.qml
