@@ -222,7 +222,7 @@ Item {
                         from: 0; to: 100; value: island.musicData.percent || 0
                         onMoved: {
                             island.userIsSeeking = true
-                            island.exec(`~/.config/hypr/scripts/quickshell/music/player_control.sh seek ${value} ${island.musicData.length} "${island.musicData.playerName}"`)
+                            island.exec(`~/.config/hypr/scripts/quickshell/music/player_control.sh seek ${value} ${island.musicData.length} "${island.selectedPlayer || island.musicData.playerName}"`)
                         }
                         onPressedChanged: if (!pressed) island.userIsSeeking = false
 
@@ -259,7 +259,8 @@ Item {
                     color: prevMouse.containsMouse ? island.surface1 : Qt.rgba(island.surface0.r, island.surface0.g, island.surface0.b, 0.7)
                     Behavior on color { ColorAnimation { duration: 180 } }
                     Text { anchors.centerIn: parent; text: "󰒮"; font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(20); color: island.text }
-                    MouseArea { id: prevMouse; anchors.fill: parent; hoverEnabled: true; onClicked: island.exec("playerctl previous") }
+                    MouseArea { id: prevMouse; anchors.fill: parent; hoverEnabled: true
+                        onClicked: island.exec("playerctl" + (island.selectedPlayer ? " -p " + island.selectedPlayer : "") + " previous") }
                 }
 
                 Rectangle {
@@ -270,7 +271,8 @@ Item {
                     layer.enabled: true
                     layer.effect: MultiEffect { shadowEnabled: true; shadowColor: island.mauve; shadowOpacity: 0.30; shadowBlur: 0.65 }
                     Text { anchors.centerIn: parent; text: island.musicData.status === "Playing" ? "󰏤" : "󰐊"; font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(24); color: island.base }
-                    MouseArea { id: playMouse; anchors.fill: parent; hoverEnabled: true; onClicked: island.exec("playerctl play-pause") }
+                    MouseArea { id: playMouse; anchors.fill: parent; hoverEnabled: true
+                        onClicked: island.exec("playerctl" + (island.selectedPlayer ? " -p " + island.selectedPlayer : "") + " play-pause") }
                 }
 
                 Rectangle {
@@ -278,7 +280,54 @@ Item {
                     color: nextMouse.containsMouse ? island.surface1 : Qt.rgba(island.surface0.r, island.surface0.g, island.surface0.b, 0.7)
                     Behavior on color { ColorAnimation { duration: 180 } }
                     Text { anchors.centerIn: parent; text: "󰒭"; font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(20); color: island.text }
-                    MouseArea { id: nextMouse; anchors.fill: parent; hoverEnabled: true; onClicked: island.exec("playerctl next") }
+                    MouseArea { id: nextMouse; anchors.fill: parent; hoverEnabled: true
+                        onClicked: island.exec("playerctl" + (island.selectedPlayer ? " -p " + island.selectedPlayer : "") + " next") }
+                }
+            }
+
+            // ── Source picker ───────────────────────────────────
+            RowLayout {
+                Layout.fillWidth: true; spacing: island.s(6)
+                visible: island.availablePlayers.length > 1
+
+                Text {
+                    text: "SOURCE"
+                    font.family: "JetBrains Mono"; font.pixelSize: island.s(10); font.weight: Font.Black; font.letterSpacing: 2
+                    color: island.blue
+                }
+
+                Item { Layout.fillWidth: true }
+
+                Repeater {
+                    model: island.availablePlayers
+                    delegate: Rectangle {
+                        property string playerName: modelData
+                        property string niceLabel: playerName.replace(/\.\w+$/, "").replace(/^./, c => c.toUpperCase())
+                        property bool isActive: island.selectedPlayer === playerName
+                                             || (island.selectedPlayer === "" && island.musicData.playerName === playerName)
+                        property bool isHovered: srcMouse.containsMouse
+                        Layout.preferredHeight: island.s(22)
+                        Layout.preferredWidth: srcLabel.implicitWidth + island.s(16)
+                        radius: island.s(11)
+                        color: isActive ? island.blue
+                             : (isHovered ? island.surface1
+                             : Qt.rgba(island.surface0.r, island.surface0.g, island.surface0.b, 0.6))
+                        Behavior on color { ColorAnimation { duration: 180 } }
+                        border.width: 1
+                        border.color: isActive
+                            ? Qt.rgba(island.blue.r, island.blue.g, island.blue.b, 0.8)
+                            : Qt.rgba(island.text.r, island.text.g, island.text.b, 0.08)
+                        Text {
+                            id: srcLabel; anchors.centerIn: parent
+                            text: parent.niceLabel
+                            font.family: "JetBrains Mono"; font.pixelSize: island.s(10); font.weight: Font.Bold
+                            color: parent.isActive ? island.base : island.text
+                        }
+                        MouseArea {
+                            id: srcMouse; anchors.fill: parent; hoverEnabled: true
+                            onClicked: island.selectedPlayer = parent.isActive ? "" : parent.playerName
+                        }
+                    }
                 }
             }
 

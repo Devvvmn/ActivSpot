@@ -9,8 +9,7 @@ case "$ACTION" in
     mic)    pactl set-source-mute @DEFAULT_SOURCE@ toggle ;;
 esac
 
-MUTED=$(pactl get-sink-mute @DEFAULT_SINK@ | grep -c "yes" || echo 0)
-if [ "$MUTED" -gt 0 ]; then
+if pactl get-sink-mute @DEFAULT_SINK@ | grep -q "yes"; then
     echo "volume|0" > /tmp/qs_osd
 else
     VOL=$(pactl get-sink-volume @DEFAULT_SINK@ | grep -oP '\d+(?=%)' | head -1)

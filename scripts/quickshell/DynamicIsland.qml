@@ -46,6 +46,7 @@ PanelWindow {
     readonly property color pink:     Theme.pink
     readonly property color teal:     Theme.teal
     readonly property color red:      Theme.red
+    readonly property color yellow:   Theme.yellow
 
     readonly property string themeId: Theme.themeId
     readonly property bool glassTheme: Theme.isGlass
@@ -114,6 +115,8 @@ PanelWindow {
         "length": 1, "playerName": ""
     })
     property bool isMediaActive: musicData.status !== "Stopped" && musicData.title !== "" && musicData.title !== "Not Playing"
+    property string selectedPlayer: ""
+    property var availablePlayers: []
 
     // Equalizer
     property var eqData: ({ "preset": "Flat", "b1": 0, "b2": 0, "b3": 0, "b4": 0, "b5": 0,
@@ -495,7 +498,7 @@ PanelWindow {
     // Music info polling
     Process {
         id: musicProc
-        command: ["bash", "-c", "~/.config/hypr/scripts/quickshell/music/music_info.sh"]
+        command: ["bash", "-c", `~/.config/hypr/scripts/quickshell/music/music_info.sh "${islandWindow.selectedPlayer}"`]
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
@@ -507,6 +510,20 @@ PanelWindow {
             }
         }
     }
+
+    // Available players polling
+    Process {
+        id: playersProc
+        command: ["bash", "-c", "playerctl -l 2>/dev/null"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let lines = this.text.trim().split("\n").filter(l => l.length > 0)
+                islandWindow.availablePlayers = lines
+            }
+        }
+    }
+    Timer { interval: 3000; running: true; repeat: true; triggeredOnStart: true
+        onTriggered: playersProc.running = true }
     Process {
         id: eqProc
         command: ["bash", "-c", "~/.config/hypr/scripts/quickshell/music/equalizer.sh get"]
@@ -1107,6 +1124,7 @@ PanelWindow {
         // ── Music playing outer glow — beat-reactive, matches island stretch ──
         // Toned down: thin rim, low max opacity, slow attack — reads as gentle breath, not strobe.
         Rectangle {
+            id: glowRim
             anchors.fill: parent
             anchors.margins: -s(2)
             radius: bg.radius + s(2)
@@ -1134,7 +1152,7 @@ PanelWindow {
                 origin.x: islandWindow.volStretch >= 0
                     ? (s(3) + bg.width * 0.08)
                     : (s(3) + bg.width * 0.92)
-                origin.y: parent.height * 0.5
+                origin.y: glowRim.height * 0.5
             }
         }
 
@@ -1207,8 +1225,9 @@ PanelWindow {
             acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
             target: null
             onWheel: (event) => {
-                if (scrollCooldown.running || islandWindow.notifActive
-                    || (islandWindow.editBarMode && !islandWindow.expanded)) {
+                // In expanded edit mode let scroll propagate to the Flickable
+                if (islandWindow.editBarMode && islandWindow.expanded) return;
+                if (scrollCooldown.running || islandWindow.notifActive || islandWindow.editBarMode) {
                     event.accepted = true; return;
                 }
                 if (event.angleDelta.y > 0) islandWindow.navigatePrev();

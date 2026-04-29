@@ -47,9 +47,7 @@ while inotifywait -q -e close_write "$SETTINGS_FILE"; do
         # We use '|' as the sed delimiter here to prevent path slashes from breaking the command
         sed -i "s|^env = WALLPAPER_DIR,.*|env = WALLPAPER_DIR,$WP_DIR|" "$HYPR_CONF"
         
-        # Keep ZSH in sync if it exists
-        if [ -f "$ZSH_RC" ]; then
-            sed -i "s|^export WALLPAPER_DIR=.*|export WALLPAPER_DIR=\"$WP_DIR\"|" "$ZSH_RC"
-        fi
+        # WALLPAPER_DIR is already exported via hyprland.conf env = line above;
+        # do not mutate ~/.zshrc without explicit user consent.
     fi
 done

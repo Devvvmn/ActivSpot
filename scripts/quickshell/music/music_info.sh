@@ -11,7 +11,10 @@ if [ ! -f "$PLACEHOLDER" ]; then
 fi
 
 # --- 2. ONE playerctl CALL for everything ---
-raw=$(playerctl metadata --format \
+PLAYER_FLAG=""
+[ -n "$1" ] && PLAYER_FLAG="--player $1"
+
+raw=$(playerctl $PLAYER_FLAG metadata --format \
     '{{status}}|{{xesam:title}}|{{xesam:artist}}|{{mpris:artUrl}}|{{mpris:length}}|{{position}}|{{playerName}}' \
     2>/dev/null)
 

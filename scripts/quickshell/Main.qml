@@ -327,7 +327,7 @@ PanelWindow {
         masterWindow.targetH = t.h;
         
         let props = newWidget === "wallpaper" ? { "widgetArg": arg } : {};
-        props["notifModel"] = masterWindow.notifModel;
+        if (newWidget === "battery") props["notifModel"] = masterWindow.notifModel;
 
         if (immediate) {
             widgetStack.replace(t.comp, props, StackView.Immediate);
