@@ -84,7 +84,7 @@ PanelWindow {
         else notifPageRevertTimer.stop();
     }
     property var availablePages: {
-        let p = ["clock"];
+        let p = ["clock", "timer"];
         if (islandWindow.stashModel.count > 0) p.push("stash");
         if (islandWindow.isRecording)   p.push("recording");
         if (islandWindow.discordInCall) p.push("discord");
@@ -265,7 +265,7 @@ PanelWindow {
 
     // Bubble slot ordering — inner index = closest to island
     property var leftSlots:  ["vpn", "music", "discord"]
-    property var rightSlots: ["rec", "notif", "stash", "clock"]
+    property var rightSlots: ["rec", "notif", "stash", "clock", "timer", "sw"]
 
     // Clock / Weather
     property string timeStr:     ""
@@ -274,11 +274,40 @@ PanelWindow {
     property string weatherIcon: ""
     property string weatherTemp: "--°"
 
+    // Timer / Stopwatch
+    property bool timerRunning:       false
+    property int  timerPresetSec:     300
+    property int  timerRemainingSec:  0
+    property bool stopwatchRunning:   false
+    property int  stopwatchElapsedSec: 0
+
     // =========================================================
     // --- HELPERS ---
     // =========================================================
     function exec(cmd) { Quickshell.execDetached(["bash", "-c", cmd]); }
     function shellEsc(s) { return "'" + s.replace(/'/g, "'\\''") + "'" }
+
+    function fmtChrono(secs) {
+        let h = Math.floor(secs / 3600);
+        let m = Math.floor((secs % 3600) / 60);
+        let sc = secs % 60;
+        if (h > 0)
+            return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0") + ":" + String(sc).padStart(2, "0");
+        return String(m).padStart(2, "0") + ":" + String(sc).padStart(2, "0");
+    }
+
+    function startTimer(sec) {
+        timerPresetSec    = sec;
+        timerRemainingSec = sec;
+        timerRunning      = true;
+    }
+    function toggleTimer() {
+        if (timerRemainingSec <= 0) timerRemainingSec = timerPresetSec;
+        timerRunning = !timerRunning;
+    }
+    function resetTimer()     { timerRunning = false; timerRemainingSec = 0; }
+    function toggleStopwatch() { stopwatchRunning = !stopwatchRunning; }
+    function resetStopwatch()  { stopwatchRunning = false; stopwatchElapsedSec = 0; }
 
     function playSound(type) {
         let map = {
@@ -299,6 +328,8 @@ PanelWindow {
         if (id === "notif")   return badgeBubble
         if (id === "stash")   return stashBubble
         if (id === "clock")   return clockBubble
+        if (id === "timer")   return timerBubble
+        if (id === "sw")      return swBubble
         return null
     }
 
@@ -430,11 +461,13 @@ PanelWindow {
         { name: "discord",      expandedH: 270, comp: discordPageComp      },
         { name: "music",        expandedH: 630, comp: musicPageComp        },
         { name: "notifs",       expandedH: 450, comp: notifsPageComp       },
+        { name: "timer",        expandedH: 380, comp: timerPageComp        },
         { name: "stash",        expandedH: 260, comp: stashPageComp        },
         { name: "appletPicker", expandedH: 380, comp: appletPickerPageComp },
     ]
 
     Component { id: clockPageComp;        ClockPage        { island: islandWindow } }
+    Component { id: timerPageComp;        TimerPage        { island: islandWindow } }
     Component { id: recordingPageComp;    RecordingPage    { island: islandWindow } }
     Component { id: discordPageComp;      DiscordPage      { island: islandWindow } }
     Component { id: musicPageComp;        MusicPage        { island: islandWindow } }
@@ -599,6 +632,19 @@ PanelWindow {
             islandWindow.timeStr    = Qt.formatDateTime(d, "hh:mm");
             islandWindow.timeStrSec = Qt.formatDateTime(d, "hh:mm:ss");
             islandWindow.dateStr    = Qt.formatDateTime(d, "ddd, MMM dd");
+        }
+    }
+
+    // Timer / Stopwatch tick
+    Timer { interval: 1000; running: islandWindow.timerRunning || islandWindow.stopwatchRunning; repeat: true
+        onTriggered: {
+            if (islandWindow.timerRunning) {
+                if (islandWindow.timerRemainingSec > 0) {
+                    islandWindow.timerRemainingSec--;
+                    if (islandWindow.timerRemainingSec === 0) islandWindow.timerRunning = false;
+                }
+            }
+            if (islandWindow.stopwatchRunning) islandWindow.stopwatchElapsedSec++;
         }
     }
 
@@ -818,7 +864,7 @@ PanelWindow {
                     let all = islandWindow.leftSlots.concat(islandWindow.rightSlots)
                     let r = islandWindow.rightSlots.slice()
                     let l = islandWindow.leftSlots.slice()
-                    for (let id of ["rec", "notif", "stash", "clock"]) {
+                    for (let id of ["rec", "notif", "stash", "clock", "timer", "sw"]) {
                         if (all.indexOf(id) < 0) r.push(id)
                     }
                     for (let id of ["vpn", "music", "discord"]) {
@@ -907,6 +953,8 @@ PanelWindow {
             if (recBubble.visible)     m = Math.min(m, recBubble.x);
             if (stashBubble.visible)   m = Math.min(m, stashBubble.x);
             if (clockBubble.visible)   m = Math.min(m, clockBubble.x);
+            if (timerBubble.visible)   m = Math.min(m, timerBubble.x);
+            if (swBubble.visible)      m = Math.min(m, swBubble.x);
             return Math.max(0, m - s(8));
         }
 
@@ -919,6 +967,8 @@ PanelWindow {
             if (recBubble.visible)     m = Math.max(m, recBubble.x + recBubble.width);
             if (stashBubble.visible)   m = Math.max(m, stashBubble.x + stashBubble.width);
             if (clockBubble.visible)   m = Math.max(m, clockBubble.x + clockBubble.width);
+            if (timerBubble.visible)   m = Math.max(m, timerBubble.x + timerBubble.width);
+            if (swBubble.visible)      m = Math.max(m, swBubble.x + swBubble.width);
             return Math.min(Screen.width, m + s(8));
         }
 
@@ -931,6 +981,8 @@ PanelWindow {
             if (recBubble.visible)     m = Math.max(m, recBubble.y + recBubble.height + s(6));
             if (stashBubble.visible)   m = Math.max(m, stashBubble.y + stashBubble.height + s(6));
             if (clockBubble.visible)   m = Math.max(m, clockBubble.y + clockBubble.height + s(6));
+            if (timerBubble.visible)   m = Math.max(m, timerBubble.y + timerBubble.height + s(6));
+            if (swBubble.visible)      m = Math.max(m, swBubble.y + swBubble.height + s(6));
             return m;
         }
 
@@ -972,6 +1024,7 @@ PanelWindow {
             if (islandWindow.currentPage === "music"     && islandWindow.isMediaActive) return musicCollapsed.preferredWidth;
             if (islandWindow.currentPage === "notifs")                                  return notifsCollapsed.preferredWidth;
             if (islandWindow.currentPage === "stash")                                   return stashCollapsed.preferredWidth;
+            if (islandWindow.currentPage === "timer")                                   return timerCollapsed.preferredWidth;
             return clockCollapsed.preferredWidth;
         }
         property int collapsedH: s(36)
@@ -1335,6 +1388,16 @@ PanelWindow {
                 }}
             }
 
+            TimerCollapsed {
+                id: timerCollapsed; island: islandWindow; anchors.centerIn: parent
+                opacity: (!islandWindow.osdActive && !islandWindow.volDragging && islandWindow.currentPage === "timer") ? 1.0 : 0.0
+                visible: opacity > 0.001
+                Behavior on opacity { SequentialAnimation {
+                    PauseAnimation { duration: islandWindow.currentPage === "timer" && !islandWindow.osdActive ? 60 : 0 }
+                    NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
+                }}
+            }
+
             DiscordCollapsed {
                 id: discordCollapsed; island: islandWindow; anchors.centerIn: parent
                 opacity: (!islandWindow.osdActive && !islandWindow.volDragging && islandWindow.currentPage === "discord" && islandWindow.discordInCall) ? 1.0 : 0.0
@@ -1522,6 +1585,22 @@ PanelWindow {
         island: islandWindow
         z: 10
         homeX: homeXFor("clock")
+        homeY: s(4) + (islandShape.collapsedH - height) / 2
+    }
+
+    TimerMiniBubble {
+        id: timerBubble
+        island: islandWindow
+        z: 10
+        homeX: homeXFor("timer")
+        homeY: s(4) + (islandShape.collapsedH - height) / 2
+    }
+
+    StopwatchMiniBubble {
+        id: swBubble
+        island: islandWindow
+        z: 10
+        homeX: homeXFor("sw")
         homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
 

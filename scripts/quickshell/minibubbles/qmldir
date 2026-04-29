@@ -6,3 +6,5 @@ DiscordMiniBubble 1.0 DiscordMiniBubble.qml
 VpnMiniBubble 1.0 VpnMiniBubble.qml
 NotifMiniBubble 1.0 NotifMiniBubble.qml
 StashMiniBubble 1.0 StashMiniBubble.qml
+TimerMiniBubble 1.0 TimerMiniBubble.qml
+StopwatchMiniBubble 1.0 StopwatchMiniBubble.qml

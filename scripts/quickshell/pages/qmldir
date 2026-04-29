@@ -1,5 +1,6 @@
 module pages
 ClockPage 1.0 ClockPage.qml
+TimerPage 1.0 TimerPage.qml
 DiscordPage 1.0 DiscordPage.qml
 MusicPage 1.0 MusicPage.qml
 NotifsPage 1.0 NotifsPage.qml
