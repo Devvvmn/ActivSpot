@@ -8,3 +8,4 @@ NotifExpandedPage 1.0 NotifExpandedPage.qml
 RecordingPage 1.0 RecordingPage.qml
 StashPage 1.0 StashPage.qml
 AppletPickerPage 1.0 AppletPickerPage.qml
+GamePage 1.0 GamePage.qml

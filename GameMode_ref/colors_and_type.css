@@ -1,0 +1,216 @@
+/**
+ * ActivSpot Design System
+ * CSS Custom Properties — Colors & Typography
+ *
+ * Colors: Catppuccin Mocha (default) — dynamically overridden by Matugen
+ * at runtime based on wallpaper. These are the hardcoded fallbacks.
+ * Typography: JetBrains Mono (primary) + Iosevka Nerd Font (icons)
+ */
+
+/* ── Google Fonts fallback (use local fonts if available) ─────────────── */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;900&display=swap');
+
+/* ── Base Color Tokens ────────────────────────────────────────────────── */
+:root {
+  /* Backgrounds — darkest to lightest */
+  --crust:    #11111b;  /* Absolute darkest — rarely used */
+  --mantle:   #181825;  /* Secondary background */
+  --base:     #1e1e2e;  /* Island pill, main background */
+  --surface0: #313244;  /* Card / container background */
+  --surface1: #45475a;  /* Hover state background */
+  --surface2: #585b70;  /* Active / pressed background */
+
+  /* Overlays / muted elements */
+  --overlay0: #6c7086;
+  --overlay1: #7f849c;
+  --overlay2: #9399b2;
+
+  /* Text */
+  --text:     #cdd6f4;  /* Primary text */
+  --subtext1: #bac2de;  /* Secondary text */
+  --subtext0: #a6adc8;  /* Muted / caption text */
+
+  /* Accent palette */
+  --mauve:   #cba6f7;   /* PRIMARY accent — buttons, fills, gradients */
+  --blue:    #89b4fa;   /* Secondary accent — gradient endpoint */
+  --sapphire:#74c7ec;   /* Tertiary cool accent */
+  --teal:    #94e2d5;   /* Tertiary warm-cool */
+  --green:   #a6e3a1;   /* Success */
+  --yellow:  #f9e2af;   /* Warning / warm highlight */
+  --peach:   #fab387;   /* Temperature, warm accent */
+  --maroon:  #eba0ac;   /* Error-adjacent */
+  --red:     #f38ba8;   /* Error, destructive */
+  --pink:    #f5c2e7;   /* Soft accent */
+
+  /* ── Semantic tokens ──────────────────────────────────────────────── */
+  --color-bg:             var(--base);
+  --color-bg-raised:      var(--surface0);
+  --color-bg-hover:       var(--surface1);
+  --color-bg-active:      var(--surface2);
+
+  --color-fg:             var(--text);
+  --color-fg-muted:       var(--subtext0);
+  --color-fg-subtle:      var(--overlay0);
+
+  --color-accent:         var(--mauve);
+  --color-accent-alt:     var(--blue);
+  --color-accent-warm:    var(--peach);
+  --color-accent-cool:    var(--teal);
+
+  --color-success:        var(--green);
+  --color-warning:        var(--yellow);
+  --color-error:          var(--red);
+
+  --color-border:         rgba(205, 214, 244, 0.07); /* text @ 7% */
+  --color-border-accent:  rgba(203, 166, 247, 0.40); /* mauve @ 40% */
+  --color-border-focus:   rgba(203, 166, 247, 0.80); /* mauve @ 80% */
+
+  /* ── Gradients ────────────────────────────────────────────────────── */
+  --gradient-accent:      linear-gradient(90deg, var(--mauve), var(--blue));
+  --gradient-warm:        linear-gradient(90deg, var(--red), var(--peach));
+  --gradient-battery-ok:  linear-gradient(90deg, var(--green), #b9f0b5);
+  --gradient-battery-med: linear-gradient(90deg, var(--peach), #ffd0a8);
+  --gradient-battery-low: linear-gradient(90deg, var(--red), #ffb4ab);
+
+  /* ── Typography ───────────────────────────────────────────────────── */
+  --font-mono:   'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --font-icons:  'Iosevka Nerd Font', 'Symbols Nerd Font', monospace;
+
+  /* Type scale (base 16px) */
+  --text-xs:   0.5rem;    /* 8px  — EQ frequency labels */
+  --text-sm:   0.6875rem; /* 11px — captions, section labels */
+  --text-base: 0.8125rem; /* 13px — body, UI labels */
+  --text-md:   0.875rem;  /* 14px — slightly larger body */
+  --text-lg:   1.25rem;   /* 20px — headings, track title */
+  --text-xl:   1.5rem;    /* 24px — temperature, large values */
+  --text-2xl:  3.125rem;  /* 50px — clock display */
+
+  /* Font weights */
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-bold:    700;
+  --weight-black:   900;
+
+  /* Letter spacing */
+  --tracking-tight:  -0.02em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.1em;   /* Section labels */
+  --tracking-widest:  0.15em;  /* ALL CAPS section headers */
+
+  /* ── Spacing ──────────────────────────────────────────────────────── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+
+  /* ── Radii ────────────────────────────────────────────────────────── */
+  --radius-xs:   4px;   /* Tiny accents, cava bars */
+  --radius-sm:   8px;   /* Album art thumbnail, small chips */
+  --radius-md:  12px;   /* Notification cards */
+  --radius-lg:  14px;   /* Album art large, container cards */
+  --radius-xl:  16px;   /* Applet backgrounds */
+  --radius-2xl: 22px;   /* Large panel corners */
+  --radius-pill: 9999px; /* Full pills, bubble shapes */
+
+  /* ── Shadows ──────────────────────────────────────────────────────── */
+  --shadow-island:  0 10px 34px rgba(0,0,0,0.38);
+  --shadow-card:    0 4px 16px  rgba(0,0,0,0.28);
+  --shadow-glow:    0 0  16px   rgba(203,166,247,0.40); /* mauve glow */
+
+  /* ── Transitions ──────────────────────────────────────────────────── */
+  --transition-fast:   160ms cubic-bezier(0.16, 1, 0.3, 1); /* OutExpo */
+  --transition-base:   280ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-morph:  540ms cubic-bezier(0.16, 1, 0.3, 1); /* Island morph */
+  --transition-color:  180ms ease;
+
+  /* ── Z-index ──────────────────────────────────────────────────────── */
+  --z-topbar:   100;
+  --z-island:    10;
+  --z-bubble:    20;  /* Bubbles sit above island during drag */
+  --z-overlay:  200;
+}
+
+/* ── Semantic element styles ──────────────────────────────────────────── */
+
+body {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: var(--weight-regular);
+  color: var(--color-fg);
+  background: var(--color-bg);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Display — clock */
+.text-display {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-black);
+  color: var(--color-fg);
+  line-height: 1;
+}
+
+/* Section label — ALL CAPS headers */
+.text-section {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-black);
+  color: var(--color-accent);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+}
+
+/* Track title / primary heading */
+.text-heading {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-black);
+  color: var(--color-fg);
+}
+
+/* Large value — temperature, percentage */
+.text-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-black);
+  color: var(--color-accent-warm);
+}
+
+/* Body text */
+.text-body {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: var(--weight-regular);
+  color: var(--color-fg);
+}
+
+/* Muted / secondary text */
+.text-muted {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  color: var(--color-fg-muted);
+}
+
+/* Caption — timestamps, labels */
+.text-caption {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-fg-muted);
+}
+
+/* Tiny — EQ bands, micro labels */
+.text-tiny {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-fg-subtle);
+}
+
+/* Nerd Font icon */
+.icon {
+  font-family: var(--font-icons);
+  font-style: normal;
+}

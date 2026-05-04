@@ -114,6 +114,10 @@ Variants {
             // Bind this specific bar instance to the dynamically assigned screen
             screen: modelData
 
+            // Hide along with the Dynamic Island when a fullscreen window is
+            // focused, so the top of the screen is fully unobstructed.
+            visible: !FullscreenService.active
+
             anchors {
                 top: true
                 left: true

@@ -8,3 +8,4 @@ NotifMiniBubble 1.0 NotifMiniBubble.qml
 StashMiniBubble 1.0 StashMiniBubble.qml
 TimerMiniBubble 1.0 TimerMiniBubble.qml
 StopwatchMiniBubble 1.0 StopwatchMiniBubble.qml
+GameMiniBubble 1.0 GameMiniBubble.qml

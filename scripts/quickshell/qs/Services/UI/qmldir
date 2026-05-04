@@ -3,3 +3,4 @@ singleton ToastService 1.0 ToastService.qml
 singleton TooltipService 1.0 TooltipService.qml
 singleton BarService 1.0 BarService.qml
 singleton PanelService 1.0 PanelService.qml
+singleton FullscreenService 1.0 FullscreenService.qml

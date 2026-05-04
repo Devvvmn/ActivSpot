@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ActivSpot — Game Mode</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; overflow:hidden; }
+body { font-family:'JetBrains Mono',monospace; background:#0a0a14; color:#cdd6f4; -webkit-font-smoothing:antialiased; }
+#root { height:100%; }
+
+@keyframes hud-pulse   { 0%,100%{opacity:1} 50%{opacity:0.25} }
+@keyframes ring-pulse  { 0%,100%{transform:scale(1);opacity:.55} 50%{transform:scale(1.05);opacity:1} }
+@keyframes mode-in     { from{opacity:0;transform:translateY(-6px) scale(.97)} to{opacity:1;transform:none} }
+@keyframes mode-flash  { 0%{opacity:0} 12%{opacity:1} 88%{opacity:1} 100%{opacity:0} }
+@keyframes graph-scroll{ from{transform:translateX(0)} to{transform:translateX(-100%)} }
+@keyframes slide-up    { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+@keyframes bar-draw    { from{width:0} to{width:var(--w)} }
+
+.mode-in    { animation: mode-in  420ms cubic-bezier(.16,1,.3,1) both; }
+.mode-flash { animation: mode-flash 900ms ease both; }
+.slide-up   { animation: slide-up  380ms cubic-bezier(.16,1,.3,1) both; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+/* ── design tokens (mirroring real shell) ──────────────────────────── */
+const C = {
+  base:'#1e1e2e', mantle:'#181825', crust:'#11111b',
+  sv:'#252535',         /* surfaceVariant */
+  s0:'#313244', s1:'#45475a', s2:'#585b70',
+  ov0:'#6c7086', ov1:'#7f849c',
+  text:'#cdd6f4', sub1:'#bac2de', sub0:'#a6adc8',
+  mauve:'#cba6f7', blue:'#89b4fa', teal:'#94e2d5',
+  green:'#a6e3a1', peach:'#fab387', red:'#f38ba8',
+  yellow:'#f9e2af', pink:'#f5c2e7',
+  border:'rgba(205,214,244,0.07)',
+};
+const sp = { xs:4, s:8, m:12, l:16, xl:20, '2l':24 };
+const r  = { s:8, m:12, l:16, xl:20, pill:9999 };
+const fs = { xs:10, s:11, m:13, l:15, xl:18, '2xl':24 };
+
+function rgb(hex) {
+  return `${parseInt(hex.slice(1,3),16)},${parseInt(hex.slice(3,5),16)},${parseInt(hex.slice(5,7),16)}`;
+}
+function alpha(hex, a) { return `rgba(${rgb(hex)},${a})`; }
+
+/* ── live stats simulation ─────────────────────────────────────────── */
+function useStats() {
+  const mk = (v,lo,hi,d) => Math.round(Math.max(lo, Math.min(hi, v+(Math.random()-.48)*d)));
+  const [s, setS] = useState({fps:144,ping:12,gpu:76,cpu:38,ram:61,temp:70,vram:64,net:2.1});
+  const fH = useRef(Array(40).fill(144));
+  const pH = useRef(Array(40).fill(12));
+  const gH = useRef(Array(40).fill(76));
+  const cH = useRef(Array(40).fill(38));
+
+  useEffect(() => {
+    const iv = setInterval(() => setS(s => {
+      const fps = mk(s.fps,55,165,10), ping=mk(s.ping,8,48,5);
+      const gpu = mk(s.gpu,48,98,6),  cpu =mk(s.cpu,18,92,5);
+      const ram = mk(s.ram,44,86,2),  temp=mk(s.temp,58,87,2);
+      const vram= mk(s.vram,38,94,4), net =Math.round(Math.max(.2,Math.min(9,s.net+(Math.random()-.5)*1.2))*10)/10;
+      fH.current=[...fH.current.slice(1),fps]; pH.current=[...pH.current.slice(1),ping];
+      gH.current=[...gH.current.slice(1),gpu]; cH.current=[...cH.current.slice(1),cpu];
+      return {fps,ping,gpu,cpu,ram,temp,vram,net};
+    }), 900);
+    return ()=>clearInterval(iv);
+  },[]);
+
+  return {s, fH:fH.current, pH:pH.current, gH:gH.current, cH:cH.current};
+}
+
+/* ── health color ──────────────────────────────────────────────────── */
+function health(fps,ping) {
+  if(fps>100 && ping<22) return {key:'good',  color:C.green,  label:'OPTIMAL'};
+  if(fps>60  && ping<45) return {key:'ok',    color:C.yellow, label:'DEGRADED'};
+  return                        {key:'bad',   color:C.red,    label:'CRITICAL'};
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SHARED PRIMITIVES
+══════════════════════════════════════════════════════════════════ */
+
+/* NBox faithful replica */
+function NBox({children, style={}, pad=sp.m}) {
+  return (
+    <div style={{
+      background:alpha(C.sv,.82),
+      border:`1px solid ${C.border}`,
+      borderRadius:r.m,
+      padding:pad,
+      ...style,
+    }}>{children}</div>
+  );
+}
+
+/* NCircleStat — arc 150°→390°, gap bottom, icon below value */
+function NCircleStat({value, max=100, unit='%', icon, color, size=64, stroke=6}) {
+  const canRef = useRef();
+  const displayVal = Math.round(value);
+  const ratio = Math.min(1, Math.max(0, value/max));
+
+  useEffect(() => {
+    const c = canRef.current; if(!c) return;
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio||1;
+    c.width = size*dpr; c.height = size*dpr;
+    c.style.width=size+'px'; c.style.height=size+'px';
+    ctx.scale(dpr,dpr);
+
+    const cx=size/2, cy=size/2, rad=size/2-stroke-2;
+    const start=Math.PI*5/6, end=Math.PI*13/6;          // 150° → 390°
+
+    ctx.clearRect(0,0,size,size);
+    // track
+    ctx.lineWidth=stroke; ctx.lineCap='round'; ctx.strokeStyle=C.s0;
+    ctx.beginPath(); ctx.arc(cx,cy,rad,start,end); ctx.stroke();
+    // fill
+    if(ratio>0.005){
+      ctx.strokeStyle=color;
+      ctx.beginPath(); ctx.arc(cx,cy,rad,start,start+(end-start)*ratio); ctx.stroke();
+    }
+  },[value,color,size,stroke]);
+
+  return (
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:2}}>
+      <div style={{position:'relative',width:size,height:size+4}}>
+        <canvas ref={canRef} style={{position:'absolute',top:0,left:0,imageRendering:'crisp-edges'}}/>
+        <div style={{position:'absolute',inset:0,display:'flex',flexDirection:'column',
+          alignItems:'center',justifyContent:'center',paddingBottom:8}}>
+          <span style={{fontSize:fs.m,fontWeight:900,color,letterSpacing:'-0.02em',lineHeight:1}}>
+            {displayVal}<span style={{fontSize:7,color:C.ov0}}>{unit}</span>
+          </span>
+          <span style={{fontSize:9,color:alpha(color,.7),marginTop:2}}>{icon}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* NGraph faithful replica — scrolling line + fill */
+function NGraph({values, values2=[], color, color2=C.blue, max=100, max2=100, height=52, scrollMs=900}) {
+  const canRef = useRef();
+  const tRef   = useRef(1);
+  const rafRef = useRef();
+
+  function draw(t) {
+    const c = canRef.current; if(!c) return;
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio||1;
+    const W=c.width/dpr, H=c.height/dpr;
+
+    ctx.clearRect(0,0,c.width,c.height);
+
+    const drawLine = (vals, col, mx, scroll) => {
+      if(vals.length<2) return;
+      const n=vals.length;
+      const pad=H*0.1;
+      const toX = (i) => ((i + scroll) / (n)) * W;
+      const toY = (v) => H - pad - (Math.max(0,Math.min(1,v/mx)))*(H-pad*2);
+      ctx.save(); ctx.scale(dpr,dpr);
+      ctx.beginPath();
+      vals.forEach((v,i)=>{ i===0 ? ctx.moveTo(toX(i),toY(v)) : ctx.lineTo(toX(i),toY(v)); });
+      ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.lineJoin='round'; ctx.stroke();
+      // fill
+      ctx.lineTo(toX(n-1),H); ctx.lineTo(toX(0),H); ctx.closePath();
+      ctx.fillStyle=alpha(col,.13); ctx.fill();
+      ctx.restore();
+    };
+
+    drawLine(values,  color,  max,  t);
+    drawLine(values2, color2, max2, t);
+  }
+
+  useEffect(()=>{
+    tRef.current=0;
+    let start=null;
+    function frame(ts) {
+      if(!start) start=ts;
+      tRef.current = Math.min(1,(ts-start)/scrollMs);
+      draw(tRef.current);
+      if(tRef.current<1) rafRef.current=requestAnimationFrame(frame);
+    }
+    rafRef.current=requestAnimationFrame(frame);
+    return()=>cancelAnimationFrame(rafRef.current);
+  },[values, values2]);
+
+  return (
+    <canvas ref={canRef}
+      width={400} height={height*2}
+      style={{width:'100%',height,display:'block'}}/>
+  );
+}
+
+/* NToggle row — icon label description + pill switch */
+function NToggle({icon, label, desc, on, onToggle, color=C.mauve, delay=0}) {
+  return (
+    <div onClick={onToggle} className="slide-up" style={{
+      display:'flex',alignItems:'center',gap:sp.m,
+      padding:`${sp.s}px ${sp.m}px`,
+      background: on ? alpha(color,.06) : alpha(C.s0,.3),
+      border:`1px solid ${on ? alpha(color,.18) : 'rgba(205,214,244,0.05)'}`,
+      borderRadius:r.m, cursor:'pointer', userSelect:'none',
+      transition:'background 200ms, border-color 200ms',
+      animationDelay:`${delay}ms`,
+    }}>
+      {icon && <span style={{fontSize:14,color:on?color:C.ov0,transition:'color 200ms',width:18,textAlign:'center',flexShrink:0}}>{icon}</span>}
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{fontSize:fs.m,fontWeight:700,color:on?C.text:C.sub0,transition:'color 200ms',lineHeight:1.2}}>{label}</div>
+        {desc && <div style={{fontSize:fs.xs,color:C.ov0,marginTop:2,lineHeight:1.2}}>{desc}</div>}
+      </div>
+      {/* pill switch */}
+      <div style={{
+        width:34,height:19,borderRadius:10,flexShrink:0,
+        background:on?color:alpha(C.s1,.7),
+        border:`1px solid ${on?alpha(color,.5):'rgba(205,214,244,0.1)'}`,
+        position:'relative',transition:'background 200ms',
+      }}>
+        <div style={{
+          position:'absolute',top:2.5,left:on?15:2.5,
+          width:12,height:12,borderRadius:6,
+          background:on?C.base:'white',
+          transition:'left 200ms cubic-bezier(.16,1,.3,1)',
+          boxShadow:'0 1px 3px rgba(0,0,0,.5)',
+        }}/>
+      </div>
+    </div>
+  );
+}
+
+/* graph card — header row + NGraph, matches SystemStatsPanel */
+function GraphCard({icon, label, value, unit='', color, values, values2=[], max=100, max2=100, color2}) {
+  return (
+    <NBox pad={sp.s} style={{marginBottom:sp.s}}>
+      <div style={{display:'flex',alignItems:'center',gap:sp.s,marginBottom:sp.s}}>
+        <span style={{fontSize:11,color}}>{icon}</span>
+        <span style={{fontSize:fs.xs,fontWeight:900,color,fontVariantNumeric:'tabular-nums'}}>
+          {value}{unit}
+        </span>
+        {values2.length>0 && color2 && (
+          <span style={{fontSize:fs.xs,color:color2,marginLeft:2}}>· <GraphVal values={values2} color={color2} max={max2}/></span>
+        )}
+        <span style={{fontSize:fs.xs,color:C.ov0,marginLeft:'auto',letterSpacing:'0.06em'}}>{label}</span>
+      </div>
+      <NGraph values={values} values2={values2} color={color} color2={color2||C.blue} max={max} max2={max2} height={44}/>
+    </NBox>
+  );
+}
+
+function GraphVal({values,color,max}) {
+  const last=values[values.length-1]||0;
+  return <span style={{color,fontWeight:900}}>{Math.round(last)}</span>;
+}
+
+/* island pill wrapper */
+function Island({children, width, height=36, expanded, onClick, accentColor, style={}}) {
+  return (
+    <div onClick={onClick} style={{
+      position:'relative',
+      width, height,
+      background:C.base,
+      borderRadius:expanded?r.xl:height/2,
+      boxShadow:'0 12px 44px rgba(0,0,0,.55)',
+      display:'flex',alignItems:'center',justifyContent:'center',
+      overflow:'hidden', cursor:onClick?'pointer':'default',
+      transition:'all 520ms cubic-bezier(.16,1,.3,1)',
+      border: accentColor ? `1px solid ${alpha(accentColor,.22)}` : '1px solid rgba(205,214,244,0.05)',
+      ...style,
+    }}>
+      {/* top accent bar */}
+      {accentColor && expanded && (
+        <div style={{position:'absolute',top:0,left:'15%',right:'15%',height:1.5,
+          background:`linear-gradient(90deg,transparent,${accentColor},transparent)`,
+          borderRadius:1,zIndex:5}}/>
+      )}
+      {children}
+    </div>
+  );
+}
+
+/* collapse button */
+function CollapseBtn({onClick}) {
+  return (
+    <button onClick={onClick} style={{
+      marginTop:6,height:24,padding:'0 16px',borderRadius:r.pill,
+      background:alpha(C.s0,.6),border:`1px solid rgba(205,214,244,0.07)`,
+      color:C.ov0,fontSize:9,fontWeight:900,letterSpacing:'0.12em',
+      cursor:'pointer',fontFamily:'inherit',backdropFilter:'blur(8px)',
+      transition:'background 180ms',
+    }}>COLLAPSE ↑</button>
+  );
+}
+
+/* activation flash */
+function Flash({color, onDone}) {
+  useEffect(()=>{ const t=setTimeout(onDone,950); return()=>clearTimeout(t); },[]);
+  return (
+    <div className="mode-flash" style={{
+      position:'fixed',inset:0,zIndex:999,pointerEvents:'none',
+      background:alpha(color,.05),
+      display:'flex',alignItems:'center',justifyContent:'center',
+    }}>
+      <span style={{
+        fontSize:10,fontWeight:900,color,letterSpacing:'0.32em',
+        textShadow:`0 0 24px ${color}`,
+        animation:'mode-flash 950ms ease both',
+      }}>GAME MODE ACTIVATED</span>
+    </div>
+  );
+}
+
+/* blinking status dot */
+function Dot({color,size=6,glow=true}) {
+  return (
+    <div style={{
+      width:size,height:size,borderRadius:'50%',background:color,flexShrink:0,
+      boxShadow:glow?`0 0 ${size*1.5}px ${alpha(color,.7)}`:'none',
+      animation:'hud-pulse 1300ms ease infinite',
+    }}/>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   VARIANT A  —  LIVE STATS
+   Collapsed: FPS + health dot
+   Expanded:  NCircleStat row + NGraph scrolling cards (matches SystemStatsPanel)
+══════════════════════════════════════════════════════════════════ */
+function VariantStats() {
+  const {s, fH, pH, gH, cH} = useStats();
+  const [open,  setOpen]  = useState(false);
+  const [flash, setFlash] = useState(false);
+  const h = health(s.fps, s.ping);
+
+  return (
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:8}}>
+      {flash && <Flash color={h.color} onDone={()=>setFlash(false)}/>}
+
+      <Island
+        width={open?440:180} height={open?'auto':36} expanded={open}
+        accentColor={h.color}
+        onClick={!open?()=>{setFlash(true);setOpen(true);}:undefined}
+        style={open?{cursor:'default'}:{}}
+      >
+        {open ? (
+          <div className="mode-in" style={{width:'100%',padding:`${sp.xl}px ${sp['2l']}px`}}>
+
+            {/* header */}
+            <div style={{display:'flex',alignItems:'center',gap:sp.m,marginBottom:sp.xl}}>
+              <Dot color={h.color} size={7}/>
+              <div>
+                <div style={{fontSize:9,fontWeight:900,color:h.color,letterSpacing:'0.18em',marginBottom:2}}>GAME MODE · LIVE</div>
+                <div style={{fontSize:fs.xl,fontWeight:900,color:C.text,letterSpacing:'-0.02em',lineHeight:1}}>Metro Exodus</div>
+              </div>
+              <div style={{marginLeft:'auto',textAlign:'right'}}>
+                <div style={{fontSize:9,color:C.ov0,marginBottom:2}}>SESSION</div>
+                <div style={{fontSize:fs.m,fontWeight:700,color:C.sub1}}>02:14:38</div>
+              </div>
+            </div>
+
+            {/* NCircleStat row */}
+            <NBox pad={`${sp.m}px ${sp.xl}px`} style={{marginBottom:sp.m}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+                <NCircleStat value={s.fps} max={165} unit="" icon="fps" color={h.color}    size={64}/>
+                <NCircleStat value={s.ping} max={60}  unit="ms" icon="ping" color={s.ping<22?C.teal:C.yellow} size={64}/>
+                <NCircleStat value={s.gpu}  max={100} unit="%" icon="gpu"  color={C.blue}  size={64}/>
+                <NCircleStat value={s.cpu}  max={100} unit="%" icon="cpu"  color={C.mauve} size={64}/>
+                <NCircleStat value={s.ram}  max={100} unit="%" icon="ram"  color={C.teal}  size={64}/>
+              </div>
+            </NBox>
+
+            {/* NGraph cards — matches SystemStatsPanel pattern */}
+            <GraphCard icon="▲" label="FPS"
+              value={s.fps} color={h.color}
+              values={fH} max={165}/>
+            <GraphCard icon="◌" label="CPU · TEMP"
+              value={s.cpu} unit="%" color={C.mauve}
+              values={cH} values2={Array(40).fill(s.temp).map((v,i)=>v+(i-20)*0.1)} color2={C.peach}
+              max={100} max2={100}/>
+            <GraphCard icon="⬡" label="GPU"
+              value={s.gpu} unit="%" color={C.blue}
+              values={gH} max={100}/>
+
+            {/* temp + vram bars */}
+            <NBox pad={sp.m} style={{marginBottom:sp.m}}>
+              {[
+                {label:'GPU TEMP', val:s.temp, max:90, color:s.temp>80?C.peach:C.teal,  unit:'°C'},
+                {label:'VRAM',     val:s.vram, max:100,color:C.blue,                    unit:'%'},
+                {label:'NET ↓',    val:Math.round(s.net*10), max:100,color:C.green,     unit:`${s.net} MB/s`},
+              ].map(({label,val,max,color,unit})=>(
+                <div key={label} style={{display:'flex',alignItems:'center',gap:sp.m,padding:`5px 0`,
+                  borderBottom:`1px solid rgba(205,214,244,0.04)`}}>
+                  <span style={{fontSize:fs.xs,color:C.ov0,width:62,flexShrink:0,letterSpacing:'0.06em'}}>{label}</span>
+                  <div style={{flex:1,height:3,background:C.s0,borderRadius:2,overflow:'hidden'}}>
+                    <div style={{
+                      height:'100%',width:`${(val/max)*100}%`,
+                      background:color,borderRadius:2,
+                      transition:'width 900ms cubic-bezier(.16,1,.3,1)',
+                    }}/>
+                  </div>
+                  <span style={{fontSize:fs.xs,fontWeight:700,color,width:52,textAlign:'right'}}>{unit}</span>
+                </div>
+              ))}
+            </NBox>
+
+          </div>
+        ) : (
+          /* collapsed */
+          <div style={{display:'flex',alignItems:'center',gap:sp.m,padding:`0 ${sp.xl}px`,height:'100%',userSelect:'none'}}>
+            <Dot color={h.color} size={6}/>
+            <span style={{fontSize:9,fontWeight:900,color:C.ov0,letterSpacing:'0.1em'}}>METRO</span>
+            <div style={{width:1,height:12,background:alpha(C.text,.08)}}/>
+            <span style={{fontSize:fs.xl,fontWeight:900,color:C.text,letterSpacing:'-0.03em'}}>{s.fps}</span>
+            <span style={{fontSize:9,color:C.ov0}}>fps</span>
+            <div style={{width:1,height:12,background:alpha(C.text,.08)}}/>
+            <span style={{fontSize:fs.s,fontWeight:700,color:s.ping<22?C.teal:C.yellow}}>{s.ping}<span style={{fontSize:8,color:C.ov0,marginLeft:2}}>ms</span></span>
+          </div>
+        )}
+      </Island>
+      {open && <CollapseBtn onClick={()=>setOpen(false)}/>}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   VARIANT B  —  CONTROL CENTER
+   Collapsed: game name + perf mode chip
+   Expanded:  ControlCenter-style, NBox sections + NToggle rows
+              with a profile-card header and shortcuts-card grid
+══════════════════════════════════════════════════════════════════ */
+const GAMES = [
+  {name:'Metro Exodus Enhanced',  genre:'POST-APOC · SHOOTER',   color:C.yellow},
+  {name:'Counter-Strike 2',       genre:'TACTICAL · FPS',         color:C.red},
+  {name:'Hollow Knight',          genre:'METROIDVANIA · INDIE',   color:C.blue},
+];
+
+function VariantControl() {
+  const {s} = useStats();
+  const [open,   setOpen]   = useState(false);
+  const [flash,  setFlash]  = useState(false);
+  const [gIdx,   setGIdx]   = useState(0);
+  const [dnd,    setDnd]    = useState(true);
+  const [perf,   setPerf]   = useState(true);
+  const [stash,  setStash]  = useState(true);
+  const [mic,    setMic]    = useState(false);
+  const [stream, setStream] = useState(false);
+  const [netPri, setNetPri] = useState(true);
+
+  const game = GAMES[gIdx];
+  const h = health(s.fps, s.ping);
+
+  /* quick-action grid — mirrors ShortcutsCard layout */
+  const shortcuts = [
+    {icon:'🔕', label:'DND',     active:dnd,    toggle:()=>setDnd(d=>!d)},
+    {icon:'⚡', label:'PERF',    active:perf,   toggle:()=>setPerf(p=>!p)},
+    {icon:'📶', label:'NET PRI', active:netPri, toggle:()=>setNetPri(n=>!n)},
+    {icon:'🎙', label:'MIC OFF', active:mic,    toggle:()=>setMic(m=>!m)},
+  ];
+
+  return (
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:8}}>
+      {flash && <Flash color={game.color} onDone={()=>setFlash(false)}/>}
+
+      <Island
+        width={open?420:300} height={open?'auto':36} expanded={open}
+        accentColor={game.color}
+        onClick={!open?()=>{setFlash(true);setOpen(true);}:undefined}
+        style={open?{cursor:'default'}:{}}
+      >
+        {open ? (
+          <div className="mode-in" style={{width:'100%',padding:`${sp.xl}px ${sp['2l']}px`}}>
+
+            {/* profile-card style header */}
+            <NBox pad={sp.m} style={{marginBottom:sp.m}}>
+              <div style={{display:'flex',alignItems:'center',gap:sp.l}}>
+                {/* game "cover" */}
+                <div style={{
+                  width:54,height:54,borderRadius:r.l,flexShrink:0,
+                  background:`linear-gradient(135deg,${alpha(game.color,.28)},${alpha(game.color,.08)})`,
+                  border:`1px solid ${alpha(game.color,.3)}`,
+                  display:'flex',alignItems:'center',justifyContent:'center',
+                  boxShadow:`0 4px 18px ${alpha(game.color,.18)}`,
+                }}>
+                  <span style={{fontSize:22,color:game.color,lineHeight:1}}>▶</span>
+                </div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:9,fontWeight:900,color:game.color,letterSpacing:'0.18em',marginBottom:3}}>{game.genre}</div>
+                  <div style={{fontSize:fs.xl,fontWeight:900,color:C.text,lineHeight:1.1,
+                    overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{game.name}</div>
+                  <div style={{display:'flex',alignItems:'center',gap:sp.s,marginTop:4}}>
+                    <Dot color={h.color} size={5}/>
+                    <span style={{fontSize:9,color:C.ov0}}>RUNNING · 02:14:38</span>
+                  </div>
+                </div>
+                <button onClick={()=>setOpen(false)} style={{
+                  background:'none',border:'none',color:C.ov0,fontSize:13,
+                  cursor:'pointer',padding:4,lineHeight:1,flexShrink:0,
+                }}>✕</button>
+              </div>
+            </NBox>
+
+            {/* shortcuts grid — mirrors ShortcutsCard */}
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:sp.s,marginBottom:sp.m}}>
+              {shortcuts.map(({icon,label,active,toggle})=>(
+                <div key={label} onClick={toggle} style={{
+                  height:42,borderRadius:r.m,
+                  display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:4,
+                  background:active?alpha(game.color,.12):alpha(C.s0,.4),
+                  border:`1px solid ${active?alpha(game.color,.3):'rgba(205,214,244,0.06)'}`,
+                  cursor:'pointer',userSelect:'none',
+                  transition:'all 200ms',
+                }}>
+                  <span style={{fontSize:14,lineHeight:1}}>{icon}</span>
+                  <span style={{fontSize:8,fontWeight:900,color:active?game.color:C.ov0,letterSpacing:'0.1em'}}>{label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* focus section — NToggle rows */}
+            <div style={{fontSize:9,fontWeight:900,color:C.ov1,letterSpacing:'0.16em',marginBottom:sp.s}}>FOCUS</div>
+            <div style={{display:'flex',flexDirection:'column',gap:sp.s,marginBottom:sp.m}}>
+              <NToggle icon="🔕" label="Do Not Disturb"       desc="Block all notifications"      on={dnd}    onToggle={()=>setDnd(d=>!d)}    color={C.mauve}  delay={0}/>
+              <NToggle icon="📥" label="Stash notifications"   desc="Queue instead of popup"       on={stash}  onToggle={()=>setStash(s=>!s)}  color={C.blue}   delay={40}/>
+              <NToggle icon="🎙" label="Mute microphone"        desc="Silence system mic input"    on={mic}    onToggle={()=>setMic(m=>!m)}    color={C.red}    delay={80}/>
+            </div>
+
+            {/* performance section */}
+            <div style={{fontSize:9,fontWeight:900,color:C.ov1,letterSpacing:'0.16em',marginBottom:sp.s}}>PERFORMANCE</div>
+            <div style={{display:'flex',flexDirection:'column',gap:sp.s,marginBottom:sp.m}}>
+              <NToggle icon="⚡" label="Performance governor"   desc="Max CPU & GPU clock"         on={perf}   onToggle={()=>setPerf(p=>!p)}   color={C.green}  delay={0}/>
+              <NToggle icon="📶" label="Network priority"        desc="Prioritize game traffic"    on={netPri} onToggle={()=>setNetPri(n=>!n)} color={C.teal}   delay={40}/>
+              <NToggle icon="📡" label="Stream output (NDI)"     desc="Enable OBS/NDI capture"    on={stream} onToggle={()=>setStream(s=>!s)} color={game.color} delay={80}/>
+            </div>
+
+            {/* live mini stats row */}
+            <NBox pad={`${sp.s}px ${sp.m}px`}>
+              <div style={{display:'flex',justifyContent:'space-between'}}>
+                {[
+                  {l:'FPS',  v:s.fps,        c:h.color},
+                  {l:'PING', v:`${s.ping}ms`, c:s.ping<22?C.teal:C.yellow},
+                  {l:'GPU',  v:`${s.gpu}%`,   c:C.blue},
+                  {l:'TEMP', v:`${s.temp}°`,  c:s.temp>80?C.peach:C.sub0},
+                ].map(({l,v,c})=>(
+                  <div key={l} style={{textAlign:'center'}}>
+                    <div style={{fontSize:9,color:C.ov0,letterSpacing:'0.08em',marginBottom:3}}>{l}</div>
+                    <div style={{fontSize:fs.m,fontWeight:900,color:c}}>{v}</div>
+                  </div>
+                ))}
+              </div>
+            </NBox>
+
+          </div>
+        ) : (
+          /* collapsed */
+          <div style={{display:'flex',alignItems:'center',gap:sp.m,padding:`0 ${sp.m}px`,height:'100%',userSelect:'none'}}>
+            <div style={{
+              width:22,height:22,borderRadius:6,flexShrink:0,
+              background:alpha(game.color,.2),border:`1px solid ${alpha(game.color,.35)}`,
+              display:'flex',alignItems:'center',justifyContent:'center',
+            }}>
+              <span style={{fontSize:9,color:game.color}}>▶</span>
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:1}}>
+              <span style={{fontSize:11,fontWeight:900,color:C.text,whiteSpace:'nowrap',
+                maxWidth:160,overflow:'hidden',textOverflow:'ellipsis'}}>{game.name}</span>
+              <span style={{fontSize:8,color:game.color,fontWeight:900,letterSpacing:'0.1em'}}>{game.genre.split(' · ')[1]}</span>
+            </div>
+            <Dot color={game.color} size={5} glow={true}/>
+          </div>
+        )}
+      </Island>
+
+      {/* game switcher dots */}
+      {!open && (
+        <div style={{display:'flex',gap:sp.s,marginTop:4}}>
+          {GAMES.map((g,i)=>(
+            <div key={i} onClick={()=>setGIdx(i)} style={{
+              width:i===gIdx?20:6,height:6,borderRadius:3,cursor:'pointer',
+              background:i===gIdx?g.color:C.s1,
+              transition:'all 300ms cubic-bezier(.16,1,.3,1)',
+              boxShadow:i===gIdx?`0 0 6px ${alpha(g.color,.6)}`:'none',
+            }}/>
+          ))}
+        </div>
+      )}
+      {open && <CollapseBtn onClick={()=>setOpen(false)}/>}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   VARIANT C  —  GHOST
+   Ultra-minimal pill — just a health ring + FPS
+   Expands to ambient health overview with large NCircleStats
+══════════════════════════════════════════════════════════════════ */
+function VariantGhost() {
+  const {s} = useStats();
+  const [open,  setOpen]  = useState(false);
+  const [flash, setFlash] = useState(false);
+  const h = health(s.fps, s.ping);
+
+  return (
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:8}}>
+      {flash && <Flash color={h.color} onDone={()=>setFlash(false)}/>}
+
+      <Island
+        width={open?360:108} height={open?'auto':36} expanded={open}
+        accentColor={h.color}
+        onClick={!open?()=>{setFlash(true);setOpen(true);}:undefined}
+        style={open?{cursor:'default'}:{}}
+      >
+        {open ? (
+          <div className="mode-in" style={{width:'100%',padding:`${sp.xl}px ${sp['2l']}px`}}>
+
+            {/* ambient status header */}
+            <div style={{display:'flex',alignItems:'center',gap:sp.l,marginBottom:sp.xl}}>
+              <div style={{
+                width:42,height:42,borderRadius:'50%',flexShrink:0,
+                background:`radial-gradient(circle,${alpha(h.color,.18)},${alpha(h.color,.04)})`,
+                border:`1.5px solid ${alpha(h.color,.4)}`,
+                display:'flex',alignItems:'center',justifyContent:'center',
+                animation:'ring-pulse 2000ms ease infinite',
+              }}>
+                <Dot color={h.color} size={11} glow/>
+              </div>
+              <div>
+                <div style={{fontSize:12,fontWeight:900,color:h.color,letterSpacing:'0.15em'}}>{h.label}</div>
+                <div style={{fontSize:9,color:C.ov0,marginTop:2}}>system health · cs2</div>
+              </div>
+              <div style={{marginLeft:'auto',textAlign:'right'}}>
+                <div style={{fontSize:28,fontWeight:900,color:C.text,letterSpacing:'-0.04em',lineHeight:1}}>{s.fps}</div>
+                <div style={{fontSize:8,color:C.ov0}}>fps</div>
+              </div>
+            </div>
+
+            {/* large NCircleStats */}
+            <NBox pad={`${sp.m}px ${sp.l}px ${sp.m}px`}
+              style={{background:`linear-gradient(135deg,${alpha(h.color,.05)},transparent)`,
+              border:`1px solid ${alpha(h.color,.1)}`,marginBottom:sp.m}}>
+              <div style={{display:'flex',justifyContent:'space-around'}}>
+                <NCircleStat value={s.ping} max={60}  unit="ms" icon="ping" color={s.ping<22?C.teal:C.yellow} size={68}/>
+                <NCircleStat value={s.gpu}  max={100} unit="%"  icon="gpu"  color={C.blue}                     size={68}/>
+                <NCircleStat value={s.cpu}  max={100} unit="%"  icon="cpu"  color={C.mauve}                    size={68}/>
+                <NCircleStat value={s.ram}  max={100} unit="%"  icon="ram"  color={C.teal}                     size={68}/>
+              </div>
+            </NBox>
+
+            {/* compact bars */}
+            <NBox pad={sp.m}>
+              {[
+                {l:'GPU TEMP', v:s.temp, max:90, c:s.temp>80?C.peach:C.teal,  u:`${s.temp}°C`},
+                {l:'VRAM',     v:s.vram, max:100,c:C.blue,                     u:`${s.vram}%`},
+              ].map(({l,v,max,c,u})=>(
+                <div key={l} style={{display:'flex',alignItems:'center',gap:sp.m,padding:'5px 0',
+                  borderBottom:'1px solid rgba(205,214,244,0.04)'}}>
+                  <span style={{fontSize:fs.xs,color:C.ov0,width:66,flexShrink:0}}>{l}</span>
+                  <div style={{flex:1,height:3,background:C.s0,borderRadius:2,overflow:'hidden'}}>
+                    <div style={{height:'100%',width:`${(v/max)*100}%`,background:c,borderRadius:2,transition:'width 900ms'}}/>
+                  </div>
+                  <span style={{fontSize:fs.xs,fontWeight:700,color:c,width:38,textAlign:'right'}}>{u}</span>
+                </div>
+              ))}
+            </NBox>
+
+          </div>
+        ) : (
+          <div style={{display:'flex',alignItems:'center',gap:sp.s,padding:`0 ${sp.l}px`,height:'100%',userSelect:'none'}}>
+            <div style={{
+              width:16,height:16,borderRadius:'50%',flexShrink:0,
+              background:`radial-gradient(circle,${alpha(h.color,.3)},${alpha(h.color,.05)})`,
+              border:`1.5px solid ${alpha(h.color,.5)}`,
+              display:'flex',alignItems:'center',justifyContent:'center',
+              animation:'ring-pulse 1800ms ease infinite',
+            }}>
+              <div style={{width:5,height:5,borderRadius:'50%',background:h.color}}/>
+            </div>
+            <span style={{fontSize:fs.l,fontWeight:900,color:C.text,letterSpacing:'-0.03em'}}>{s.fps}</span>
+            <span style={{fontSize:8,color:C.ov0}}>fps</span>
+          </div>
+        )}
+      </Island>
+      {open && <CollapseBtn onClick={()=>setOpen(false)}/>}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CHROME
+══════════════════════════════════════════════════════════════════ */
+function Wallpaper({glowColor}) {
+  return (
+    <div style={{position:'fixed',inset:0,zIndex:0,
+      background:'radial-gradient(ellipse 80% 55% at 58% 48%,#12122a 0%,transparent 65%), linear-gradient(155deg,#0d0d1e,#060614)'}}>
+      <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice"
+        style={{position:'absolute',bottom:0,left:0,width:'100%',height:'60%'}}>
+        <polygon points="0,900 200,350 400,500 640,200 870,420 1060,145 1280,325 1440,240 1440,900" fill="rgba(8,8,22,.94)"/>
+        <polygon points="0,900 160,465 360,580 540,300 740,460 960,215 1160,390 1380,275 1440,315 1440,900" fill="rgba(5,5,16,.97)"/>
+      </svg>
+      <div style={{position:'absolute',inset:0,
+        backgroundImage:'radial-gradient(circle,rgba(203,166,247,.045) 1px,transparent 1px)',
+        backgroundSize:'30px 30px'}}/>
+      {glowColor && <div style={{position:'absolute',inset:0,
+        background:`radial-gradient(ellipse 110% 35% at 50% 0%,${alpha(glowColor,.05)} 0%,transparent 60%)`,
+        transition:'background 1.2s ease',pointerEvents:'none'}}/>}
+    </div>
+  );
+}
+
+function EdgeGlow({color}) {
+  return <div style={{position:'fixed',inset:0,zIndex:2,pointerEvents:'none',
+    boxShadow:`inset 0 0 90px ${alpha(color,.07)}`,transition:'box-shadow 1.2s ease'}}/>;
+}
+
+function TopBar({glowColor}) {
+  const [time,setTime]=useState('');
+  useEffect(()=>{
+    const up=()=>setTime(new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
+    up(); const iv=setInterval(up,1000); return()=>clearInterval(iv);
+  },[]);
+  return (
+    <div style={{position:'fixed',top:0,left:0,right:0,height:46,zIndex:50,
+      background:'rgba(10,10,20,.82)',backdropFilter:'blur(20px)',
+      borderBottom:`1px solid ${glowColor?alpha(glowColor,.1):'rgba(205,214,244,0.04)'}`,
+      display:'flex',alignItems:'center',padding:`0 ${sp['2l']}px`,gap:sp.m,
+      transition:'border-color 1s'}}>
+      {[1,2,3,4].map(n=>(
+        <div key={n} style={{
+          width:n===2?18:9,height:n===2?18:9,borderRadius:n===2?4:2,
+          background:n===2?C.mauve:alpha(C.mauve,.18),
+          display:'flex',alignItems:'center',justifyContent:'center',
+          fontSize:6,fontWeight:900,color:n===2?C.base:'transparent',
+        }}>{n===2?'2':''}</div>
+      ))}
+      <div style={{flex:1}}/>
+      <div style={{display:'flex',alignItems:'center',gap:6,padding:'3px 10px',borderRadius:r.pill,
+        background:alpha(C.green,.08),border:`1px solid ${alpha(C.green,.25)}`}}>
+        <div style={{width:5,height:5,borderRadius:'50%',background:C.green,animation:'hud-pulse 1400ms ease infinite'}}/>
+        <span style={{fontSize:8,fontWeight:900,color:C.green,letterSpacing:'0.12em'}}>GAME MODE</span>
+      </div>
+      <div style={{height:13,width:1,background:'rgba(205,214,244,0.07)'}}/>
+      <span style={{fontSize:11,fontWeight:700,color:C.sub1}}>{time}</span>
+    </div>
+  );
+}
+
+function VariantTabs({active, onChange}) {
+  const tabs=[
+    {id:'stats',   label:'A — LIVE STATS'},
+    {id:'control', label:'B — CONTROL'},
+    {id:'ghost',   label:'C — GHOST'},
+  ];
+  return (
+    <div style={{position:'fixed',bottom:28,left:'50%',transform:'translateX(-50%)',zIndex:1000,display:'flex',gap:sp.s}}>
+      {tabs.map(t=>(
+        <button key={t.id} onClick={()=>onChange(t.id)} style={{
+          height:28,padding:'0 14px',borderRadius:r.pill,
+          background:active===t.id?C.mauve:alpha(C.mantle,.9),
+          color:active===t.id?C.base:C.sub0,
+          border:`1px solid ${active===t.id?alpha(C.mauve,.9):'rgba(205,214,244,0.07)'}`,
+          fontSize:9,fontWeight:900,letterSpacing:'0.12em',cursor:'pointer',fontFamily:'inherit',
+          backdropFilter:'blur(16px)',
+          transition:'all 200ms cubic-bezier(.16,1,.3,1)',
+          boxShadow:active===t.id?`0 0 14px ${alpha(C.mauve,.3)}`:'none',
+        }}>{t.label}</button>
+      ))}
+    </div>
+  );
+}
+
+function App() {
+  const [variant, setVariant] = useState('stats');
+  const {s} = useStats();
+  const h = health(s.fps, s.ping);
+
+  return (
+    <div style={{position:'relative',width:'100%',height:'100%'}}>
+      <Wallpaper glowColor={h.color}/>
+      <EdgeGlow color={h.color}/>
+      <TopBar glowColor={h.color}/>
+      <div style={{position:'relative',zIndex:10,height:'100%',display:'flex',
+        alignItems:'center',justifyContent:'center',paddingTop:46}}>
+        {variant==='stats'   && <VariantStats/>}
+        {variant==='control' && <VariantControl/>}
+        {variant==='ghost'   && <VariantGhost/>}
+      </div>
+      <VariantTabs active={variant} onChange={setVariant}/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

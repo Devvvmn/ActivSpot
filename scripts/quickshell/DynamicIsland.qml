@@ -11,12 +11,36 @@ import "./pages"
 import "./collapsed"
 import "./minibubbles"
 import "./themes"
+import qs.Services.UI
 
 PanelWindow {
     id: islandWindow
 
     WlrLayershell.namespace: "qs-island"
-    WlrLayershell.layer: WlrLayer.Top
+    // Per wlr-layer-shell spec: `overlay` (z=3) renders above fullscreen,
+    // `top` (z=2) is where fullscreen surfaces typically sit. Switching to
+    // Overlay when AOT is on keeps the island above fullscreen games.
+    // Pair it with OnDemand keyboard focus so the compositor lets the
+    // surface receive pointer/keyboard input over the fullscreen client.
+    // Static Overlay (z=3, above fullscreen). Switching layers in runtime
+    // desyncs the input region after a fullscreen surface opens/closes, so
+    // we keep the layer fixed and emulate the "fullscreen hides the island"
+    // behavior in QML below (see _hideForFullscreen).
+    WlrLayershell.layer: WlrLayer.Overlay
+    // OnDemand lets the surface receive pointer input naturally; it only
+    // takes keyboard focus when the user clicks in.
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+
+    // When something on the active workspace is in real fullscreen and the
+    // user has NOT explicitly pinned the island via AOT, hide it entirely:
+    // both visually (opacity 0) and from input (empty mask).
+    readonly property bool _hideForFullscreen: FullscreenService.active && !alwaysOnTop
+
+    Item    { id: emptyMaskItem; x: 0; y: 0; width: 0; height: 0 }
+    Region  { id: emptyRegion;   item: emptyMaskItem }
+
+    // Persisted via ~/.cache/qs_island_aot. Game-mode toggle.
+    property bool alwaysOnTop: false
 
     anchors { top: true; left: true; right: true }
     exclusionMode: ExclusionMode.Ignore
@@ -89,6 +113,7 @@ PanelWindow {
         if (islandWindow.isRecording)   p.push("recording");
         if (islandWindow.discordInCall) p.push("discord");
         if (islandWindow.isMediaActive) p.push("music");
+        if (islandWindow.gameActive)    p.push("game");
         if (notifHistory.count > 0 || islandWindow.notifActive) p.push("notifs");
         return p;
     }
@@ -166,6 +191,35 @@ PanelWindow {
         vpnBadgeConnect = vpnActive;
         vpnBadgeVisible = true;
         vpnBadgeTimer.restart();
+    }
+
+    // Game mode
+    property bool   gameActive:   false
+    property string gameName:     ""
+    property string gameCover:    ""
+    property int    gameStart:    0
+    property int    gameFps:      0
+    property int    gameGpu:      0
+    property int    gameGpuTemp:  0
+    property int    gameCpu:      0
+    property int    gameRam:      0
+    property int    gameVram:     0
+    property int    gamePing:     0
+
+    onGameActiveChanged: {
+        if (gameActive) {
+            currentPage = "game";
+        } else {
+            if (currentPage === "game") currentPage = "clock";
+            if (expanded) expanded = false;
+            // Always-on-top is a per-session game-mode override; clear it
+            // when the game ends so the island goes back to the normal Top
+            // layer (lets fullscreen surfaces cover it).
+            if (alwaysOnTop) {
+                alwaysOnTop = false;
+                exec("echo '0' > ~/.cache/qs_island_aot");
+            }
+        }
     }
 
     // Screen recording
@@ -264,7 +318,7 @@ PanelWindow {
     readonly property int islandCollapsedW: islandShape.collapsedW
 
     // Bubble slot ordering — inner index = closest to island
-    property var leftSlots:  ["vpn", "music", "discord"]
+    property var leftSlots:  ["vpn", "music", "discord", "game"]
     property var rightSlots: ["rec", "notif", "stash", "clock", "timer", "sw"]
 
     // Clock / Weather
@@ -321,6 +375,7 @@ PanelWindow {
     // --- Slot-based bubble positioning ---
 
     function bubbleFor(id) {
+        if (id === "game")    return gameBubble
         if (id === "music")   return musicBubble
         if (id === "discord") return discordBubble
         if (id === "vpn")     return vpnBadge
@@ -460,6 +515,7 @@ PanelWindow {
         { name: "recording",    expandedH: 320, comp: recordingPageComp    },
         { name: "discord",      expandedH: 270, comp: discordPageComp      },
         { name: "music",        expandedH: 630, comp: musicPageComp        },
+        { name: "game",         expandedH: 480, comp: gamePageComp         },
         { name: "notifs",       expandedH: 450, comp: notifsPageComp       },
         { name: "timer",        expandedH: 380, comp: timerPageComp        },
         { name: "stash",        expandedH: 260, comp: stashPageComp        },
@@ -475,6 +531,7 @@ PanelWindow {
     Component { id: notifExpandedComp;    NotifExpandedPage{ island: islandWindow } }
     Component { id: stashPageComp;        StashPage        { island: islandWindow } }
     Component { id: appletPickerPageComp; AppletPickerPage { island: islandWindow } }
+    Component { id: gamePageComp;         GamePage         { island: islandWindow } }
 
     function dismissNotif() {
         notifHideTimer.stop();
@@ -818,6 +875,51 @@ PanelWindow {
     Timer { interval: 2000; running: true; repeat: true; triggeredOnStart: true
         onTriggered: recStateProc.running = true }
 
+    // Game mode — poll /tmp/qs_game_active
+    Process {
+        id: gameActivePoller
+        command: ["bash", "-c", "cat /tmp/qs_game_active 2>/dev/null || echo '{\"active\":false}'"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    let d = JSON.parse(this.text.trim());
+                    islandWindow.gameActive  = d.active === true;
+                    islandWindow.gameName    = d.name   || "";
+                    islandWindow.gameCover   = d.cover  || "";
+                    islandWindow.gameStart   = d.start  || 0;
+                } catch(e) { islandWindow.gameActive = false; }
+            }
+        }
+    }
+    Timer {
+        id: gameActiveTimer; interval: 3000; running: true; repeat: true
+        onTriggered: gameActivePoller.running = true
+    }
+
+    // Game mode — poll /tmp/qs_game_stats
+    Process {
+        id: gameStatsPoller
+        command: ["bash", "-c", "cat /tmp/qs_game_stats 2>/dev/null || echo '{}'"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    let d = JSON.parse(this.text.trim());
+                    islandWindow.gameFps     = d.fps      || 0;
+                    islandWindow.gameGpu     = d.gpu      || 0;
+                    islandWindow.gameGpuTemp = d.gpu_temp || 0;
+                    islandWindow.gameCpu     = d.cpu      || 0;
+                    islandWindow.gameRam     = d.ram      || 0;
+                    islandWindow.gameVram    = d.vram     || 0;
+                    islandWindow.gamePing    = d.ping     || 0;
+                } catch(e) {}
+            }
+        }
+    }
+    Timer {
+        id: gameStatsTimer; interval: 2000; running: true; repeat: true
+        onTriggered: gameStatsPoller.running = true
+    }
+
     // DND state from disk
     Process {
         id: dndInit; running: true
@@ -826,6 +928,16 @@ PanelWindow {
             onStreamFinished: { islandWindow.dndEnabled = (this.text.trim() === "1"); }
         }
     }
+
+    // Always-on-top state from disk
+    Process {
+        id: aotInit; running: true
+        command: ["bash", "-c", "cat ~/.cache/qs_island_aot 2>/dev/null || echo '0'"]
+        stdout: StdioCollector {
+            onStreamFinished: { islandWindow.alwaysOnTop = (this.text.trim() === "1"); }
+        }
+    }
+
 
     // Notification history from disk (load once on startup)
     Process {
@@ -867,7 +979,7 @@ PanelWindow {
                     for (let id of ["rec", "notif", "stash", "clock", "timer", "sw"]) {
                         if (all.indexOf(id) < 0) r.push(id)
                     }
-                    for (let id of ["vpn", "music", "discord"]) {
+                    for (let id of ["vpn", "music", "discord", "game"]) {
                         if (all.indexOf(id) < 0) l.push(id)
                     }
                     islandWindow.rightSlots = r
@@ -925,8 +1037,9 @@ PanelWindow {
     // =========================================================
     // In editBarMode: mask to island pill column only — bar applets on the
     // sides are outside this region and receive drag events normally.
-    mask: editBarMode   ? editBarMaskedRegion
-        : expanded      ? null
+    mask: _hideForFullscreen ? emptyRegion
+        : editBarMode        ? editBarMaskedRegion
+        : expanded           ? null
         : maskedRegion
 
     Item {
@@ -1015,6 +1128,8 @@ PanelWindow {
     Item {
         id: islandShape
         z: 10
+        opacity: islandWindow._hideForFullscreen ? 0 : 1
+        Behavior on opacity { NumberAnimation { duration: 150 } }
 
         property int collapsedW: {
             if (islandWindow.osdActive)                                                return osdCollapsed.preferredWidth;
@@ -1022,6 +1137,7 @@ PanelWindow {
             if (islandWindow.currentPage === "recording" && islandWindow.isRecording) return recordingCollapsed.preferredWidth;
             if (islandWindow.currentPage === "discord"   && islandWindow.discordInCall) return discordCollapsed.preferredWidth;
             if (islandWindow.currentPage === "music"     && islandWindow.isMediaActive) return musicCollapsed.preferredWidth;
+            if (islandWindow.currentPage === "game"      && islandWindow.gameActive)    return gameCollapsed.preferredWidth;
             if (islandWindow.currentPage === "notifs")                                  return notifsCollapsed.preferredWidth;
             if (islandWindow.currentPage === "stash")                                   return stashCollapsed.preferredWidth;
             if (islandWindow.currentPage === "timer")                                   return timerCollapsed.preferredWidth;
@@ -1398,6 +1514,16 @@ PanelWindow {
                 }}
             }
 
+            GameCollapsed {
+                id: gameCollapsed; island: islandWindow; anchors.centerIn: parent
+                opacity: (!islandWindow.osdActive && !islandWindow.volDragging && islandWindow.currentPage === "game" && islandWindow.gameActive) ? 1.0 : 0.0
+                visible: opacity > 0.001
+                Behavior on opacity { SequentialAnimation {
+                    PauseAnimation { duration: islandWindow.currentPage === "game" && !islandWindow.osdActive ? 60 : 0 }
+                    NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
+                }}
+            }
+
             DiscordCollapsed {
                 id: discordCollapsed; island: islandWindow; anchors.centerIn: parent
                 opacity: (!islandWindow.osdActive && !islandWindow.volDragging && islandWindow.currentPage === "discord" && islandWindow.discordInCall) ? 1.0 : 0.0
@@ -1530,9 +1656,18 @@ PanelWindow {
 
     // =========================================================
     // MINI-BUBBLES — satellite pills around the main island
+    // Hidden during real fullscreen so games / videos aren't cluttered
+    // by floating bubbles. The main island pill itself is gated separately
+    // by the AOT toggle.
     // =========================================================
+    Item {
+        id: bubblesGate
+        anchors.fill: parent
+        visible: !FullscreenService.active
+    }
 
     NotifMiniBubble {
+        parent: bubblesGate
         id: badgeBubble
         island: islandWindow
         z: 10
@@ -1541,6 +1676,7 @@ PanelWindow {
     }
 
     VpnMiniBubble {
+        parent: bubblesGate
         id: vpnBadge
         island: islandWindow
         z: 10
@@ -1548,7 +1684,17 @@ PanelWindow {
         homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
 
+    GameMiniBubble {
+        parent: bubblesGate
+        id: gameBubble
+        island: islandWindow
+        z: 10
+        homeX: homeXFor("game")
+        homeY: s(4) + (islandShape.collapsedH - height) / 2
+    }
+
     MusicMiniBubble {
+        parent: bubblesGate
         id: musicBubble
         island: islandWindow
         z: 10
@@ -1557,6 +1703,7 @@ PanelWindow {
     }
 
     DiscordMiniBubble {
+        parent: bubblesGate
         id: discordBubble
         island: islandWindow
         z: 10
@@ -1565,6 +1712,7 @@ PanelWindow {
     }
 
     RecordingMiniBubble {
+        parent: bubblesGate
         id: recBubble
         island: islandWindow
         z: 10
@@ -1573,6 +1721,7 @@ PanelWindow {
     }
 
     StashMiniBubble {
+        parent: bubblesGate
         id: stashBubble
         island: islandWindow
         z: 10
@@ -1581,6 +1730,7 @@ PanelWindow {
     }
 
     ClockMiniBubble {
+        parent: bubblesGate
         id: clockBubble
         island: islandWindow
         z: 10
@@ -1589,6 +1739,7 @@ PanelWindow {
     }
 
     TimerMiniBubble {
+        parent: bubblesGate
         id: timerBubble
         island: islandWindow
         z: 10
@@ -1597,6 +1748,7 @@ PanelWindow {
     }
 
     StopwatchMiniBubble {
+        parent: bubblesGate
         id: swBubble
         island: islandWindow
         z: 10

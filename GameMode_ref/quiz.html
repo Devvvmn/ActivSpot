@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Mode — Design Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { height:100%; overflow:hidden; }
+body { font-family:'JetBrains Mono',monospace; background:#0a0a14; color:#cdd6f4; -webkit-font-smoothing:antialiased; }
+#root { height:100%; }
+
+@keyframes hud-blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+@keyframes fade-up   { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+@keyframes pop-in    { from{opacity:0;transform:scale(.92)} to{opacity:1;transform:none} }
+@keyframes slide-next{ from{opacity:0;transform:translateX(22px)} to{opacity:1;transform:none} }
+@keyframes slide-prev{ from{opacity:0;transform:translateX(-22px)} to{opacity:1;transform:none} }
+@keyframes chosen    { 0%{box-shadow:0 0 0 0 var(--ac)} 60%{box-shadow:0 0 0 8px transparent} 100%{box-shadow:none} }
+
+.fade-up   { animation: fade-up   340ms cubic-bezier(.16,1,.3,1) both; }
+.pop-in    { animation: pop-in    380ms cubic-bezier(.16,1,.3,1) both; }
+.slide-next{ animation: slide-next 280ms cubic-bezier(.16,1,.3,1) both; }
+.slide-prev{ animation: slide-prev 280ms cubic-bezier(.16,1,.3,1) both; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const C = {
+  base:'#1e1e2e', mantle:'#181825',
+  sv:'#252535', s0:'#313244', s1:'#45475a',
+  ov0:'#6c7086', ov1:'#7f849c',
+  text:'#cdd6f4', sub1:'#bac2de', sub0:'#a6adc8',
+  mauve:'#cba6f7', blue:'#89b4fa', teal:'#94e2d5',
+  green:'#a6e3a1', peach:'#fab387', red:'#f38ba8', yellow:'#f9e2af',
+};
+const a = (hex,op) => { const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return `rgba(${r},${g},${b},${op})`; };
+
+/* ── mini stat sim ───────────────────────── */
+function useTick(){ const [t,setT]=useState(0); useEffect(()=>{const iv=setInterval(()=>setT(x=>x+1),900);return()=>clearInterval(iv);},[]); return t; }
+function fakeVal(base,lo,hi,t,seed){ return Math.round(Math.max(lo,Math.min(hi,base+Math.sin(t*.7+seed)*((hi-lo)*.22)))); }
+
+/* ── QUESTIONS ───────────────────────────── */
+
+/* Each question: { id, prompt, hint?, options: [{id, label, preview: ReactEl, note?}] } */
+
+function CollapsedA({ t }) {
+  const fps = fakeVal(144,85,163,t,0), gpu=fakeVal(76,48,98,t,1.2), cpu=fakeVal(38,18,92,t,2.4);
+  const hc = fps>100?C.green:fps>60?C.yellow:C.red;
+  return (
+    <div style={{display:'flex',alignItems:'center',gap:0,padding:'0 14px',height:'100%'}}>
+      <div style={{width:6,height:6,borderRadius:'50%',background:hc,marginRight:10,
+        boxShadow:`0 0 7px ${a(hc,.7)}`,animation:'hud-blink 1.3s ease infinite'}}/>
+      <span style={{fontSize:9,fontWeight:900,color:C.ov0,letterSpacing:'0.1em',marginRight:10}}>MEE</span>
+      <div style={{width:1,height:12,background:a(C.text,.08),marginRight:9}}/>
+      <span style={{fontSize:13,fontWeight:900,color:hc,letterSpacing:'-0.03em'}}>{fps}</span>
+      <span style={{fontSize:8,color:C.ov0,marginRight:9}}> fps</span>
+      <div style={{width:1,height:12,background:a(C.text,.08),marginRight:9}}/>
+      <span style={{fontSize:8,color:C.ov0,marginRight:3}}>GPU</span><span style={{fontSize:12,fontWeight:900,color:C.blue}}>{gpu}</span><span style={{fontSize:8,color:C.ov0,marginRight:9}}>%</span>
+      <div style={{width:1,height:12,background:a(C.text,.08),marginRight:9}}/>
+      <span style={{fontSize:8,color:C.ov0,marginRight:3}}>CPU</span><span style={{fontSize:12,fontWeight:900,color:C.mauve}}>{cpu}</span><span style={{fontSize:8,color:C.ov0}}>%</span>
+    </div>
+  );
+}
+function CollapsedB({ t }) {
+  const fps=fakeVal(144,85,163,t,0); const hc=fps>100?C.green:fps>60?C.yellow:C.red;
+  const bars=Array(12).fill(0).map((_,i)=>Math.abs(Math.sin(t*.08+i*.9+1))*0.75+0.15);
+  return (
+    <div style={{display:'flex',alignItems:'center',gap:8,padding:'0 14px',height:'100%'}}>
+      <div style={{width:5,height:5,borderRadius:'50%',background:hc,animation:'hud-blink 1.3s ease infinite'}}/>
+      <span style={{fontSize:13,fontWeight:900,color:C.text,letterSpacing:'-0.03em'}}>{fps}</span>
+      <span style={{fontSize:8,color:C.ov0}}>fps</span>
+      <div style={{display:'flex',alignItems:'flex-end',gap:1.5,height:16}}>
+        {bars.map((v,i)=><div key={i} style={{width:2.5,height:`${v*100}%`,background:i===bars.length-1?hc:a(hc,.4),borderRadius:1}}/>)}
+      </div>
+    </div>
+  );
+}
+function CollapsedC({ t }) {
+  const fps=fakeVal(144,85,163,t,0); const ping=fakeVal(12,7,44,t,1.5);
+  const hc=fps>100&&ping<22?C.green:fps>60?C.yellow:C.red;
+  return (
+    <div style={{display:'flex',alignItems:'center',gap:0,padding:'0 14px',height:'100%'}}>
+      <div style={{width:16,height:16,borderRadius:'50%',flexShrink:0,
+        border:`1.5px solid ${a(hc,.5)}`,background:a(hc,.08),
+        display:'flex',alignItems:'center',justifyContent:'center',marginRight:9}}>
+        <div style={{width:5,height:5,borderRadius:'50%',background:hc}}/>
+      </div>
+      <span style={{fontSize:14,fontWeight:900,color:C.text,letterSpacing:'-0.04em'}}>{fps}</span>
+      <span style={{fontSize:8,color:C.ov0,marginLeft:3}}>fps</span>
+    </div>
+  );
+}
+function CollapsedD({ t }) {
+  const fps=fakeVal(144,85,163,t,0),ping=fakeVal(12,7,44,t,1.5),gpu=fakeVal(76,48,98,t,2.2);
+  const hc=fps>100?C.green:fps>60?C.yellow:C.red;
+  return (
+    <div style={{display:'flex',alignItems:'center',gap:0,padding:'0 14px',height:'100%'}}>
+      <div style={{
+        height:20,padding:'0 8px',borderRadius:5,
+        background:a(hc,.12),border:`1px solid ${a(hc,.3)}`,
+        display:'flex',alignItems:'center',gap:4,marginRight:8,
+      }}>
+        <span style={{fontSize:11,fontWeight:900,color:hc}}>{fps}</span>
+        <span style={{fontSize:7,color:a(hc,.6)}}>FPS</span>
+      </div>
+      <div style={{height:20,padding:'0 8px',borderRadius:5,background:a(C.blue,.1),border:`1px solid ${a(C.blue,.25)}`,display:'flex',alignItems:'center',gap:4,marginRight:8}}>
+        <span style={{fontSize:11,fontWeight:900,color:C.blue}}>{gpu}%</span>
+        <span style={{fontSize:7,color:a(C.blue,.6)}}>GPU</span>
+      </div>
+      <div style={{height:20,padding:'0 8px',borderRadius:5,background:a(C.yellow,.1),border:`1px solid ${a(C.yellow,.25)}`,display:'flex',alignItems:'center',gap:4}}>
+        <span style={{fontSize:11,fontWeight:900,color:C.yellow}}>{ping}</span>
+        <span style={{fontSize:7,color:a(C.yellow,.6)}}>MS</span>
+      </div>
+    </div>
+  );
+}
+
+/* ── stat card shapes ──────────────────── */
+function ShapeCircle({color,value,unit}){
+  const canRef=useRef();
+  const size=54,stroke=5;
+  useEffect(()=>{
+    const c=canRef.current; if(!c) return;
+    const dpr=window.devicePixelRatio||1;
+    c.width=size*dpr; c.height=size*dpr; c.style.width=size+'px'; c.style.height=size+'px';
+    const ctx=c.getContext('2d'); ctx.scale(dpr,dpr);
+    const cx=size/2,cy=size/2,r=size/2-stroke-2;
+    const start=Math.PI*5/6,end=Math.PI*13/6;
+    ctx.clearRect(0,0,size,size);
+    ctx.lineWidth=stroke; ctx.lineCap='round';
+    ctx.strokeStyle=C.s0; ctx.beginPath(); ctx.arc(cx,cy,r,start,end); ctx.stroke();
+    const ratio=Math.min(1,value/100);
+    if(ratio>.005){ ctx.strokeStyle=color; ctx.beginPath(); ctx.arc(cx,cy,r,start,start+(end-start)*ratio); ctx.stroke(); }
+  },[value,color]);
+  return (
+    <div style={{position:'relative',width:size,height:size}}>
+      <canvas ref={canRef} style={{imageRendering:'crisp-edges'}}/>
+      <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',paddingBottom:6}}>
+        <span style={{fontSize:11,fontWeight:900,color,letterSpacing:'-0.02em'}}>{value}<span style={{fontSize:7,color:a(color,.6)}}>{unit}</span></span>
+      </div>
+    </div>
+  );
+}
+function ShapeBar({color,value,label}){
+  return (
+    <div style={{flex:1,padding:'8px 10px',borderRadius:8,background:a(color,.06),border:`1px solid ${a(color,.18)}`,textAlign:'center'}}>
+      <div style={{fontSize:8,fontWeight:900,color,letterSpacing:'0.1em',marginBottom:5}}>{label}</div>
+      <div style={{fontSize:14,fontWeight:900,color:C.text,marginBottom:4}}>{value}<span style={{fontSize:7,color:C.ov0}}>%</span></div>
+      <div style={{height:2,borderRadius:1,background:C.s0,overflow:'hidden'}}>
+        <div style={{height:'100%',width:`${value}%`,background:color,borderRadius:1,transition:'width .9s'}}/>
+      </div>
+    </div>
+  );
+}
+function ShapeRing({color,value,label}){
+  const size=42,stroke=4;
+  const canRef=useRef();
+  useEffect(()=>{
+    const c=canRef.current; if(!c) return;
+    const dpr=window.devicePixelRatio||1;
+    c.width=size*dpr; c.height=size*dpr; c.style.width=size+'px'; c.style.height=size+'px';
+    const ctx=c.getContext('2d'); ctx.scale(dpr,dpr);
+    const cx=size/2,cy=size/2,r=size/2-stroke-1;
+    ctx.lineWidth=stroke; ctx.lineCap='round';
+    ctx.strokeStyle=C.s0; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+    ctx.strokeStyle=color;
+    const ratio=Math.min(1,value/100);
+    ctx.beginPath(); ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*ratio); ctx.stroke();
+  },[value,color]);
+  return (
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
+      <div style={{position:'relative',width:size,height:size}}>
+        <canvas ref={canRef} style={{imageRendering:'crisp-edges'}}/>
+        <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <span style={{fontSize:9,fontWeight:900,color,letterSpacing:'-0.02em'}}>{value}</span>
+        </div>
+      </div>
+      <span style={{fontSize:7,color:C.ov0,letterSpacing:'0.08em'}}>{label}</span>
+    </div>
+  );
+}
+
+/* ── NGraph mini ─────────────────────── */
+function MiniGraph({values,color,height=32}){
+  const ref=useRef();
+  useEffect(()=>{
+    const c=ref.current; if(!c) return;
+    const dpr=window.devicePixelRatio||1, W=c.clientWidth, H=height;
+    c.width=W*dpr; c.height=H*dpr;
+    const ctx=c.getContext('2d'); ctx.scale(dpr,dpr);
+    ctx.clearRect(0,0,W,H);
+    if(values.length<2) return;
+    const mx=Math.max(...values,1),pad=H*.1;
+    const toX=i=>(i/(values.length-1))*W;
+    const toY=v=>H-pad-(v/mx)*(H-pad*2);
+    ctx.beginPath();
+    values.forEach((v,i)=>i===0?ctx.moveTo(toX(i),toY(v)):ctx.lineTo(toX(i),toY(v)));
+    ctx.strokeStyle=color; ctx.lineWidth=1.5; ctx.lineJoin='round'; ctx.stroke();
+    ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath();
+    ctx.fillStyle=a(color,.12); ctx.fill();
+  },[values]);
+  return <canvas ref={ref} style={{width:'100%',height,display:'block'}}/>;
+}
+
+/* ── QUIZ DATA ───────────────────────── */
+const QUESTIONS = [
+  {
+    id:'collapsed',
+    prompt:'Как выглядит пилюля в свёрнутом виде?',
+    hint:'Всегда видна поверх игры — важна читаемость.',
+    dir:'next',
+    options:[
+      { id:'abc', label:'FPS + GPU + CPU',
+        note:'Три метрики, три цвета — плотно, но информативно',
+        preview:(t)=><CollapsedPreview><CollapsedA t={t}/></CollapsedPreview> },
+      { id:'sparkline', label:'FPS + sparkline',
+        note:'Одна метрика + живой график прямо в пилюле',
+        preview:(t)=><CollapsedPreview><CollapsedB t={t}/></CollapsedPreview> },
+      { id:'dot', label:'Только FPS + кольцо',
+        note:'Максимальный минимализм — здоровье = цвет',
+        preview:(t)=><CollapsedPreview><CollapsedC t={t}/></CollapsedPreview> },
+      { id:'chips', label:'Три chip-бейджа',
+        note:'FPS / GPU / PING в отдельных карточках',
+        preview:(t)=><CollapsedPreview w={320}><CollapsedD t={t}/></CollapsedPreview> },
+    ],
+  },
+  {
+    id:'stat_shape',
+    prompt:'Как отображаются метрики в раскрытой панели?',
+    hint:'Первое что видишь после разворота острова.',
+    dir:'next',
+    options:[
+      { id:'circle', label:'Дуга NCircleStat',
+        note:'Как в системном мониторе — 150°→390°, зазор снизу',
+        preview:()=>(
+          <StatPreview>
+            <div style={{display:'flex',gap:10,justifyContent:'center'}}>
+              {[[C.green,144],[C.blue,77],[C.mauve,40],[C.teal,62]].map(([c,v],i)=>
+                <ShapeCircle key={i} color={c} value={v} unit="%"/>)}
+            </div>
+          </StatPreview>
+        )},
+      { id:'bar', label:'Горизонтальные бары',
+        note:'Компактно, легко сравнивать',
+        preview:()=>(
+          <StatPreview>
+            <div style={{display:'flex',gap:6}}>
+              {[['FPS',87,C.green],['GPU',77,C.blue],['CPU',40,C.mauve],['RAM',62,C.teal]].map(([l,v,c])=>
+                <ShapeBar key={l} color={c} value={v} label={l}/>)}
+            </div>
+          </StatPreview>
+        )},
+      { id:'ring', label:'Полные кольца',
+        note:'360° ring — более «игровой» вайб',
+        preview:()=>(
+          <StatPreview>
+            <div style={{display:'flex',gap:16,justifyContent:'center'}}>
+              {[[C.green,'FPS',87],[C.blue,'GPU',77],[C.mauve,'CPU',40],[C.teal,'RAM',62]].map(([c,l,v])=>
+                <ShapeRing key={l} color={c} value={v} label={l}/>)}
+            </div>
+          </StatPreview>
+        )},
+      { id:'numbers', label:'Большие цифры',
+        note:'Только числа, максимум размер — как реальный HUD',
+        preview:()=>(
+          <StatPreview>
+            <div style={{display:'flex',gap:14,alignItems:'flex-end'}}>
+              {[[144,'fps',C.green],[77,'%',C.blue],[40,'%',C.mauve],[12,'ms',C.yellow]].map(([v,u,c],i)=>(
+                <div key={i} style={{textAlign:'center'}}>
+                  <div style={{fontSize:i===0?28:20,fontWeight:900,color:c,letterSpacing:'-0.04em',lineHeight:1}}>{v}</div>
+                  <div style={{fontSize:8,color:C.ov0,marginTop:2}}>{u}</div>
+                </div>
+              ))}
+            </div>
+          </StatPreview>
+        )},
+    ],
+  },
+  {
+    id:'graph_style',
+    prompt:'Стиль графиков истории?',
+    hint:'Показывают изменение метрик за последние ~40 сэмплов.',
+    dir:'next',
+    options:[
+      { id:'fill', label:'Линия + заливка',
+        note:'Текущий стиль — как в SystemStatsPanel',
+        preview:()=>{
+          const vals=Array(30).fill(0).map((_,i)=>80+Math.sin(i*.7)*30+Math.random()*8);
+          return <GraphPreview><MiniGraph values={vals} color={C.mauve} height={44}/></GraphPreview>;
+        }},
+      { id:'bars', label:'Вертикальные бары',
+        note:'Ближе к аудио-эквалайзеру',
+        preview:()=>{
+          const vals=Array(28).fill(0).map((_,i)=>50+Math.sin(i*.6)*35+Math.random()*10);
+          const mx=Math.max(...vals);
+          return (
+            <GraphPreview>
+              <div style={{display:'flex',alignItems:'flex-end',gap:1.5,height:44}}>
+                {vals.map((v,i)=><div key={i} style={{flex:1,height:`${(v/mx)*100}%`,minHeight:2,
+                  background:i===vals.length-1?C.mauve:a(C.mauve,.45),borderRadius:'1px 1px 0 0'}}/>)}
+              </div>
+            </GraphPreview>
+          );
+        }},
+      { id:'stepped', label:'Ступенчатый (stepped)',
+        note:'Хорошо для дискретных значений FPS',
+        preview:()=>{
+          const vals=Array(22).fill(0).map((_,i)=>Math.round((70+Math.sin(i*.8)*28+Math.random()*6)/10)*10);
+          const mx=Math.max(...vals),H=44,pad=4;
+          return (
+            <GraphPreview>
+              <svg width="100%" height={H} style={{display:'block'}}>
+                {vals.map((v,i)=>{
+                  const x=(i/(vals.length-1))*100, xn=((i+1)/(vals.length-1))*100;
+                  const y=H-pad-(v/mx)*(H-pad*2);
+                  return i<vals.length-1&&(
+                    <g key={i}>
+                      <line x1={`${x}%`} y1={y} x2={`${xn}%`} y2={y} stroke={C.blue} strokeWidth="1.5"/>
+                      <line x1={`${xn}%`} y1={y} x2={`${xn}%`} y2={H-pad-(vals[i+1]/mx)*(H-pad*2)} stroke={C.blue} strokeWidth="1.5"/>
+                      <rect x={`${x}%`} y={y} width={`${xn-x}%`} height={H-y} fill={a(C.blue,.09)}/>
+                    </g>
+                  );
+                })}
+              </svg>
+            </GraphPreview>
+          );
+        }},
+      { id:'dot_trail', label:'Точечный след',
+        note:'Каждый сэмпл — точка, связанные линией',
+        preview:()=>{
+          const vals=Array(24).fill(0).map((_,i)=>60+Math.sin(i*.7)*32+Math.random()*8);
+          const mx=Math.max(...vals),H=44,pad=4;
+          const pts=vals.map((v,i)=>[`${(i/(vals.length-1))*100}%`,H-pad-(v/mx)*(H-pad*2)]);
+          return (
+            <GraphPreview>
+              <svg width="100%" height={H} style={{display:'block'}}>
+                <polyline points={pts.map(([x,y],i)=>`${i*(100/(vals.length-1))},${y}`).join(' ')}
+                  fill="none" stroke={a(C.teal,.4)} strokeWidth="1"/>
+                {pts.map(([x,y],i)=>(
+                  <circle key={i} cx={`${i*(100/(vals.length-1))}%`} cy={y} r={i===pts.length-1?3:1.5}
+                    fill={i===pts.length-1?C.teal:a(C.teal,.6)}/>
+                ))}
+              </svg>
+            </GraphPreview>
+          );
+        }},
+    ],
+  },
+  {
+    id:'expand_anim',
+    prompt:'Анимация раскрытия острова?',
+    hint:'Ощущение перехода из collapsed → панель.',
+    dir:'next',
+    options:[
+      { id:'morph', label:'Морф (текущий)',
+        note:'Пилюля плавно растягивается до панели',
+        preview:()=><AnimPreview label="pill → panel" color={C.mauve} type="morph"/>},
+      { id:'fade_scale', label:'Fade + scale',
+        note:'Появляется с лёгким масштабом',
+        preview:()=><AnimPreview label="scale .94 → 1" color={C.blue} type="scale"/>},
+      { id:'unfold', label:'Разворот сверху',
+        note:'Панель «падает» вниз из острова',
+        preview:()=><AnimPreview label="height 0 → auto" color={C.teal} type="unfold"/>},
+      { id:'flash', label:'Flash → reveal',
+        note:'Короткая вспышка, потом панель',
+        preview:()=><AnimPreview label="flash + reveal" color={C.green} type="flash"/>},
+    ],
+  },
+  {
+    id:'accent',
+    prompt:'Цвет акцента Game Mode?',
+    hint:'Используется в dot, ring glow, graph fill и edge glow.',
+    dir:'next',
+    options:[
+      { id:'health', label:'Динамический (здоровье)',
+        note:'Зелёный/жёлтый/красный — меняется с FPS+ping',
+        preview:()=><AccentPreview colors={[C.green,C.yellow,C.red]} label="fps-driven"/>},
+      { id:'mauve', label:'Mauve (фирменный)',
+        note:'#cba6f7 — основной акцент всей системы',
+        preview:()=><AccentPreview colors={[C.mauve]} label="always mauve"/>},
+      { id:'blue', label:'Blue',
+        note:'#89b4fa — холодный, технологичный',
+        preview:()=><AccentPreview colors={[C.blue]} label="always blue"/>},
+      { id:'teal', label:'Teal',
+        note:'#94e2d5 — нейтральный, не агрессивный',
+        preview:()=><AccentPreview colors={[C.teal]} label="always teal"/>},
+    ],
+  },
+  {
+    id:'settings_place',
+    prompt:'Где настройки (DND, perf mode, net priority)?',
+    hint:'Тогглы нужны, но важно не загромождать.',
+    dir:'next',
+    options:[
+      { id:'tab', label:'Отдельная вкладка SETTINGS',
+        note:'Текущий подход — чисто, не отвлекает',
+        preview:()=><SettingsPreview type="tab"/>},
+      { id:'bottom', label:'Снизу на OVERVIEW',
+        note:'Всё в одном виде — меньше кликов',
+        preview:()=><SettingsPreview type="bottom"/>},
+      { id:'sidebar', label:'Боковая панель',
+        note:'Toggles справа, stats слева',
+        preview:()=><SettingsPreview type="sidebar"/>},
+      { id:'none', label:'Не нужны в острове',
+        note:'Настройки отдельно, остров только для stats',
+        preview:()=><SettingsPreview type="none"/>},
+    ],
+  },
+];
+
+/* ── Preview wrappers ─────────────────── */
+function CollapsedPreview({children,w=280}){
+  return (
+    <div style={{display:'flex',justifyContent:'center',marginBottom:4}}>
+      <div style={{width:w,height:34,background:C.base,borderRadius:17,
+        boxShadow:'0 6px 20px rgba(0,0,0,.4)',overflow:'hidden',display:'flex',alignItems:'center'}}>
+        {children}
+      </div>
+    </div>
+  );
+}
+function StatPreview({children}){
+  return <div style={{padding:'10px 14px',background:a(C.sv,.8),borderRadius:10,border:`1px solid rgba(205,214,244,.07)`}}>{children}</div>;
+}
+function GraphPreview({children}){
+  return <div style={{padding:'8px 10px',background:a(C.sv,.8),borderRadius:10,border:`1px solid rgba(205,214,244,.07)`}}>{children}</div>;
+}
+
+function AnimPreview({label,color,type}){
+  const [phase,setPhase]=useState(0);
+  useEffect(()=>{const iv=setInterval(()=>setPhase(p=>(p+1)%3),1800);return()=>clearInterval(iv);},[]);
+  const isOpen=phase===1||phase===2;
+  const styles={
+    morph:      {width:isOpen?200:120,height:isOpen?80:28,borderRadius:isOpen?10:14,transition:'all 540ms cubic-bezier(.16,1,.3,1)'},
+    scale:      {width:isOpen?200:120,height:isOpen?80:28,borderRadius:isOpen?10:14,opacity:isOpen?1:0.6,transform:isOpen?'scale(1)':'scale(.94)',transition:'all 400ms cubic-bezier(.16,1,.3,1)'},
+    unfold:     {width:200,height:isOpen?80:28,borderRadius:isOpen?10:14,overflow:'hidden',transition:'height 420ms cubic-bezier(.16,1,.3,1), border-radius 420ms'},
+    flash:      {width:200,height:isOpen?80:28,borderRadius:isOpen?10:14,opacity:phase===0?0.5:1,transition:'all 350ms'},
+  };
+  return (
+    <div style={{display:'flex',justifyContent:'center'}}>
+      <div style={{background:C.base,border:`1px solid ${a(color,.3)}`,boxShadow:`0 0 12px ${a(color,.12)}`,
+        display:'flex',alignItems:'center',justifyContent:'center',...styles[type]}}>
+        <span style={{fontSize:8,color,letterSpacing:'0.1em',fontWeight:900}}>{label}</span>
+      </div>
+    </div>
+  );
+}
+function AccentPreview({colors,label}){
+  return (
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:8}}>
+      <div style={{display:'flex',gap:8}}>
+        {colors.map((c,i)=>(
+          <div key={i} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
+            <div style={{width:28,height:28,borderRadius:'50%',background:a(c,.2),border:`1.5px solid ${a(c,.6)}`,
+              display:'flex',alignItems:'center',justifyContent:'center',
+              boxShadow:`0 0 12px ${a(c,.3)}`}}>
+              <div style={{width:8,height:8,borderRadius:'50%',background:c}}/>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{height:3,width:80,borderRadius:2,background:`linear-gradient(90deg,${colors.join(',')})`}}/>
+      <span style={{fontSize:8,color:C.ov0,letterSpacing:'0.08em'}}>{label}</span>
+    </div>
+  );
+}
+function SettingsPreview({type}){
+  const items=[['🔕','DND',true],['⚡','PERF',true],['📶','NET',false]];
+  if(type==='none') return (
+    <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:60,
+      color:C.ov0,fontSize:10,letterSpacing:'0.1em',fontWeight:900}}>STATS ONLY</div>
+  );
+  if(type==='tab') return (
+    <div style={{display:'flex',flexDirection:'column',gap:4}}>
+      <div style={{display:'flex',borderBottom:`1px solid rgba(205,214,244,.08)`,marginBottom:4}}>
+        {['OVERVIEW','GRAPHS','SETTINGS'].map((l,i)=>(
+          <div key={l} style={{flex:1,textAlign:'center',fontSize:7,fontWeight:900,
+            color:i===2?C.mauve:C.ov0,padding:'4px 0',letterSpacing:'0.08em',
+            borderBottom:i===2?`1.5px solid ${C.mauve}`:'1.5px solid transparent'}}>{l}</div>
+        ))}
+      </div>
+      {items.map(([ic,l,on])=>(
+        <div key={l} style={{display:'flex',alignItems:'center',gap:6,padding:'3px 0'}}>
+          <span style={{fontSize:10}}>{ic}</span>
+          <span style={{fontSize:9,color:on?C.text:C.sub0,flex:1}}>{l}</span>
+          <div style={{width:22,height:12,borderRadius:6,background:on?C.mauve:C.s1,position:'relative'}}>
+            <div style={{position:'absolute',top:2,left:on?12:2,width:8,height:8,borderRadius:4,background:'white'}}/>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+  if(type==='bottom') return (
+    <div style={{display:'flex',flexDirection:'column',gap:4}}>
+      <div style={{display:'flex',gap:6,marginBottom:4}}>
+        {[[C.green,77],[C.blue,40],[C.mauve,62]].map(([c,v],i)=>(
+          <div key={i} style={{flex:1,height:24,borderRadius:6,background:a(c,.08),border:`1px solid ${a(c,.2)}`,
+            display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:900,color:c}}>{v}%</div>
+        ))}
+      </div>
+      <div style={{height:1,background:'rgba(205,214,244,0.06)',margin:'2px 0'}}/>
+      {items.map(([ic,l,on])=>(
+        <div key={l} style={{display:'flex',alignItems:'center',gap:6,padding:'2px 0'}}>
+          <span style={{fontSize:10}}>{ic}</span>
+          <span style={{fontSize:9,color:on?C.text:C.sub0,flex:1}}>{l}</span>
+          <div style={{width:22,height:12,borderRadius:6,background:on?C.mauve:C.s1,position:'relative'}}>
+            <div style={{position:'absolute',top:2,left:on?12:2,width:8,height:8,borderRadius:4,background:'white'}}/>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+  if(type==='sidebar') return (
+    <div style={{display:'flex',gap:8}}>
+      <div style={{flex:2,display:'flex',gap:5}}>
+        {[[C.green,77,'FPS'],[C.blue,40,'GPU'],[C.mauve,62,'CPU']].map(([c,v,l])=>(
+          <div key={l} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
+            <div style={{fontSize:13,fontWeight:900,color:c}}>{v}</div>
+            <div style={{fontSize:7,color:C.ov0}}>{l}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{width:1,background:'rgba(205,214,244,0.07)'}}/>
+      <div style={{flex:1,display:'flex',flexDirection:'column',gap:5}}>
+        {items.map(([ic,l,on])=>(
+          <div key={l} style={{display:'flex',alignItems:'center',gap:4}}>
+            <span style={{fontSize:9}}>{ic}</span>
+            <span style={{fontSize:8,color:on?C.text:C.ov0,flex:1}}>{l}</span>
+            <div style={{width:18,height:10,borderRadius:5,background:on?C.mauve:C.s1,position:'relative',flexShrink:0}}>
+              <div style={{position:'absolute',top:1.5,left:on?9.5:1.5,width:7,height:7,borderRadius:'50%',background:'white'}}/>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── Option card ─────────────────────── */
+function OptionCard({opt,selected,onSelect,qId,t}){
+  const isSelected=selected===opt.id;
+  const ac=C.mauve;
+  return (
+    <div onClick={()=>onSelect(opt.id)}
+      style={{
+        '--ac':ac,
+        padding:12, borderRadius:12, cursor:'pointer', userSelect:'none',
+        background: isSelected ? a(ac,.1) : a(C.sv,.75),
+        border:`1.5px solid ${isSelected ? a(ac,.5) : 'rgba(205,214,244,0.07)'}`,
+        boxShadow: isSelected ? `0 0 0 3px ${a(ac,.12)}` : 'none',
+        transition:'all 180ms cubic-bezier(.16,1,.3,1)',
+        animation: isSelected ? `chosen 500ms ease` : 'none',
+      }}>
+      <div style={{marginBottom:8, minHeight:70, display:'flex', alignItems:'center', justifyContent:'center'}}>
+        {typeof opt.preview === 'function' ? opt.preview(t) : opt.preview}
+      </div>
+      <div style={{display:'flex',alignItems:'flex-start',gap:6}}>
+        <div style={{
+          width:14,height:14,borderRadius:'50%',flexShrink:0,marginTop:1,
+          background:isSelected?ac:C.s1,
+          border:`1.5px solid ${isSelected?ac:C.s1}`,
+          display:'flex',alignItems:'center',justifyContent:'center',
+          transition:'all 180ms',
+        }}>
+          {isSelected&&<div style={{width:5,height:5,borderRadius:'50%',background:C.base}}/>}
+        </div>
+        <div>
+          <div style={{fontSize:11,fontWeight:700,color:isSelected?C.text:C.sub0,marginBottom:2,transition:'color 180ms'}}>{opt.label}</div>
+          {opt.note&&<div style={{fontSize:9,color:C.ov0,lineHeight:1.4}}>{opt.note}</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Results screen ───────────────────── */
+const LABELS = {
+  collapsed: { abc:'FPS + GPU + CPU', sparkline:'FPS + sparkline', dot:'Только FPS', chips:'Три chip-бейджа' },
+  stat_shape:{ circle:'Дуга NCircleStat', bar:'Горизонтальные бары', ring:'Полные кольца', numbers:'Большие цифры' },
+  graph_style:{ fill:'Линия + заливка', bars:'Вертикальные бары', stepped:'Stepped', dot_trail:'Точечный след' },
+  expand_anim:{ morph:'Морф', fade_scale:'Fade + scale', unfold:'Разворот', flash:'Flash → reveal' },
+  accent:     { health:'Динамический', mauve:'Mauve', blue:'Blue', teal:'Teal' },
+  settings_place:{ tab:'Вкладка SETTINGS', bottom:'Снизу OVERVIEW', sidebar:'Боковая панель', none:'Не нужны' },
+};
+function Results({answers,onRestart}){
+  return (
+    <div className="fade-up" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:20,padding:'32px 24px',maxWidth:480,margin:'0 auto'}}>
+      <div style={{fontSize:10,fontWeight:900,color:C.mauve,letterSpacing:'0.2em',marginBottom:4}}>КВИЗ ЗАВЕРШЁН</div>
+      <div style={{fontSize:18,fontWeight:900,color:C.text,letterSpacing:'-0.02em',marginBottom:8,textAlign:'center'}}>Вот твои предпочтения</div>
+
+      <div style={{width:'100%',display:'flex',flexDirection:'column',gap:8}}>
+        {Object.entries(answers).map(([qId,aId])=>{
+          const q=QUESTIONS.find(x=>x.id===qId);
+          return (
+            <div key={qId} style={{display:'flex',alignItems:'center',gap:12,padding:'10px 14px',
+              background:a(C.sv,.8),borderRadius:10,border:`1px solid rgba(205,214,244,0.07)`}}>
+              <div style={{width:5,height:5,borderRadius:'50%',background:C.mauve,flexShrink:0}}/>
+              <div style={{flex:1}}>
+                <div style={{fontSize:9,color:C.ov0,marginBottom:2,letterSpacing:'0.06em'}}>{q?.prompt}</div>
+                <div style={{fontSize:12,fontWeight:700,color:C.text}}>{LABELS[qId]?.[aId]||aId}</div>
+              </div>
+              <div style={{fontSize:9,fontWeight:900,color:C.mauve,letterSpacing:'0.08em',
+                padding:'2px 8px',background:a(C.mauve,.1),border:`1px solid ${a(C.mauve,.3)}`,borderRadius:9999}}>{aId}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{fontSize:10,color:C.ov0,textAlign:'center',lineHeight:1.6,marginTop:4}}>
+        Отправь эти ответы в чат — я перестрою Live Stats.html под твои предпочтения.
+      </div>
+
+      <button onClick={onRestart} style={{
+        height:32,padding:'0 20px',borderRadius:9999,
+        background:a(C.mauve,.12),border:`1px solid ${a(C.mauve,.3)}`,
+        color:C.mauve,fontSize:9,fontWeight:900,letterSpacing:'0.12em',
+        cursor:'pointer',fontFamily:'inherit',marginTop:4,
+      }}>← ПРОЙТИ ЕЩЁ РАЗ</button>
+    </div>
+  );
+}
+
+/* ── QUIZ SHELL ──────────────────────── */
+function Quiz(){
+  const [qi,  setQi]     = useState(0);
+  const [answers, setAns]= useState({});
+  const [dir, setDir]    = useState('next');
+  const [done,setDone]   = useState(false);
+  const t = useTick();
+
+  const q = QUESTIONS[qi];
+  const selected = answers[q?.id];
+  const progress = (qi / QUESTIONS.length) * 100;
+
+  function choose(id){
+    setAns(a=>({...a,[q.id]:id}));
+  }
+  function goNext(){
+    if(!selected) return;
+    if(qi===QUESTIONS.length-1){ setDone(true); return; }
+    setDir('next'); setQi(i=>i+1);
+  }
+  function goPrev(){
+    if(qi===0) return;
+    setDir('prev'); setQi(i=>i-1);
+  }
+
+  const canNext=!!selected;
+
+  if(done) return (
+    <div style={{height:'100%',overflowY:'auto',background:'#0a0a14'}}>
+      <Results answers={answers} onRestart={()=>{setQi(0);setAns({});setDone(false);}}/>
+    </div>
+  );
+
+  return (
+    <div style={{height:'100%',display:'flex',flexDirection:'column',background:'#0a0a14'}}>
+      {/* progress bar */}
+      <div style={{height:2,background:C.s0,flexShrink:0}}>
+        <div style={{height:'100%',width:`${progress}%`,background:C.mauve,transition:'width 400ms cubic-bezier(.16,1,.3,1)',borderRadius:1}}/>
+      </div>
+
+      {/* header */}
+      <div style={{padding:'16px 24px 12px',flexShrink:0}}>
+        <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
+          <span style={{fontSize:9,fontWeight:900,color:C.mauve,letterSpacing:'0.18em'}}>{qi+1} / {QUESTIONS.length}</span>
+          <div style={{flex:1,height:1,background:'rgba(205,214,244,0.06)'}}/>
+          <span style={{fontSize:9,color:C.ov0,letterSpacing:'0.08em'}}>GAME MODE QUIZ</span>
+        </div>
+        <div key={qi} className={dir==='next'?'slide-next':'slide-prev'}
+          style={{fontSize:16,fontWeight:900,color:C.text,letterSpacing:'-0.01em',lineHeight:1.25,marginBottom:4}}>
+          {q.prompt}
+        </div>
+        {q.hint&&<div style={{fontSize:10,color:C.ov0,lineHeight:1.4}}>{q.hint}</div>}
+      </div>
+
+      {/* options grid */}
+      <div style={{flex:1,overflowY:'auto',padding:'0 24px'}}>
+        <div key={`grid-${qi}`}
+          style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,paddingBottom:16}}>
+          {q.options.map((opt,i)=>(
+            <div key={opt.id} className={dir==='next'?'slide-next':'slide-prev'}
+              style={{animationDelay:`${i*40}ms`}}>
+              <OptionCard opt={opt} selected={selected} onSelect={choose} qId={q.id} t={t}/>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* nav */}
+      <div style={{padding:'12px 24px',display:'flex',gap:10,flexShrink:0,
+        borderTop:'1px solid rgba(205,214,244,0.05)'}}>
+        <button onClick={goPrev} disabled={qi===0} style={{
+          height:34,padding:'0 16px',borderRadius:8,
+          background:a(C.s0,.5),border:'1px solid rgba(205,214,244,0.07)',
+          color:qi===0?C.ov0:C.sub1,fontSize:9,fontWeight:900,letterSpacing:'0.1em',
+          cursor:qi===0?'not-allowed':'pointer',fontFamily:'inherit',transition:'all 180ms',
+        }}>← НАЗАД</button>
+        <button onClick={goNext} disabled={!canNext} style={{
+          flex:1,height:34,borderRadius:8,
+          background:canNext?C.mauve:a(C.s0,.4),border:'none',
+          color:canNext?C.base:C.ov0,fontSize:9,fontWeight:900,letterSpacing:'0.12em',
+          cursor:canNext?'pointer':'not-allowed',fontFamily:'inherit',
+          boxShadow:canNext?`0 0 14px ${a(C.mauve,.3)}`:'none',
+          transition:'all 200ms cubic-bezier(.16,1,.3,1)',
+        }}>{qi===QUESTIONS.length-1?'ГОТОВО →':'ДАЛЕЕ →'}</button>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Quiz/>);
+</script>
+</body>
+</html>
