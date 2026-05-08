@@ -19,14 +19,14 @@ Rectangle {
     visible: targetW > 0
     clip: true
 
-    Behavior on targetW   { NumberAnimation { duration: 500; easing.type: Easing.OutQuint } }
+    Behavior on targetW   { NumberAnimation { duration: 240; easing.type: Easing.OutQuint } }
     Behavior on color     { ColorAnimation  { duration: 200 } }
 
     Rectangle {
         anchors.fill: parent
         radius: bar.s(14)
         opacity: bar.isBtOn ? 1.0 : 0.0
-        Behavior on opacity { NumberAnimation { duration: 300 } }
+        Behavior on opacity { NumberAnimation { duration: 180 } }
         gradient: Gradient {
             orientation: Gradient.Horizontal
             GradientStop { position: 0.0; color: bar.mauve }
@@ -34,8 +34,8 @@ Rectangle {
         }
     }
 
-    scale: isHovered ? 1.05 : 1.0
-    Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
+    scale: btMouse.pressed ? 0.95 : (isHovered ? 1.04 : 1.0)
+    Behavior on scale { NumberAnimation { duration: 130; easing.type: Easing.OutCubic } }
 
     Row {
         id: btRow
@@ -54,7 +54,7 @@ Rectangle {
             visible: text !== ""
             font.family: "JetBrains Mono"
             font.pixelSize: bar.s(13)
-            font.weight: Font.Black
+            font.weight: Font.DemiBold
             color: bar.isBtOn ? bar.base : bar.text
             width: Math.min(implicitWidth, bar.s(100))
             elide: Text.ElideRight

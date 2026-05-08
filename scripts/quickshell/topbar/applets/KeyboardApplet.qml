@@ -16,11 +16,11 @@ Rectangle {
     implicitWidth:  kbRow.width + bar.s(24)
     clip: true
 
-    Behavior on implicitWidth { NumberAnimation { duration: 500; easing.type: Easing.OutQuint } }
+    Behavior on implicitWidth { NumberAnimation { duration: 240; easing.type: Easing.OutQuint } }
     Behavior on color         { ColorAnimation  { duration: 200 } }
 
-    scale: isHovered ? 1.05 : 1.0
-    Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
+    scale: kbMouse.pressed ? 0.95 : (isHovered ? 1.04 : 1.0)
+    Behavior on scale { NumberAnimation { duration: 130; easing.type: Easing.OutCubic } }
 
     Row {
         id: kbRow
@@ -39,7 +39,7 @@ Rectangle {
             text: bar.kbLayout
             font.family: "JetBrains Mono"
             font.pixelSize: bar.s(13)
-            font.weight: Font.Black
+            font.weight: Font.DemiBold
             color: bar.text
         }
     }

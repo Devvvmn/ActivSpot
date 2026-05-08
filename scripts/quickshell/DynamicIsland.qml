@@ -47,6 +47,13 @@ PanelWindow {
     focusable: expanded
     color: "transparent"
 
+    Keys.onEscapePressed: function(event) {
+        if (islandWindow.expanded) {
+            islandWindow.expanded = false
+            event.accepted = true
+        }
+    }
+
     Scaler { id: scaler; currentWidth: Screen.width }
     function s(v) { return scaler.s(v); }
 
@@ -115,7 +122,8 @@ PanelWindow {
         if (islandWindow.isMediaActive) p.push("music");
         if (islandWindow.gameActive)    p.push("game");
         if (notifHistory.count > 0 || islandWindow.notifActive) p.push("notifs");
-        return p;
+        // Drop pages the user has disabled in config-ui.
+        return p.filter(function (id) { return Theme.pageEnabled(id); });
     }
     property int stashExpandedHeight: 260
     property bool _isRefreshingStash: false
@@ -1576,10 +1584,11 @@ PanelWindow {
                 z: 5
 
                 readonly property bool isCurrent: islandWindow.expanded && !islandWindow.notifActive && islandWindow.currentPage === modelData.name
+                readonly property bool userEnabled: Theme.pageEnabled(modelData.name)
 
-                opacity: isCurrent ? 1 : 0
+                opacity: (isCurrent && userEnabled) ? 1 : 0
                 visible: opacity > 0.001
-                Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.InOutCubic } }
+                Behavior on opacity { NumberAnimation { duration: Theme.pageAnimDuration; easing.type: Easing.InOutCubic } }
 
                 transform: Translate {
                     y: !islandWindow.notifActive && islandWindow.currentPage === modelData.name ? 0 : islandWindow.s(-8)
@@ -1668,6 +1677,7 @@ PanelWindow {
 
     NotifMiniBubble {
         parent: bubblesGate
+        visible: Theme.bubbleEnabled("Notif") && Theme.pageEnabled("notifs")
         id: badgeBubble
         island: islandWindow
         z: 10
@@ -1677,6 +1687,7 @@ PanelWindow {
 
     VpnMiniBubble {
         parent: bubblesGate
+        visible: Theme.bubbleEnabled("Vpn")
         id: vpnBadge
         island: islandWindow
         z: 10
@@ -1686,6 +1697,7 @@ PanelWindow {
 
     GameMiniBubble {
         parent: bubblesGate
+        visible: Theme.bubbleEnabled("Game") && Theme.pageEnabled("game")
         id: gameBubble
         island: islandWindow
         z: 10
@@ -1695,6 +1707,7 @@ PanelWindow {
 
     MusicMiniBubble {
         parent: bubblesGate
+        visible: Theme.bubbleEnabled("Music") && Theme.pageEnabled("music")
         id: musicBubble
         island: islandWindow
         z: 10
@@ -1704,6 +1717,7 @@ PanelWindow {
 
     DiscordMiniBubble {
         parent: bubblesGate
+        visible: Theme.bubbleEnabled("Discord") && Theme.pageEnabled("discord")
         id: discordBubble
         island: islandWindow
         z: 10
@@ -1713,6 +1727,7 @@ PanelWindow {
 
     RecordingMiniBubble {
         parent: bubblesGate
+        visible: Theme.bubbleEnabled("Recording") && Theme.pageEnabled("recording")
         id: recBubble
         island: islandWindow
         z: 10
@@ -1722,6 +1737,7 @@ PanelWindow {
 
     StashMiniBubble {
         parent: bubblesGate
+        visible: Theme.bubbleEnabled("Stash") && Theme.pageEnabled("stash")
         id: stashBubble
         island: islandWindow
         z: 10
@@ -1731,6 +1747,7 @@ PanelWindow {
 
     ClockMiniBubble {
         parent: bubblesGate
+        visible: Theme.bubbleEnabled("Clock") && Theme.pageEnabled("clock")
         id: clockBubble
         island: islandWindow
         z: 10
@@ -1740,6 +1757,7 @@ PanelWindow {
 
     TimerMiniBubble {
         parent: bubblesGate
+        visible: Theme.bubbleEnabled("Timer") && Theme.pageEnabled("timer")
         id: timerBubble
         island: islandWindow
         z: 10
@@ -1749,6 +1767,7 @@ PanelWindow {
 
     StopwatchMiniBubble {
         parent: bubblesGate
+        visible: Theme.bubbleEnabled("Stopwatch")
         id: swBubble
         island: islandWindow
         z: 10
@@ -1785,12 +1804,17 @@ PanelWindow {
                         if (!islandWindow.dndEnabled) {
                             // Normal: show popup card + sound
                             islandWindow.playSound("notification");
-                            islandWindow.notifData            = item;
+                            islandWindow.notifData              = item;
                             islandWindow.wasExpandedBeforeNotif = islandWindow.expanded;
-                            islandWindow.notifActive          = true;
-                            islandWindow.notifAutoSwitched    = true;
-                            islandWindow.currentPage          = "notifs";
-                            islandWindow.expanded             = true;
+                            islandWindow.notifActive            = true;
+                            // Only auto-switch page when not already expanded on something else
+                            if (!islandWindow.expanded) {
+                                islandWindow.notifAutoSwitched = true;
+                                islandWindow.currentPage       = "notifs";
+                                islandWindow.expanded          = true;
+                            } else {
+                                islandWindow.notifBadgeVisible = true;
+                            }
                             notifHideTimer.restart();
                         } else {
                             // DND: silent badge only

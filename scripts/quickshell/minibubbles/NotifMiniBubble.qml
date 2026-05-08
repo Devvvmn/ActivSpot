@@ -1,4 +1,5 @@
 import QtQuick
+import "../themes"
 
 BaseBubble {
     id: root
@@ -30,7 +31,7 @@ BaseBubble {
         border.width: 1.5
 
         SequentialAnimation on border.color {
-            running: root.shouldShow; loops: Animation.Infinite
+            running: root.shouldShow && !Theme.reduceMotion; loops: Animation.Infinite
             ColorAnimation { to: Qt.rgba(island.peach.r, island.peach.g, island.peach.b, 0.65); duration: 1100; easing.type: Easing.InOutSine }
             ColorAnimation { to: Qt.rgba(island.peach.r, island.peach.g, island.peach.b, 0.25); duration: 1100; easing.type: Easing.InOutSine }
         }

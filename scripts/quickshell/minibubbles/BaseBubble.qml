@@ -86,6 +86,10 @@ Item {
     }
 
     TapHandler {
+        id: tap
         onTapped: root.tapped()
     }
+
+    scale: tap.pressed ? 0.92 : 1.0
+    Behavior on scale { NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
 }

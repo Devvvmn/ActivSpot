@@ -20,12 +20,12 @@ Rectangle {
     visible: targetW > 0 || opacity > 0
     opacity: bar.showHelpIcon ? 1.0 : 0.0
 
-    Behavior on targetW  { NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
-    Behavior on opacity  { NumberAnimation { duration: 300 } }
+    Behavior on targetW  { NumberAnimation { duration: 240; easing.type: Easing.OutQuint } }
+    Behavior on opacity  { NumberAnimation { duration: 180 } }
     Behavior on color    { ColorAnimation  { duration: 200 } }
 
-    scale: isHovered ? 1.05 : 1.0
-    Behavior on scale { NumberAnimation { duration: 250; easing.type: Easing.OutExpo } }
+    scale: helpMouse.pressed ? 0.95 : (isHovered ? 1.04 : 1.0)
+    Behavior on scale { NumberAnimation { duration: 130; easing.type: Easing.OutCubic } }
 
     Text {
         anchors.centerIn: parent

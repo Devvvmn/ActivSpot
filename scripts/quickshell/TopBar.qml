@@ -101,6 +101,68 @@ PanelWindow {
     }
 }
 
+// ── Plugin panel overlay ───────────────────────────────────────────────────
+// Hosts Panel.qml from any plugin that calls pluginApi.openPanel(). Single
+// global slot — opening another plugin's panel replaces the current one.
+PanelWindow {
+    id: pluginPanelOverlay
+
+    visible: PanelService.panelVisible
+    color: "transparent"
+    screen: PanelService._panelScreen ?? Quickshell.screens[0]
+
+    anchors { top: true; bottom: true; left: true; right: true }
+    WlrLayershell.layer: WlrLayer.Overlay
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+
+    // Outside click dismiss
+    MouseArea {
+        anchors.fill: parent
+        onClicked: PanelService.closePluginPanel("")
+    }
+
+    Item {
+        id: panelHost
+        // Position under the trigger anchor; clamp to screen edges with margin.
+        readonly property real margin: 6
+        readonly property real desiredX: PanelService.panelAnchorX
+        readonly property real desiredY: PanelService.panelAnchorY + PanelService.panelAnchorH + 4
+        x: Math.max(margin, Math.min(Math.round(desiredX), parent.width  - width  - margin))
+        y: Math.max(margin, Math.min(Math.round(desiredY), parent.height - height - margin))
+
+        // Size from the loaded item's geometryPlaceholder (Noctalia panel
+        // contract) or fall back to the item's own implicit size.
+        readonly property var geom: panelLoader.item ? (panelLoader.item.geometryPlaceholder ?? null) : null
+        width:  geom ? (geom.implicitWidth  || geom.width  || 420)
+                     : (panelLoader.item ? (panelLoader.item.implicitWidth  || 420) : 420)
+        height: geom ? (geom.implicitHeight || geom.height || 480)
+                     : (panelLoader.item ? (panelLoader.item.implicitHeight || 480) : 480)
+
+        // Eat clicks inside the panel so the dismiss MouseArea doesn't fire.
+        MouseArea { anchors.fill: parent; propagateComposedEvents: true; onClicked: (m) => m.accepted = false }
+
+        Loader {
+            id: panelLoader
+            anchors.fill: parent
+            asynchronous: false
+            // Re-instantiate when source OR epoch changes (toggling same panel).
+            property int _epoch: PanelService._panelEpoch
+            source: PanelService.panelVisible ? PanelService.panelSource : ""
+            onLoaded: {
+                if (!item) return
+                let p = PanelService.panelProps
+                for (let k in p) {
+                    try { item[k] = p[k] } catch (_) {}
+                }
+            }
+            onStatusChanged: {
+                if (status === Loader.Error)
+                    console.warn("[PluginPanel] failed to load:", PanelService.panelSource)
+            }
+        }
+    }
+}
+
 // ── Bar (one per screen) ───────────────────────────────────────────────────
 Variants {
     model: Quickshell.screens
@@ -122,6 +184,17 @@ Variants {
                 top: true
                 left: true
                 right: true
+            }
+
+            // Subtle scrim in glass mode so text stays readable on any wallpaper.
+            Rectangle {
+                visible: barWindow.glassTheme
+                anchors.fill: parent
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.18) }
+                    GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.0) }
+                }
+                z: -1
             }
 
             // --- Responsive Scaling Logic ---

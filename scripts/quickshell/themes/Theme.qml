@@ -21,6 +21,44 @@ QtObject {
     readonly property string surfaceStyle: themeId === "glass" ? "glass" : "solid"
     readonly property bool isGlass: surfaceStyle === "glass"
 
+    // ── User-configurable extension (driven by config-ui) ─────────
+    // Palette overrides: { "crust": "#bbc1c9", … } merged on top of the
+    // active theme palette. Empty by default.
+    property var paletteOverrides: ({})
+
+    // Enabled minibubble / page IDs (by short name, e.g. "Music", "Notif").
+    // Empty array means "all enabled" — first config-ui save populates them.
+    property var enabledBubbles: []
+    property var enabledPages: []
+
+    // Animation timings (ms). Defaults match the pre-config values used
+    // throughout the shell, so an unset settings.json keeps existing feel.
+    property int bubbleShowMs: 220
+    property int bubbleHideMs: 360
+    property int pageAnimDuration: 300
+
+    // Lookup helpers used by minibubbles / page registry.
+    function _hasCi(arr, id) {
+        if (!arr || !arr.length || !id) return false
+        const lo = String(id).toLowerCase()
+        for (let i = 0; i < arr.length; i++) {
+            if (String(arr[i]).toLowerCase() === lo) return true
+        }
+        return false
+    }
+    function bubbleEnabled(id) {
+        if (!enabledBubbles || enabledBubbles.length === 0) return true
+        return _hasCi(enabledBubbles, id)
+    }
+    // System pages users can't disable from the UI (no corresponding bubble
+    // or core navigation surfaces).
+    readonly property var _alwaysOnPages: ["appletPicker"]
+    function pageEnabled(id) {
+        if (_hasCi(_alwaysOnPages, id)) return true
+        if (!enabledPages || enabledPages.length === 0) return true
+        return _hasCi(enabledPages, id)
+    }
+
     // ── Palette ────────────────────────────────────────────────────
     // Catppuccin Mocha — used by the mocha and glass themes, and as the
     // fallback for any key matugen hasn't supplied.
@@ -118,6 +156,30 @@ QtObject {
     readonly property color danger: red
     readonly property color positive: green
 
+    // ── Design tokens ─────────────────────────────────────────────
+    readonly property int durFast:  120
+    readonly property int durMed:   220
+    readonly property int durSlow:  320
+    readonly property int durEnter: 280
+    readonly property int durExit:  180
+
+    readonly property int sp1: 4
+    readonly property int sp2: 8
+    readonly property int sp3: 12
+    readonly property int sp4: 16
+    readonly property int sp5: 24
+    readonly property int sp6: 32
+
+    readonly property int radXs: 6
+    readonly property int radSm: 10
+    readonly property int radMd: 14
+    readonly property int radLg: 20
+    readonly property int radXl: 28
+
+    property bool reduceMotion: false
+
+    function withAlpha(c, a) { return Qt.rgba(c.r, c.g, c.b, a) }
+
     // ── Computed surface colours ──────────────────────────────────
     readonly property color pillColor: isGlass
         ? Qt.rgba(1, 1, 1, 0.09)
@@ -162,9 +224,25 @@ QtObject {
         } else {
             colorsReader.running = false
             colorsWatcher.running = false
-            _palette = _staticPalette(themeId)
+            _palette = _withOverrides(_staticPalette(themeId))
         }
     }
+
+    // Merge paletteOverrides on top of `base`, returning a new object so
+    // the bindings on _palette re-evaluate. Only known keys are accepted.
+    function _withOverrides(base) {
+        if (!paletteOverrides || typeof paletteOverrides !== "object") return base
+        const out = {}
+        const keys = Object.keys(_mochaPalette)
+        for (let i = 0; i < keys.length; i++) {
+            const k = keys[i]
+            const ov = paletteOverrides[k]
+            out[k] = (typeof ov === "string" && /^#[0-9a-fA-F]{3,8}$/.test(ov)) ? ov : base[k]
+        }
+        return out
+    }
+
+    onPaletteOverridesChanged: _applyTheme()
 
     // ── Settings IO ───────────────────────────────────────────────
     property Process _settingsReader: Process {
@@ -178,6 +256,33 @@ QtObject {
                     if (typeof d.topbarTheme === "string" && d.topbarTheme.length
                         && root.themeId !== d.topbarTheme) {
                         root.themeId = d.topbarTheme
+                    }
+                    // Palette overrides
+                    const ov = (d.theme && typeof d.theme.overrides === "object") ? d.theme.overrides : {}
+                    if (JSON.stringify(ov) !== JSON.stringify(root.paletteOverrides)) {
+                        root.paletteOverrides = ov
+                    }
+                    // Enabled bubble / page lists
+                    const bub = (d.minibubbles && Array.isArray(d.minibubbles.enabled)) ? d.minibubbles.enabled : []
+                    if (JSON.stringify(bub) !== JSON.stringify(root.enabledBubbles)) {
+                        root.enabledBubbles = bub
+                    }
+                    const pg = (d.pages && Array.isArray(d.pages.enabled)) ? d.pages.enabled : []
+                    if (JSON.stringify(pg) !== JSON.stringify(root.enabledPages)) {
+                        root.enabledPages = pg
+                    }
+                    // Timings
+                    if (d.minibubbles && d.minibubbles.timing) {
+                        const t = d.minibubbles.timing
+                        if (typeof t.showMs === "number" && t.showMs >= 0) root.bubbleShowMs = t.showMs
+                        if (typeof t.hideMs === "number" && t.hideMs >= 0) root.bubbleHideMs = t.hideMs
+                    }
+                    if (d.pages && d.pages.animations) {
+                        const a = d.pages.animations
+                        if (typeof a.duration === "number" && a.duration >= 0) root.pageAnimDuration = a.duration
+                    }
+                    if (typeof d.reduceMotion === "boolean" && root.reduceMotion !== d.reduceMotion) {
+                        root.reduceMotion = d.reduceMotion
                     }
                 } catch (e) {}
             }
@@ -209,7 +314,7 @@ QtObject {
             onStreamFinished: {
                 if (root.themeId !== "matugen") return
                 const merged = root._matugenMerged(this.text)
-                root._palette = merged ? merged : root._mochaPalette
+                root._palette = root._withOverrides(merged ? merged : root._mochaPalette)
             }
         }
     }

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Effects
+import "../themes"
 
 Item {
     id: root
@@ -46,7 +47,7 @@ Item {
             // Only tick while music page is actually visible — saves CPU/GPU
             // when collapsed or on another page. (Item.visible doesn't cascade
             // from Loader, so we check the island state directly.)
-            running: island.expanded && island.currentPage === "music"
+            running: island.expanded && island.currentPage === "music" && !Theme.reduceMotion
             // 24s per "unit"; cycle of a freq=1 wave = 24s
             onTriggered: bgLayer.t += frameTime / 24.0
         }

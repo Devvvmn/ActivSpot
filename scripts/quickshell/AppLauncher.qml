@@ -177,10 +177,10 @@ PanelWindow {
         // Vertical: island top position → screen center
         y: launcherRoot.open ? Math.round((parent.height - openH) / 2) : s(8)
 
-        Behavior on width  { NumberAnimation { duration: 540; easing.type: Easing.OutExpo } }
-        Behavior on height { NumberAnimation { duration: 540; easing.type: Easing.OutExpo } }
-        Behavior on radius { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
-        Behavior on y      { NumberAnimation { duration: 540; easing.type: Easing.OutExpo } }
+        Behavior on width  { NumberAnimation { duration: 360; easing.type: Easing.OutExpo } }
+        Behavior on height { NumberAnimation { duration: 360; easing.type: Easing.OutExpo } }
+        Behavior on radius { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+        Behavior on y      { NumberAnimation { duration: 360; easing.type: Easing.OutExpo } }
 
         opacity: launcherRoot.open ? 1.0 : 0.0
         Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
@@ -220,7 +220,7 @@ PanelWindow {
                             visible: searchInput.text.length === 0
                             text: "Search apps..."
                             font.family: "JetBrains Mono"; font.pixelSize: s(15)
-                            color: Qt.rgba(theme.subtext0.r, theme.subtext0.g, theme.subtext0.b, 0.4)
+                            color: Qt.rgba(theme.subtext0.r, theme.subtext0.g, theme.subtext0.b, 0.7)
                             anchors.verticalCenter: parent.verticalCenter
                         }
 
@@ -311,6 +311,20 @@ PanelWindow {
                             id: rowHover; anchors.fill: parent
                             onClicked: launcherRoot.launchApp(index)
                         }
+                    }
+                }
+
+                Item {
+                    visible: filteredModel.count === 0 && searchInput.text.length > 0
+                    width: parent.width
+                    height: s(100)
+                    Text {
+                        anchors.centerIn: parent
+                        text: "No matches"
+                        font.family: "JetBrains Mono"
+                        font.pixelSize: s(13)
+                        color: theme.subtext0
+                        opacity: 0.6
                     }
                 }
             }

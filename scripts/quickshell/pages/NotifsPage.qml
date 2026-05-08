@@ -24,25 +24,31 @@ Item {
                     color: island.mauve; Layout.fillWidth: true
                 }
 
-                Rectangle {
-                    height: island.s(22); width: dndLabel.implicitWidth + island.s(16); radius: island.s(11)
-                    color: island.dndEnabled
-                        ? Qt.rgba(island.mauve.r, island.mauve.g, island.mauve.b, 0.22)
-                        : (dndMouse.containsMouse
-                            ? Qt.rgba(island.surface1.r, island.surface1.g, island.surface1.b, 0.7)
-                            : Qt.rgba(island.surface0.r, island.surface0.g, island.surface0.b, 0.5))
-                    border.width: 1
-                    border.color: island.dndEnabled
-                        ? Qt.rgba(island.mauve.r, island.mauve.g, island.mauve.b, 0.5)
-                        : Qt.rgba(island.text.r, island.text.g, island.text.b, 0.08)
-                    Behavior on color { ColorAnimation { duration: 180 } }
-                    Behavior on border.color { ColorAnimation { duration: 180 } }
-                    Text {
-                        id: dndLabel; anchors.centerIn: parent
-                        text: island.dndEnabled ? "󰂛  DND" : "󰂚  DND"
-                        font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(11)
-                        color: island.dndEnabled ? island.mauve : island.subtext0
+                Item {
+                    implicitHeight: island.s(44)
+                    implicitWidth: dndLabel.implicitWidth + island.s(16)
+
+                    Rectangle {
+                        anchors.centerIn: parent
+                        height: island.s(22); width: parent.implicitWidth; radius: island.s(11)
+                        color: island.dndEnabled
+                            ? Qt.rgba(island.mauve.r, island.mauve.g, island.mauve.b, 0.22)
+                            : (dndMouse.containsMouse
+                                ? Qt.rgba(island.surface1.r, island.surface1.g, island.surface1.b, 0.7)
+                                : Qt.rgba(island.surface0.r, island.surface0.g, island.surface0.b, 0.5))
+                        border.width: 1
+                        border.color: island.dndEnabled
+                            ? Qt.rgba(island.mauve.r, island.mauve.g, island.mauve.b, 0.5)
+                            : Qt.rgba(island.text.r, island.text.g, island.text.b, 0.08)
                         Behavior on color { ColorAnimation { duration: 180 } }
+                        Behavior on border.color { ColorAnimation { duration: 180 } }
+                        Text {
+                            id: dndLabel; anchors.centerIn: parent
+                            text: island.dndEnabled ? "󰂛  DND" : "󰂚  DND"
+                            font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(11)
+                            color: island.dndEnabled ? island.mauve : island.subtext0
+                            Behavior on color { ColorAnimation { duration: 180 } }
+                        }
                     }
                     MouseArea {
                         id: dndMouse; anchors.fill: parent; hoverEnabled: true
@@ -53,14 +59,20 @@ Item {
                     }
                 }
 
-                Rectangle {
+                Item {
                     visible: island.notifHistory.count > 0
-                    height: island.s(22); width: clearAllLabel.implicitWidth + island.s(14); radius: island.s(11)
-                    color: clearAllMouse.containsMouse
-                        ? Qt.rgba(island.surface1.r, island.surface1.g, island.surface1.b, 0.8)
-                        : Qt.rgba(island.surface0.r, island.surface0.g, island.surface0.b, 0.5)
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Text { id: clearAllLabel; anchors.centerIn: parent; text: "Clear"; font.family: "JetBrains Mono"; font.pixelSize: island.s(10); color: island.subtext0 }
+                    implicitHeight: island.s(44)
+                    implicitWidth: clearAllLabel.implicitWidth + island.s(14)
+
+                    Rectangle {
+                        anchors.centerIn: parent
+                        height: island.s(22); width: parent.implicitWidth; radius: island.s(11)
+                        color: clearAllMouse.containsMouse
+                            ? Qt.rgba(island.surface1.r, island.surface1.g, island.surface1.b, 0.8)
+                            : Qt.rgba(island.surface0.r, island.surface0.g, island.surface0.b, 0.5)
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                        Text { id: clearAllLabel; anchors.centerIn: parent; text: "Clear"; font.family: "JetBrains Mono"; font.pixelSize: island.s(10); color: island.subtext0 }
+                    }
                     MouseArea {
                         id: clearAllMouse; anchors.fill: parent; hoverEnabled: true
                         onClicked: { island.notifHistory.clear(); island.saveNotifHistory() }
@@ -75,7 +87,7 @@ Item {
                 ColumnLayout {
                     anchors.centerIn: parent; spacing: island.s(10)
                     Text { Layout.alignment: Qt.AlignHCenter; text: "󰂚"; font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(40); color: island.surface2 }
-                    Text { Layout.alignment: Qt.AlignHCenter; text: "Нет уведомлений"; font.family: "JetBrains Mono"; font.pixelSize: island.s(13); color: island.subtext0; opacity: 0.6 }
+                    Text { Layout.alignment: Qt.AlignHCenter; text: "No notifications"; font.family: "JetBrains Mono"; font.pixelSize: island.s(13); color: island.subtext0; opacity: 0.6 }
                 }
             }
 
@@ -140,14 +152,19 @@ Item {
                             }
                         }
 
-                        Rectangle {
-                            Layout.preferredWidth: island.s(22); Layout.preferredHeight: island.s(22); radius: island.s(11)
-                            color: histDismissMouse.containsMouse
-                                ? Qt.rgba(island.surface1.r, island.surface1.g, island.surface1.b, 0.8)
-                                : "transparent"
+                        Item {
+                            Layout.preferredWidth: island.s(44); Layout.preferredHeight: island.s(44)
                             Layout.alignment: Qt.AlignVCenter
-                            Behavior on color { ColorAnimation { duration: 120 } }
-                            Text { anchors.centerIn: parent; text: "󰅖"; font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(11); color: island.subtext0 }
+
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: island.s(22); height: island.s(22); radius: island.s(11)
+                                color: histDismissMouse.containsMouse
+                                    ? Qt.rgba(island.surface1.r, island.surface1.g, island.surface1.b, 0.8)
+                                    : "transparent"
+                                Behavior on color { ColorAnimation { duration: 120 } }
+                                Text { anchors.centerIn: parent; text: "󰅖"; font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(11); color: island.subtext0 }
+                            }
                             MouseArea {
                                 id: histDismissMouse; anchors.fill: parent; hoverEnabled: true
                                 onClicked: { island.notifHistory.remove(index); island.saveNotifHistory() }
