@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import "../themes"
 
 Item {
     id: root
@@ -63,18 +64,18 @@ Item {
                     }
                     Text {
                         text: island.notifData ? (island.notifData.appName || "System") : ""
-                        font.family: "JetBrains Mono"; font.pixelSize: island.s(11); font.weight: Font.Medium
+                        font.family: Theme.fontUI; font.pixelSize: island.s(11); font.weight: Font.Medium
                         color: island.peach; opacity: 0.85; elide: Text.ElideRight; Layout.fillWidth: true
                     }
                 }
                 Text {
                     text: island.notifData ? (island.notifData.title || "") : ""
-                    font.family: "JetBrains Mono"; font.pixelSize: island.s(14); font.weight: Font.Black
+                    font.family: Theme.fontUI; font.pixelSize: island.s(14); font.weight: Font.DemiBold
                     color: island.text; wrapMode: Text.Wrap; maximumLineCount: 2; elide: Text.ElideRight; Layout.fillWidth: true
                 }
                 Text {
                     text: island.notifData ? (island.notifData.body || "") : ""
-                    font.family: "JetBrains Mono"; font.pixelSize: island.s(11)
+                    font.family: Theme.fontUI; font.pixelSize: island.s(12); font.weight: Font.Normal
                     color: island.subtext0; wrapMode: Text.Wrap; maximumLineCount: 2; elide: Text.ElideRight
                     Layout.fillWidth: true; visible: text !== ""
                 }

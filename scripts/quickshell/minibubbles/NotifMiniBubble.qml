@@ -40,9 +40,9 @@ BaseBubble {
             anchors.centerIn: parent
             text: island.notifHistory.count > 9 ? "9+"
                 : (island.notifHistory.count > 1 ? island.notifHistory.count.toString() : "󰂚")
-            font.family:    island.notifHistory.count > 1 ? "JetBrains Mono" : "Iosevka Nerd Font"
-            font.weight:    island.notifHistory.count > 1 ? Font.Black : Font.Normal
-            font.pixelSize: island.notifHistory.count > 1 ? root.sz * 0.40 : root.sz * 0.48
+            font.family:    "Iosevka Nerd Font"
+            font.weight:    island.notifHistory.count > 1 ? Font.Bold : Font.Normal
+            font.pixelSize: root.sz * 0.46
             color: island.peach
         }
     }

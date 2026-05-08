@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import "../themes"
 
 Item {
     id: root
@@ -16,9 +17,9 @@ Item {
 
             Text {
                 text: "Timer & Stopwatch"
-                font.family: "JetBrains Mono"
+                font.family: Theme.fontUI
                 font.pixelSize: island.s(16)
-                font.weight: Font.Black
+                font.weight: Font.DemiBold
                 color: island.text
                 Layout.alignment: Qt.AlignHCenter
             }
@@ -70,9 +71,9 @@ Item {
                                 Text {
                                     anchors.centerIn: parent
                                     text: island.timerRunning ? "Pause" : "Start"
-                                    font.family: "JetBrains Mono"
-                                    font.pixelSize: island.s(11)
-                                    font.weight: Font.Black
+                                    font.family: Theme.fontUI
+                                    font.pixelSize: island.s(12)
+                                    font.weight: Font.Medium
                                     color: island.base
                                 }
                                 MouseArea { anchors.fill: parent; onClicked: island.toggleTimer() }
@@ -87,9 +88,9 @@ Item {
                                 Text {
                                     anchors.centerIn: parent
                                     text: "Reset"
-                                    font.family: "JetBrains Mono"
-                                    font.pixelSize: island.s(11)
-                                    font.weight: Font.Black
+                                    font.family: Theme.fontUI
+                                    font.pixelSize: island.s(12)
+                                    font.weight: Font.Medium
                                     color: island.text
                                 }
                                 MouseArea { anchors.fill: parent; onClicked: island.resetTimer() }
@@ -183,9 +184,9 @@ Item {
                                 Text {
                                     anchors.centerIn: parent
                                     text: "Reset"
-                                    font.family: "JetBrains Mono"
-                                    font.pixelSize: island.s(11)
-                                    font.weight: Font.Black
+                                    font.family: Theme.fontUI
+                                    font.pixelSize: island.s(12)
+                                    font.weight: Font.Medium
                                     color: island.text
                                 }
                                 MouseArea { anchors.fill: parent; onClicked: island.resetStopwatch() }

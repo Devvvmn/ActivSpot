@@ -148,9 +148,9 @@ Item {
 
         Text {
             text: "Bar Applets"
-            font.family: "JetBrains Mono"
+            font.family: "Ubuntu"
             font.pixelSize: island.s(16)
-            font.weight: Font.Bold
+            font.weight: Font.DemiBold
             color: island.text
             Layout.fillWidth: true
         }
@@ -181,7 +181,7 @@ Item {
             Behavior on color { ColorAnimation { duration: 150 } }
             Text {
                 id: doneText; anchors.centerIn: parent; text: "Done"
-                font.family: "JetBrains Mono"; font.pixelSize: island.s(13); font.weight: Font.Bold
+                font.family: "Ubuntu"; font.pixelSize: island.s(13); font.weight: Font.Medium
                 color: island.mauve
             }
             MouseArea { id: doneMouse; anchors.fill: parent; hoverEnabled: true; onClicked: island.exitEditBarMode() }
@@ -223,8 +223,9 @@ Item {
                 // ── Theme label ──────────────────────────────────────────
                 Text {
                     text: "Theme"
-                    font.family: "JetBrains Mono"
+                    font.family: "Ubuntu"
                     font.pixelSize: island.s(11)
+                    font.weight: Font.Medium
                     color: island.subtext0
                 }
 
@@ -269,7 +270,7 @@ Item {
                                 Text {
                                     anchors.verticalCenter: parent.verticalCenter
                                     text: modelData.label
-                                    font.family: "JetBrains Mono"; font.pixelSize: island.s(12); font.weight: Font.Medium
+                                    font.family: "Ubuntu"; font.pixelSize: island.s(12); font.weight: Font.Normal
                                     color: themeCard.isSelected ? island.text : island.subtext0
                                 }
                             }
@@ -281,8 +282,9 @@ Item {
                 // ── Applets label ────────────────────────────────────────
                 Text {
                     text: "Available applets"
-                    font.family: "JetBrains Mono"
+                    font.family: "Ubuntu"
                     font.pixelSize: island.s(11)
+                    font.weight: Font.Medium
                     color: island.subtext0
                     topPadding: island.s(2)
                 }
@@ -332,13 +334,13 @@ Item {
                                 Text {
                                     anchors.verticalCenter: parent.verticalCenter
                                     text: modelData.label
-                                    font.family: "JetBrains Mono"; font.pixelSize: island.s(12); font.weight: Font.Medium
+                                    font.family: "Ubuntu"; font.pixelSize: island.s(12); font.weight: Font.Normal
                                     color: appletCard.placed ? island.text : island.subtext0
                                 }
                                 Text {
                                     anchors.verticalCenter: parent.verticalCenter
                                     text: appletCard.placed ? "−" : "+"
-                                    font.family: "JetBrains Mono"; font.pixelSize: island.s(14); font.weight: Font.Black
+                                    font.family: "Ubuntu"; font.pixelSize: island.s(14); font.weight: Font.DemiBold
                                     color: appletCard.placed ? island.red : island.green
                                 }
                             }

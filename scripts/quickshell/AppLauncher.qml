@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
@@ -162,6 +163,21 @@ PanelWindow {
 
     // ── Launcher card ────────────────────────────────────────────────────────
     // Starts at island position (top-center, y=8) and morphs to screen center.
+
+    // Drop shadow layer (rendered behind card)
+    MultiEffect {
+        source: card
+        anchors.fill: card
+        shadowEnabled: true
+        shadowColor: Qt.rgba(0, 0, 0, 0.55)
+        shadowBlur: 0.7
+        shadowVerticalOffset: s(8)
+        shadowHorizontalOffset: 0
+        z: card.z - 1
+        opacity: launcherRoot.open ? 1.0 : 0.0
+        Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+    }
+
     Rectangle {
         id: card
 
@@ -219,7 +235,7 @@ PanelWindow {
                         Text {
                             visible: searchInput.text.length === 0
                             text: "Search apps..."
-                            font.family: "JetBrains Mono"; font.pixelSize: s(15)
+                            font.family: "Ubuntu"; font.pixelSize: s(15)
                             color: Qt.rgba(theme.subtext0.r, theme.subtext0.g, theme.subtext0.b, 0.7)
                             anchors.verticalCenter: parent.verticalCenter
                         }
@@ -227,7 +243,7 @@ PanelWindow {
                         TextInput {
                             id: searchInput
                             anchors.fill: parent
-                            font.family: "JetBrains Mono"; font.pixelSize: s(15); font.weight: Font.Bold
+                            font.family: "Ubuntu"; font.pixelSize: s(15); font.weight: Font.Bold
                             color: theme.text
                             verticalAlignment: TextInput.AlignVCenter
                             selectionColor: Qt.rgba(theme.mauve.r, theme.mauve.g, theme.mauve.b, 0.35)
@@ -290,7 +306,7 @@ PanelWindow {
                                     Text {
                                         anchors.centerIn: parent
                                         text: model.name.charAt(0).toUpperCase()
-                                        font.family: "JetBrains Mono"; font.pixelSize: s(14); font.weight: Font.Black
+                                        font.family: "Ubuntu"; font.pixelSize: s(14); font.weight: Font.Black
                                         color: theme.subtext0
                                     }
                                 }
@@ -300,7 +316,7 @@ PanelWindow {
                                 width: parent.width - s(32) - s(10)
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: model.name
-                                font.family: "JetBrains Mono"; font.pixelSize: s(14); font.weight: Font.Bold
+                                font.family: "Ubuntu"; font.pixelSize: s(14); font.weight: Font.DemiBold
                                 color: appList.currentIndex === index ? theme.text : theme.subtext0
                                 elide: Text.ElideRight
                                 Behavior on color { ColorAnimation { duration: 100 } }

@@ -80,7 +80,7 @@ QtObject {
         surface0: "#ebdbb2", surface1: "#d5c4a1", surface2: "#bdae93",
         overlay0: "#a89984", overlay1: "#928374", overlay2: "#7c6f64",
         blue: "#076678", sapphire: "#427b58", peach: "#af3a03",
-        green: "#79740e", red: "#9d0006", mauve: "#d65d0e",
+        green: "#79740e", red: "#9d0006", mauve: "#8f3f71",
         pink: "#b16286", yellow: "#b57614", maroon: "#cc241d",
         teal: "#427b58"
     })
@@ -178,7 +178,18 @@ QtObject {
 
     property bool reduceMotion: false
 
+    // Typography tokens. fontUI for prose/labels, fontMono for numbers/data.
+    readonly property string fontUI:   "Ubuntu"
+    readonly property string fontMono: "JetBrains Mono"
+
     function withAlpha(c, a) { return Qt.rgba(c.r, c.g, c.b, a) }
+
+    // ── Surface state tokens (interactive elements) ───────────────
+    readonly property color surfaceIdle:    withAlpha(surface0, 0.50)
+    readonly property color surfaceHover:   withAlpha(surface1, 0.75)
+    readonly property color surfacePressed: withAlpha(surface1, 0.95)
+    readonly property color surfaceActive:  withAlpha(accent,   0.20)
+    readonly property color accentGlow:     withAlpha(accent,   0.22)
 
     // ── Computed surface colours ──────────────────────────────────
     readonly property color pillColor: isGlass

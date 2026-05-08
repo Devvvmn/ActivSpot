@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import "../themes"
 
 Item {
     property var island
@@ -101,7 +102,7 @@ Item {
                     }
                     Text {
                         text: island.isRecordingPaused ? "Resume" : "Pause"
-                        font.family: "JetBrains Mono"; font.pixelSize: island.s(13); font.weight: Font.Bold
+                        font.family: Theme.fontUI; font.pixelSize: island.s(13); font.weight: Font.Medium
                         color: island.isRecordingPaused ? island.green : island.text
                         anchors.verticalCenter: parent.verticalCenter
                         Behavior on color { ColorAnimation { duration: 200 } }
@@ -138,7 +139,7 @@ Item {
                     }
                     Text {
                         text: "Stop"
-                        font.family: "JetBrains Mono"; font.pixelSize: island.s(13); font.weight: Font.Bold
+                        font.family: Theme.fontUI; font.pixelSize: island.s(13); font.weight: Font.Medium
                         color: island.red; anchors.verticalCenter: parent.verticalCenter
                     }
                 }

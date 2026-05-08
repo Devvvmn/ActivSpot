@@ -191,7 +191,7 @@ Variants {
                 visible: barWindow.glassTheme
                 anchors.fill: parent
                 gradient: Gradient {
-                    GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.18) }
+                    GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.28) }
                     GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.0) }
                 }
                 z: -1

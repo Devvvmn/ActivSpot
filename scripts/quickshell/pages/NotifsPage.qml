@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import "../themes"
 
 Item {
     id: root
@@ -71,7 +72,7 @@ Item {
                             ? Qt.rgba(island.surface1.r, island.surface1.g, island.surface1.b, 0.8)
                             : Qt.rgba(island.surface0.r, island.surface0.g, island.surface0.b, 0.5)
                         Behavior on color { ColorAnimation { duration: 150 } }
-                        Text { id: clearAllLabel; anchors.centerIn: parent; text: "Clear"; font.family: "JetBrains Mono"; font.pixelSize: island.s(10); color: island.subtext0 }
+                        Text { id: clearAllLabel; anchors.centerIn: parent; text: "Clear"; font.family: Theme.fontUI; font.pixelSize: island.s(11); color: island.subtext0 }
                     }
                     MouseArea {
                         id: clearAllMouse; anchors.fill: parent; hoverEnabled: true
@@ -87,7 +88,7 @@ Item {
                 ColumnLayout {
                     anchors.centerIn: parent; spacing: island.s(10)
                     Text { Layout.alignment: Qt.AlignHCenter; text: "󰂚"; font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(40); color: island.surface2 }
-                    Text { Layout.alignment: Qt.AlignHCenter; text: "No notifications"; font.family: "JetBrains Mono"; font.pixelSize: island.s(13); color: island.subtext0; opacity: 0.6 }
+                    Text { Layout.alignment: Qt.AlignHCenter; text: "No notifications"; font.family: Theme.fontUI; font.pixelSize: island.s(13); color: island.subtext0; opacity: 0.6 }
                 }
             }
 
@@ -105,8 +106,8 @@ Item {
                 delegate: Rectangle {
                     id: notifDelegate
                     width: ListView.view.width; height: island.s(56); radius: island.s(12)
-                    color: Qt.rgba(island.surface0.r, island.surface0.g, island.surface0.b, 0.55)
-                    border.width: 1; border.color: Qt.rgba(island.text.r, island.text.g, island.text.b, 0.07)
+                    color: Theme.surfaceIdle
+                    border.width: 1; border.color: Theme.withAlpha(island.text, 0.07)
 
                     property color accentColor: island.appAccentColor(model.appName)
 
@@ -142,12 +143,12 @@ Item {
                             Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter; spacing: island.s(1)
                             Text {
                                 text: (model.appName || "System") + (model.title ? "  ·  " + model.title : "")
-                                font.family: "JetBrains Mono"; font.pixelSize: island.s(12); font.weight: Font.Bold
+                                font.family: Theme.fontUI; font.pixelSize: island.s(12); font.weight: Font.DemiBold
                                 color: island.text; Layout.fillWidth: true; elide: Text.ElideRight
                             }
                             Text {
                                 text: model.body || ""
-                                font.family: "JetBrains Mono"; font.pixelSize: island.s(10)
+                                font.family: Theme.fontUI; font.pixelSize: island.s(12); font.weight: Font.Normal
                                 color: island.subtext0; Layout.fillWidth: true; elide: Text.ElideRight; visible: text !== ""
                             }
                         }
