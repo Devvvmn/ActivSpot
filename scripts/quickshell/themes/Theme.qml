@@ -73,18 +73,6 @@ QtObject {
         teal: "#94e2d5"
     })
 
-    // Gruvbox Light (Hard) — warm cream paper palette.
-    readonly property var _gruvboxPalette: ({
-        base: "#f9f5d7", mantle: "#f2e5bc", crust: "#ebdbb2",
-        text: "#3c3836", subtext0: "#7c6f64", subtext1: "#504945",
-        surface0: "#ebdbb2", surface1: "#d5c4a1", surface2: "#bdae93",
-        overlay0: "#a89984", overlay1: "#928374", overlay2: "#7c6f64",
-        blue: "#076678", sapphire: "#427b58", peach: "#af3a03",
-        green: "#79740e", red: "#9d0006", mauve: "#8f3f71",
-        pink: "#b16286", yellow: "#b57614", maroon: "#cc241d",
-        teal: "#427b58"
-    })
-
     // Apple-like — macOS default (light) with system blue accent.
     readonly property var _applePalette: ({
         base: "#f5f5f7", mantle: "#ffffff", crust: "#e5e5ea",
@@ -111,7 +99,6 @@ QtObject {
 
     function _staticPalette(id) {
         switch (id) {
-            case "gruvbox": return _gruvboxPalette
             case "apple":   return _applePalette
             case "nord":    return _nordPalette
             default:        return _mochaPalette
@@ -176,28 +163,71 @@ QtObject {
     readonly property int radLg: 20
     readonly property int radXl: 28
 
+    // ── Elevation tokens ──────────────────────────────────────────
+    // Apple-grade depth: low opacity, large blur, small offset. Apply to
+    // MultiEffect via shadowMaximumBlur=elev*Max, shadowBlur=1.0,
+    // shadowOpacity=elev*Op, shadowVerticalOffset=elev*Off, shadowColor=shadowColor.
+    //
+    // elev1 — buttons, chips, hover cards
+    // elev2 — popups, sheets, expanded surfaces
+    // elev3 — modal/hero surfaces (album art, full-screen lock)
+    readonly property color shadowColor: "#000000"
+
+    readonly property real elev1Op:  isLight ? 0.08 : 0.18
+    readonly property real elev1Max: 24
+    readonly property int  elev1Off: 2
+
+    readonly property real elev2Op:  isLight ? 0.10 : 0.22
+    readonly property real elev2Max: 40
+    readonly property int  elev2Off: 6
+
+    readonly property real elev3Op:  isLight ? 0.12 : 0.28
+    readonly property real elev3Max: 64
+    readonly property int  elev3Off: 12
+
+    // Light themes need lower-density shadows; structural light flag for
+    // anyone consuming elevation tokens.
+    readonly property bool isLight: themeId === "apple"
+
     property bool reduceMotion: false
 
-    // Typography tokens. fontUI for prose/labels, fontMono for numbers/data.
-    readonly property string fontUI:   "Ubuntu"
-    readonly property string fontMono: "JetBrains Mono"
+    // Typography tokens. fontUI for prose/labels, fontMono for numbers/data,
+    // fontDisplay for large hero text (time, big headings).
+    readonly property string fontUI:      "SF Pro Text"
+    readonly property string fontDisplay: "SF Pro Display"
+    readonly property string fontMono:    "JetBrains Mono"
 
     function withAlpha(c, a) { return Qt.rgba(c.r, c.g, c.b, a) }
 
     // ── Surface state tokens (interactive elements) ───────────────
-    readonly property color surfaceIdle:    withAlpha(surface0, 0.50)
-    readonly property color surfaceHover:   withAlpha(surface1, 0.75)
-    readonly property color surfacePressed: withAlpha(surface1, 0.95)
-    readonly property color surfaceActive:  withAlpha(accent,   0.20)
-    readonly property color accentGlow:     withAlpha(accent,   0.22)
+    // On light themes, hover/pressed use darker (text-tinted) overlays so
+    // states stand out on white surfaces; on dark themes lighter (surface)
+    // overlays. Same semantic, inverted lightness.
+    readonly property color surfaceIdle:    isLight
+        ? withAlpha(text, 0.04) : withAlpha(surface0, 0.50)
+    readonly property color surfaceHover:   isLight
+        ? withAlpha(text, 0.08) : withAlpha(surface1, 0.75)
+    readonly property color surfacePressed: isLight
+        ? withAlpha(text, 0.14) : withAlpha(surface1, 0.95)
+    readonly property color surfaceActive:  withAlpha(accent, isLight ? 0.14 : 0.20)
+    readonly property color accentGlow:     withAlpha(accent, isLight ? 0.16 : 0.22)
 
     // ── Computed surface colours ──────────────────────────────────
+    // Glass surface: white tint on dark, black tint on light. Keeps the
+    // "translucent material" feel without inverting brand into something
+    // murky on white wallpapers.
+    //
+    // Solid surface on light: tinted off-white with translucency rather
+    // than mantle's pure #ffff at full alpha — pure white at 100% reads
+    // as harsh on bright wallpapers; Apple's own UI is materials-tinted.
     readonly property color pillColor: isGlass
-        ? Qt.rgba(1, 1, 1, 0.09)
-        : Qt.rgba(mantle.r, mantle.g, mantle.b, 1.0)
+        ? (isLight ? Qt.rgba(0, 0, 0, 0.05) : Qt.rgba(1, 1, 1, 0.09))
+        : (isLight
+            ? Qt.rgba(base.r, base.g, base.b, 0.78)
+            : Qt.rgba(mantle.r, mantle.g, mantle.b, 1.0))
     readonly property color pillBorderColor: isGlass
-        ? Qt.rgba(1, 1, 1, 0.18)
-        : Qt.rgba(text.r, text.g, text.b, 0.12)
+        ? (isLight ? Qt.rgba(0, 0, 0, 0.10) : Qt.rgba(1, 1, 1, 0.18))
+        : Qt.rgba(text.r, text.g, text.b, isLight ? 0.10 : 0.12)
 
     function surfaceTint(alpha) {
         return Qt.rgba(base.r, base.g, base.b, isGlass ? alpha * 0.4 : alpha)

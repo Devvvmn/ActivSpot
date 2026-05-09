@@ -1,0 +1,15 @@
+{
+  "common": {
+    "heads": "Face",
+    "tails": "Pile"
+  },
+  "settings": {
+    "delay": {
+      "label": "Délai d'animation",
+      "description": "Délai entre les images"
+    }
+  },
+  "widget": {
+    "tooltip": "Pile ou face"
+  }
+}

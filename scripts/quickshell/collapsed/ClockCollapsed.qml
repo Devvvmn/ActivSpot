@@ -28,7 +28,7 @@ Row {
         spacing: island.s(6); anchors.verticalCenter: parent.verticalCenter
         Text {
             text: island.weatherIcon; visible: island.weatherIcon !== ""
-            font.family: "JetBrains Mono"; font.pixelSize: island.s(18)
+            font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(18)
             color: island.mauve
             anchors.verticalCenter: parent.verticalCenter
         }

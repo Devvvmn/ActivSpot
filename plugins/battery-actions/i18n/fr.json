@@ -1,0 +1,13 @@
+{
+  "settings": {
+    "plugged_in_label": "Sur secteur",
+    "plugged_in_desc": "Le script qui sera exécuté lorsque le système est branché.",
+    "on_battery_label": "Sur batterie",
+    "on_battery_desc": "Le script qui sera exécuté lorsque le système est sur batterie.",
+    "env_vars_title": "Variables d'environnement supplémentaires fournies",
+    "env_vars_percentage": "Pourcentage de la batterie",
+    "env_vars_state": "État de la batterie (Chargement, Déchargement, Chargée, etc.)",
+    "env_vars_rate": "Taux de charge de la batterie (en Watts)",
+    "env_vars_path": "Chemin système de la batterie (/sys/class/power_supply/...)"
+  }
+}

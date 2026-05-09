@@ -1,0 +1,12 @@
+{
+  "settings": {
+    "showBackground": {
+      "label": "Afficher l'arrière-plan",
+      "desc": "Affiche le conteneur d'arrière-plan pour le widget calendrier."
+    },
+    "roundedCorners": {
+      "label": "Coins arrondis",
+      "desc": "Utilise des coins arrondis pour l'arrière-plan du widget."
+    }
+  }
+}

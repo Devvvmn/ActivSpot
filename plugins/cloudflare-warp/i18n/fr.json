@@ -1,0 +1,33 @@
+{
+  "context": {
+    "connect": "Connecter",
+    "disconnect": "Déconnecter"
+  },
+  "actions": {
+    "widget-settings": "Paramètres du widget"
+  },
+  "panel": {
+    "title": "Cloudflare WARP",
+    "status": {
+      "connected": "Connecté",
+      "disconnected": "Déconnecté"
+    },
+    "mode": "Mode",
+    "not-installed": "warp-cli introuvable. Installez Cloudflare WARP pour utiliser ce plugin."
+  },
+  "settings": {
+    "title": "Cloudflare WARP",
+    "description": "Activer et désactiver Cloudflare WARP depuis la barre et personnalisez son apparence.",
+    "connected-color": "Couleur connectée",
+    "connected-color-desc": "Couleur de l'icône lorsque WARP est connecté",
+    "disconnected-color": "Couleur déconnectée",
+    "disconnected-color-desc": "Couleur de l'icône lorsque WARP est déconnecté",
+    "refresh-interval": "Intervalle de rafraîchissement",
+    "refresh-interval-desc": "Fréquence d'interrogation de warp-cli pour l'état"
+  },
+  "toast": {
+    "title": "Cloudflare WARP",
+    "connected": "Connecté à WARP",
+    "disconnected": "Déconnecté de WARP"
+  }
+}

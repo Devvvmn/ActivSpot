@@ -1,0 +1,12 @@
+{
+  "settings": {
+    "showBackground": {
+      "label": "Arka planı göster",
+      "desc": "Takvim bileşeni için arka plan kapsayıcısını gösterir."
+    },
+    "roundedCorners": {
+      "label": "Yuvarlatılmış köşeler",
+      "desc": "Bileşen arka planı için yuvarlatılmış köşeler kullanır."
+    }
+  }
+}

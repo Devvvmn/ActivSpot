@@ -1,0 +1,56 @@
+{
+  "bar": {
+    "tooltip": "Historial del portapapeles"
+  },
+  "context": {
+    "toggle": "Alternar historial del portapapeles",
+    "settings": "Abrir ajustes"
+  },
+  "panel": {
+    "title": "Historial del portapapeles",
+    "empty": "Aún no hay historial de portapapeles",
+    "no-matches": "Sin coincidencias",
+    "search-placeholder": "Buscar...",
+    "delete": "Eliminar entrada",
+    "pin": "Fijar entrada",
+    "unpin": "Desfijar entrada",
+    "wipe": "Borrar historial",
+    "close": "Cerrar",
+    "settings": "Ajustes",
+    "filter-text": "Texto",
+    "filter-images": "Imágenes",
+    "filter-files": "Archivos",
+    "filter-text-count": "Texto ({count})",
+    "filter-images-count": "Imágenes ({count})",
+    "filter-files-count": "Archivos ({count})"
+  },
+  "settings": {
+    "tab-general": "General",
+    "max-history-size": "Tamaño máximo del historial",
+    "max-history-size-description": "Número de entradas del portapapeles en el historial. Se aplica en la próxima actualización.",
+    "show-image-previews": "Mostrar vistas previas de imágenes",
+    "show-image-previews-description": "Decodificar y mostrar miniaturas para entradas de imagen. Desactivar en sistemas con poca memoria.",
+    "density": "Densidad",
+    "density-description": "Espaciado de las entradas del portapapeles en el panel.",
+    "density-compact": "Compacto",
+    "density-comfortable": "Cómodo",
+    "density-spacious": "Espacioso"
+  },
+  "toast": {
+    "item-copied-text-title": "Texto copiado",
+    "item-copied-text-body": "Puedes pegar el texto desde el portapapeles.",
+    "item-copied-image-title": "Imagen copiada",
+    "item-copied-image-body": "Puedes pegar la imagen desde el portapapeles.",
+    "item-copied-file-title": "Archivo copiado",
+    "item-copied-file-body": "Puedes pegar el archivo desde el portapapeles.",
+    "item-pinned": "Entrada fijada",
+    "item-unpinned": "Entrada desfijada",
+    "history-cleared": "Historial del portapapeles borrado"
+  },
+  "time": {
+    "just-now": "ahora mismo",
+    "minutes-ago": "hace {minutes}m",
+    "hours-ago": "hace {hours}h",
+    "yesterday": "ayer"
+  }
+}

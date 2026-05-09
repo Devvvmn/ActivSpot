@@ -88,6 +88,7 @@ Singleton {
 
     function getCapsuleHeightForScreen(screenName) { return 32 }
     function getBarFontSizeForScreen(screenName)   { return fontSizeS }
+    function getBarHeightForScreen(screenName)     { return 36 }
 
     // Round to nearest odd integer (for pixel-perfect icon centering)
     function toOdd(n) {

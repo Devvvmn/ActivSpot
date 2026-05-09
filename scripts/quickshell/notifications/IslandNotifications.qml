@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import "../"
+import "../themes"
 
 // =========================================================
 // Dynamic Island Notifications - Apple-inspired notification system
@@ -152,10 +153,11 @@ PanelWindow {
             layer.smooth: true
             layer.effect: MultiEffect {
                 shadowEnabled: true
-                shadowColor: "#000000"
-                shadowOpacity: 0.3
+                shadowColor: Theme.shadowColor
+                blurMax: Theme.elev2Max
                 shadowBlur: 1.0
-                shadowVerticalOffset: 6
+                shadowOpacity: Theme.elev2Op
+                shadowVerticalOffset: Theme.elev2Off
             }
 
             // --- СВЕРНУТОЕ СОСТОЯНИЕ ---

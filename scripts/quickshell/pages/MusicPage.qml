@@ -9,6 +9,8 @@ Item {
     property var island
     clip: true
 
+    readonly property string _musicDir: Qt.resolvedUrl("../music").toString().replace("file://", "")
+
     // ── Album-art driven background morph ──────────────────────────────
     // Single time parameter `t` (0→1, infinite loop). All blob/art positions
     // are pure functions of t, cw, ch — no stateful from/to to desync, so
@@ -165,13 +167,43 @@ Item {
                     anchors.left: parent.left; anchors.top: parent.top
                     radius: island.s(14); color: island.surface0; clip: true; layer.enabled: true
                     layer.effect: MultiEffect {
-                        shadowEnabled: true; shadowColor: "#000000"
-                        shadowOpacity: 0.45; shadowBlur: 0.55; shadowVerticalOffset: 4
+                        shadowEnabled: true
+                        shadowColor: Theme.shadowColor
+                        blurMax: Theme.elev3Max
+                        shadowBlur: 1.0
+                        shadowOpacity: Theme.elev3Op
+                        shadowVerticalOffset: Theme.elev3Off
                     }
+
+                    // Art image
                     Image {
+                        id: coverArt
                         anchors.fill: parent; anchors.margins: 1
                         source: island.musicData.artUrl || ""
                         fillMode: Image.PreserveAspectCrop; asynchronous: true
+                    }
+
+                    // Empty-state placeholder when no cover art
+                    Item {
+                        anchors.fill: parent
+                        visible: coverArt.status !== Image.Ready
+
+                        // Soft gradient background
+                        Rectangle {
+                            anchors.fill: parent
+                            gradient: Gradient {
+                                orientation: Gradient.Vertical
+                                GradientStop { position: 0.0; color: Qt.rgba(island.mauve.r, island.mauve.g, island.mauve.b, 0.18) }
+                                GradientStop { position: 1.0; color: Qt.rgba(island.blue.r,  island.blue.g,  island.blue.b,  0.08) }
+                            }
+                        }
+                        Text {
+                            anchors.centerIn: parent
+                            text: "󰝛"
+                            font.family: "Iosevka Nerd Font"
+                            font.pixelSize: island.s(36)
+                            color: Qt.rgba(island.mauve.r, island.mauve.g, island.mauve.b, 0.45)
+                        }
                     }
                 }
 
@@ -185,15 +217,15 @@ Item {
                         anchors.left: parent.left; anchors.right: parent.right
                         anchors.top: parent.top
                         text: island.musicData.title || "Unknown"
-                        font.family: "JetBrains Mono"; font.pixelSize: island.s(18); font.weight: Font.Black
+                        font.family: Theme.fontUI; font.pixelSize: island.s(17); font.weight: Font.Bold
                         color: island.text; elide: Text.ElideRight
                     }
                     Text {
                         id: artistText
                         anchors.left: parent.left; anchors.right: parent.right
-                        anchors.top: titleText.bottom; anchors.topMargin: island.s(2)
+                        anchors.top: titleText.bottom; anchors.topMargin: island.s(3)
                         text: island.musicData.artist || "—"
-                        font.family: "JetBrains Mono"; font.pixelSize: island.s(12)
+                        font.family: Theme.fontUI; font.pixelSize: island.s(12); font.weight: Font.Medium
                         color: island.subtext0; elide: Text.ElideRight
                     }
 
@@ -223,7 +255,7 @@ Item {
                         from: 0; to: 100; value: island.musicData.percent || 0
                         onMoved: {
                             island.userIsSeeking = true
-                            island.exec(`~/.config/hypr/scripts/quickshell/music/player_control.sh seek ${value} ${island.musicData.length} "${island.selectedPlayer || island.musicData.playerName}"`)
+                            island.exec(`${root._musicDir}/player_control.sh seek ${value} ${island.musicData.length} "${island.selectedPlayer || island.musicData.playerName}"`)
                         }
                         onPressedChanged: if (!pressed) island.userIsSeeking = false
 
@@ -270,7 +302,14 @@ Item {
                     scale: playMouse.containsMouse ? 1.06 : 1.0
                     Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
                     layer.enabled: true
-                    layer.effect: MultiEffect { shadowEnabled: true; shadowColor: island.mauve; shadowOpacity: 0.30; shadowBlur: 0.65 }
+                    layer.effect: MultiEffect {
+                        shadowEnabled: true
+                        shadowColor: Theme.accent
+                        blurMax: Theme.elev2Max
+                        shadowBlur: 1.0
+                        shadowOpacity: Theme.elev2Op
+                        shadowVerticalOffset: 0
+                    }
                     Text { anchors.centerIn: parent; text: island.musicData.status === "Playing" ? "󰏤" : "󰐊"; font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(24); color: island.base }
                     MouseArea { id: playMouse; anchors.fill: parent; hoverEnabled: true
                         onClicked: island.exec("playerctl" + (island.selectedPlayer ? " -p " + island.selectedPlayer : "") + " play-pause") }
@@ -321,7 +360,7 @@ Item {
                         Text {
                             id: srcLabel; anchors.centerIn: parent
                             text: parent.niceLabel
-                            font.family: "JetBrains Mono"; font.pixelSize: island.s(10); font.weight: Font.Bold
+                            font.family: Theme.fontUI; font.pixelSize: island.s(11); font.weight: Font.SemiBold
                             color: parent.isActive ? island.base : island.text
                         }
                         MouseArea {
@@ -349,7 +388,7 @@ Item {
                     Text {
                         id: presetLabel; anchors.centerIn: parent
                         text: island.eqData.preset || "Flat"
-                        font.family: "JetBrains Mono"; font.pixelSize: island.s(10); font.weight: Font.Bold
+                        font.family: Theme.fontUI; font.pixelSize: island.s(10); font.weight: Font.SemiBold
                         color: island.mauve
                     }
                 }
@@ -377,8 +416,8 @@ Item {
                                 id: eqSlider; anchors.fill: parent; orientation: Qt.Vertical
                                 from: -12; to: 12; stepSize: 1
                                 value: island.eqData["b" + (index + 1)] || 0
-                                onMoved: island.exec(`~/.config/hypr/scripts/quickshell/music/equalizer.sh set_band ${index + 1} ${value}`)
-                                onPressedChanged: if (!pressed) island.exec(`~/.config/hypr/scripts/quickshell/music/equalizer.sh apply`)
+                                onMoved: island.exec(`${root._musicDir}/equalizer.sh set_band ${index + 1} ${value}`)
+                                onPressedChanged: if (!pressed) island.exec(`${root._musicDir}/equalizer.sh apply`)
 
                                 background: Rectangle {
                                     anchors.horizontalCenter: parent.horizontalCenter
@@ -443,12 +482,12 @@ Item {
                             : Qt.rgba(island.text.r, island.text.g, island.text.b, 0.08)
                         Text {
                             anchors.centerIn: parent; text: modelData
-                            font.family: "JetBrains Mono"; font.pixelSize: island.s(10); font.weight: Font.Bold
+                            font.family: Theme.fontUI; font.pixelSize: island.s(11); font.weight: Font.SemiBold
                             color: parent.isActive ? island.base : island.text
                         }
                         MouseArea {
                             id: chipMouse; anchors.fill: parent; hoverEnabled: true
-                            onClicked: island.exec(`~/.config/hypr/scripts/quickshell/music/equalizer.sh preset ${modelData}`)
+                            onClicked: island.exec(`${root._musicDir}/equalizer.sh preset ${modelData}`)
                         }
                     }
                 }

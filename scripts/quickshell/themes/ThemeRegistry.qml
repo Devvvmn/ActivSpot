@@ -7,7 +7,6 @@ QtObject {
         { id: "mocha",   label: "Mocha",   icon: "󰸌" },
         { id: "glass",   label: "Glass",   icon: "󰈈" },
         { id: "matugen", label: "Matugen", icon: "󰸉" },
-        { id: "gruvbox", label: "Gruvbox", icon: "󱓻" },
         { id: "apple",   label: "Apple",   icon: "" },
         { id: "nord",    label: "Nord",    icon: "󰔎" },
     ]

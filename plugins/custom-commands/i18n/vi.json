@@ -1,0 +1,19 @@
+{
+  "launcher": {
+    "command": {
+      "name": ">run",
+      "description": "Chạy lệnh tùy chỉnh"
+    }
+  },
+  "settings": {
+    "title": "Lệnh tùy chỉnh",
+    "description": "Định nghĩa các lệnh shell có thể chạy từ trình khởi chạy. Dùng >run trong trình khởi chạy để truy cập.",
+    "commandName": "Tên lệnh",
+    "shellCommand": "Lệnh shell",
+    "chooseIcon": "Chọn biểu tượng",
+    "moveUp": "Di chuyển lên",
+    "moveDown": "Di chuyển xuống",
+    "remove": "Xóa lệnh",
+    "add": "Thêm lệnh"
+  }
+}

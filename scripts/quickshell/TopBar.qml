@@ -186,13 +186,25 @@ Variants {
                 right: true
             }
 
-            // Subtle scrim in glass mode so text stays readable on any wallpaper.
+            // Subtle scrim in glass mode so text stays readable on any
+            // wallpaper. Inverted (white-tinted) on light themes so it
+            // doesn't fight the bright base.
             Rectangle {
                 visible: barWindow.glassTheme
                 anchors.fill: parent
                 gradient: Gradient {
-                    GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.28) }
-                    GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.0) }
+                    GradientStop {
+                        position: 0.0
+                        color: Theme.isLight
+                            ? Qt.rgba(1, 1, 1, 0.32)
+                            : Qt.rgba(0, 0, 0, 0.28)
+                    }
+                    GradientStop {
+                        position: 1.0
+                        color: Theme.isLight
+                            ? Qt.rgba(1, 1, 1, 0.0)
+                            : Qt.rgba(0, 0, 0, 0.0)
+                    }
                 }
                 z: -1
             }

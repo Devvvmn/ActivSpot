@@ -1,0 +1,30 @@
+{
+  "id": "color-scheme-creator",
+  "name": "Color Scheme Creator",
+  "version": "1.0.5",
+  "minNoctaliaVersion": "4.5.1",
+  "author": "Noctalia Team",
+  "official": true,
+  "license": "MIT",
+  "repository": "https://github.com/noctalia-dev/noctalia-plugins",
+  "description": "Create and manage custom predefined color schemes with a visual color editor.",
+  "tags": [
+    "Theming",
+    "Utility"
+  ],
+  "entryPoints": {
+    "main": "Main.qml",
+    "barWidget": "BarWidget.qml",
+    "controlCenterWidget": "ControlCenterWidget.qml",
+    "panel": "Panel.qml",
+    "settings": "Settings.qml"
+  },
+  "dependencies": {
+    "plugins": []
+  },
+  "metadata": {
+    "defaultSettings": {
+      "iconColor": "none"
+    }
+  }
+}

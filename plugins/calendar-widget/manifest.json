@@ -1,0 +1,24 @@
+{
+  "id": "calendar-widget",
+  "name": "Desktop Calendar",
+  "version": "1.0.10",
+  "minNoctaliaVersion": "4.5.0",
+  "author": "Simon",
+  "license": "MIT",
+  "repository": "https://github.com/noctalia-dev/noctalia-plugins",
+  "description": "Monthly calendar with today highlighted.",
+  "tags": [
+    "Desktop",
+    "Utility"
+  ],
+  "entryPoints": {
+    "desktopWidget": "DesktopWidget.qml",
+    "desktopWidgetSettings": "DesktopWidgetSettings.qml"
+  },
+  "metadata": {
+    "defaultSettings": {
+      "showBackground": true,
+      "roundedCorners": true
+    }
+  }
+}

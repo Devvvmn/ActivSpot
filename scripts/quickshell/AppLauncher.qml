@@ -4,6 +4,7 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
+import "./themes"
 
 PanelWindow {
     id: launcherRoot
@@ -152,10 +153,11 @@ PanelWindow {
 
     // ─── UI ───────────────────────────────────────────────────────────────────
 
-    // Dim — fades in behind the card
+    // Dim — fades in behind the card. Light themes use a softer black scrim
+    // so the wallpaper still reads through; dark themes can afford more.
     Rectangle {
         anchors.fill: parent
-        color: Qt.rgba(0, 0, 0, launcherRoot.open ? 0.55 : 0)
+        color: Qt.rgba(0, 0, 0, launcherRoot.open ? (Theme.isLight ? 0.20 : 0.30) : 0)
         Behavior on color { ColorAnimation { duration: 380 } }
         visible: color.a > 0.001
         MouseArea { anchors.fill: parent; onClicked: launcherRoot.open = false }
@@ -169,9 +171,11 @@ PanelWindow {
         source: card
         anchors.fill: card
         shadowEnabled: true
-        shadowColor: Qt.rgba(0, 0, 0, 0.55)
-        shadowBlur: 0.7
-        shadowVerticalOffset: s(8)
+        shadowColor: Theme.shadowColor
+        blurMax: Theme.elev3Max
+        shadowBlur: 1.0
+        shadowOpacity: Theme.elev3Op
+        shadowVerticalOffset: Theme.elev3Off
         shadowHorizontalOffset: 0
         z: card.z - 1
         opacity: launcherRoot.open ? 1.0 : 0.0

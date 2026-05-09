@@ -1,0 +1,41 @@
+{
+  "desktopWidgetSettings": {
+    "dial-style-label": "Style des repères du cadran",
+    "dial-style-description": "Style des marqueurs d'heures et de minutes",
+    "style-dots": "Points",
+    "style-numbers": "Nombres",
+    "style-full": "Lignes complètes",
+    "style-none": "Aucun",
+    
+    "hour-hand-label": "Style de l'aiguille des heures",
+    "hour-hand-description": "Style visuel de l'aiguille des heures",
+    "style-fill": "Pleine",
+    "style-hollow": "Creuse",
+    "style-classic": "Classique",
+    "style-hide": "Masquer",
+
+    "minute-hand-label": "Style de l'aiguille des minutes",
+    "minute-hand-description": "Style visuel de l'aiguille des minutes",
+    "style-bold": "Grasse",
+    "style-medium": "Moyenne",
+    "style-thin": "Fine",
+
+    "second-hand-label": "Style de la trotteuse",
+    "second-hand-description": "Style visuel de la trotteuse",
+    "style-dot": "Point",
+    "style-line": "Ligne",
+
+    "date-style-label": "Style de la date",
+    "date-style-description": "Comment afficher la date actuelle",
+    "style-bubble": "Bulles",
+    "style-rect": "Rectangle",
+
+    "show-hour-marks-label": "Afficher les repères d'heures internes",
+    "show-hour-marks-description": "Afficher un ensemble interne de repères d'heures",
+
+    "cookie-shape-label": "Coins de la forme du biscuit",
+    "cookie-shape-description": "Nombre de bords en forme d'onde sinusoïdale",
+    "background-opacity-label": "Opacité de l'arrière-plan",
+    "background-opacity-description": "Ajuster la transparence de la forme du biscuit"
+  }
+}

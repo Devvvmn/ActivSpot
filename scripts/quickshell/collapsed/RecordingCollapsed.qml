@@ -93,6 +93,6 @@ Row {
         playing: island.musicData.status === "Playing"
         notifActive: island.notifActive || island.notifBadgeVisible
         showQuestion: false
-        catColor: island.text; eyeColor: island.base
+        catColor: island.text; eyeColor: island.base; accentColor: island.mauve
     }
 }

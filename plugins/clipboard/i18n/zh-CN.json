@@ -1,0 +1,56 @@
+{
+  "bar": {
+    "tooltip": "剪贴板历史"
+  },
+  "context": {
+    "toggle": "切换剪贴板历史",
+    "settings": "打开设置"
+  },
+  "panel": {
+    "title": "剪贴板历史",
+    "empty": "暂无剪贴板历史",
+    "no-matches": "无匹配项",
+    "search-placeholder": "搜索...",
+    "delete": "删除条目",
+    "pin": "固定条目",
+    "unpin": "取消固定条目",
+    "wipe": "清空历史",
+    "close": "关闭",
+    "settings": "设置",
+    "filter-text": "文本",
+    "filter-images": "图片",
+    "filter-files": "文件",
+    "filter-text-count": "文本 ({count})",
+    "filter-images-count": "图片 ({count})",
+    "filter-files-count": "文件 ({count})"
+  },
+  "settings": {
+    "tab-general": "常规",
+    "max-history-size": "最大历史记录数",
+    "max-history-size-description": "历史记录中保留的剪贴板条目数。下次刷新时生效。",
+    "show-image-previews": "显示图片预览",
+    "show-image-previews-description": "解码并显示图片条目的缩略图。在低内存系统上请禁用。",
+    "density": "密度",
+    "density-description": "面板中剪贴板条目的间距。",
+    "density-compact": "紧凑",
+    "density-comfortable": "舒适",
+    "density-spacious": "宽松"
+  },
+  "toast": {
+    "item-copied-text-title": "文本已复制",
+    "item-copied-text-body": "您可以从剪贴板粘贴文本。",
+    "item-copied-image-title": "图片已复制",
+    "item-copied-image-body": "您可以从剪贴板粘贴图片。",
+    "item-copied-file-title": "文件已复制",
+    "item-copied-file-body": "您可以从剪贴板粘贴文件。",
+    "item-pinned": "条目已固定",
+    "item-unpinned": "条目已取消固定",
+    "history-cleared": "剪贴板历史已清空"
+  },
+  "time": {
+    "just-now": "刚刚",
+    "minutes-ago": "{minutes}分钟前",
+    "hours-ago": "{hours}小时前",
+    "yesterday": "昨天"
+  }
+}

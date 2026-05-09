@@ -1,0 +1,33 @@
+{
+  "context": {
+    "connect": "Verbinden",
+    "disconnect": "Verbreken"
+  },
+  "actions": {
+    "widget-settings": "Widget-instellingen"
+  },
+  "panel": {
+    "title": "Cloudflare WARP",
+    "status": {
+      "connected": "Verbonden",
+      "disconnected": "Verbroken"
+    },
+    "mode": "Modus",
+    "not-installed": "warp-cli niet gevonden. Installeer Cloudflare WARP om deze plugin te gebruiken."
+  },
+  "settings": {
+    "title": "Cloudflare WARP",
+    "description": "Zet Cloudflare WARP aan en uit via de balk en pas het uiterlijk aan.",
+    "connected-color": "Kleur verbonden",
+    "connected-color-desc": "Pictogramkleur wanneer WARP verbonden is",
+    "disconnected-color": "Kleur verbroken",
+    "disconnected-color-desc": "Pictogramkleur wanneer WARP verbroken is",
+    "refresh-interval": "Verversingsinterval",
+    "refresh-interval-desc": "Hoe vaak warp-cli wordt bevraagd voor de status"
+  },
+  "toast": {
+    "title": "Cloudflare WARP",
+    "connected": "Verbonden met WARP",
+    "disconnected": "Verbroken van WARP"
+  }
+}

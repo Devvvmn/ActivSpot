@@ -1,0 +1,56 @@
+{
+  "bar": {
+    "tooltip": "剪貼簿歷史"
+  },
+  "context": {
+    "toggle": "切換剪貼簿歷史",
+    "settings": "開啟設定"
+  },
+  "panel": {
+    "title": "剪貼簿歷史",
+    "empty": "尚無剪貼簿歷史",
+    "no-matches": "無匹配項",
+    "search-placeholder": "搜尋...",
+    "delete": "刪除項目",
+    "pin": "釘選項目",
+    "unpin": "取消釘選項目",
+    "wipe": "清除歷史",
+    "close": "關閉",
+    "settings": "設定",
+    "filter-text": "文字",
+    "filter-images": "圖片",
+    "filter-files": "檔案",
+    "filter-text-count": "文字 ({count})",
+    "filter-images-count": "圖片 ({count})",
+    "filter-files-count": "檔案 ({count})"
+  },
+  "settings": {
+    "tab-general": "一般",
+    "max-history-size": "最大歷史記錄數",
+    "max-history-size-description": "歷史記錄中保留的剪貼簿項目數。下次重新整理時生效。",
+    "show-image-previews": "顯示圖片預覽",
+    "show-image-previews-description": "解碼並顯示圖片項目的縮圖。在低記憶體系統上請停用。",
+    "density": "密度",
+    "density-description": "面板中剪貼簿項目的間距。",
+    "density-compact": "緊湊",
+    "density-comfortable": "舒適",
+    "density-spacious": "寬鬆"
+  },
+  "toast": {
+    "item-copied-text-title": "文字已複製",
+    "item-copied-text-body": "您可以從剪貼簿貼上文字。",
+    "item-copied-image-title": "圖片已複製",
+    "item-copied-image-body": "您可以從剪貼簿貼上圖片。",
+    "item-copied-file-title": "檔案已複製",
+    "item-copied-file-body": "您可以從剪貼簿貼上檔案。",
+    "item-pinned": "項目已釘選",
+    "item-unpinned": "項目已取消釘選",
+    "history-cleared": "剪貼簿歷史已清除"
+  },
+  "time": {
+    "just-now": "剛才",
+    "minutes-ago": "{minutes}分鐘前",
+    "hours-ago": "{hours}小時前",
+    "yesterday": "昨天"
+  }
+}

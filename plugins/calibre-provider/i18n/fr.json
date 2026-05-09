@@ -1,0 +1,16 @@
+{
+    "settings": {
+        "launcher": {
+            "title": "Lanceur",
+            "description": "Le programme utilisé pour ouvrir les fichiers de livres"
+        },
+        "forcegrid": {
+            "label": "Forcer la vue en grille",
+            "description": "Toujours utiliser la vue en grille pour afficher les résultats. Si désactivé, utilise la configuration actuelle du lanceur"
+        },
+        "recentlyOpened": {
+            "label": "Nombre d'entrées récemment ouvertes",
+            "description": "Nombre d'entrées récemment ouvertes à mémoriser"
+        }
+    }
+}

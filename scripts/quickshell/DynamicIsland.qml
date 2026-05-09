@@ -203,6 +203,8 @@ PanelWindow {
 
     // Game mode
     property bool   gameActive:   false
+    property bool   gamePerfMode: false
+    property bool   gameMicMuted: false
     property string gameName:     ""
     property string gameCover:    ""
     property int    gameStart:    0
@@ -333,8 +335,14 @@ PanelWindow {
     property string timeStr:     ""
     property string timeStrSec:  ""
     property string dateStr:     ""
-    property string weatherIcon: ""
-    property string weatherTemp: "--°"
+    property string weatherIcon:     ""
+    property string weatherTemp:     "--°"
+    property string weatherDesc:     ""
+    property string weatherFeels:    ""
+    property string weatherHumidity: ""
+    property string weatherWind:     ""
+    property string weatherHi:       ""
+    property string weatherLo:       ""
 
     // Timer / Stopwatch
     property bool timerRunning:       false
@@ -342,6 +350,61 @@ PanelWindow {
     property int  timerRemainingSec:  0
     property bool stopwatchRunning:   false
     property int  stopwatchElapsedSec: 0
+
+    // =========================================================
+    // --- BUBBLE PRIORITY (Apple-like Live Activities) ---
+    // =========================================================
+    // One bubble at a time is "primary" — slightly larger, in focus.
+    // Round-robin rotates primary every primaryRotateMs among all currently
+    // visible bubbles. Tapping a non-primary bubble pins it as primary
+    // (handled in BaseBubble); pin is released when that bubble disappears.
+    property string primaryBubbleId: "clock"
+    property string pinnedBubbleId: ""
+    property int    primaryRotateMs: 30000
+
+    // Iteration order — must match the bubbleFor() dispatch list. Stable
+    // priority used by the round-robin scheduler.
+    readonly property var _bubbleOrder: [
+        "rec", "notif", "timer", "music", "game",
+        "discord", "stash", "vpn", "sw", "clock"
+    ]
+
+    function _visibleBubbleIds() {
+        let out = []
+        for (let i = 0; i < _bubbleOrder.length; i++) {
+            let id = _bubbleOrder[i]
+            let b = bubbleFor(id)
+            if (b && b.shouldShow) out.push(id)
+        }
+        return out
+    }
+
+    function pinBubble(id) {
+        pinnedBubbleId = id
+        primaryBubbleId = id
+        playSound("haptic")
+    }
+
+    function _advancePrimary() {
+        let v = _visibleBubbleIds()
+        if (v.length === 0) { primaryBubbleId = "clock"; return }
+        // If pinned target is still visible, keep it.
+        if (pinnedBubbleId && v.indexOf(pinnedBubbleId) >= 0) {
+            primaryBubbleId = pinnedBubbleId
+            return
+        }
+        // Pin invalidated.
+        if (pinnedBubbleId) pinnedBubbleId = ""
+        let idx = v.indexOf(primaryBubbleId)
+        primaryBubbleId = v[(idx + 1) % v.length]
+    }
+
+    Timer {
+        interval: islandWindow.primaryRotateMs
+        running: !islandWindow.expanded
+        repeat: true
+        onTriggered: islandWindow._advancePrimary()
+    }
 
     // =========================================================
     // --- HELPERS ---
@@ -375,6 +438,7 @@ PanelWindow {
         let map = {
             "notification": "/usr/share/sounds/freedesktop/stereo/message.oga",
             "volume":       "/usr/share/sounds/freedesktop/stereo/audio-volume-change.oga",
+            "haptic":       "/usr/share/sounds/freedesktop/stereo/audio-volume-change.oga",
         };
         let f = map[type] || "";
         if (f) exec("[ -f \"" + f + "\" ] && paplay \"" + f + "\" 2>/dev/null &");
@@ -519,7 +583,7 @@ PanelWindow {
     }
 
     property var pageRegistry: [
-        { name: "clock",        expandedH: 350, comp: clockPageComp        },
+        { name: "clock",        expandedH: 420, comp: clockPageComp        },
         { name: "recording",    expandedH: 320, comp: recordingPageComp    },
         { name: "discord",      expandedH: 270, comp: discordPageComp      },
         { name: "music",        expandedH: 630, comp: musicPageComp        },
@@ -719,19 +783,30 @@ PanelWindow {
         command: ["bash", "-c",
             "data=$(~/.config/hypr/scripts/quickshell/calendar/weather.sh --json 2>/dev/null); " +
             "ct=$(date +%H:%M); " +
-            "icon=$(echo \"$data\" | jq -r --arg ct \"$ct\" '(.forecast[0].hourly | map(select(.time <= $ct)) | last) // .forecast[0].hourly[0] | .icon' 2>/dev/null); " +
-            "temp=$(echo \"$data\" | jq -r --arg ct \"$ct\" '(.forecast[0].hourly | map(select(.time <= $ct)) | last) // .forecast[0].hourly[0] | .temp' 2>/dev/null); " +
-            "echo \"$icon|$temp\""
+            "slot=$(echo \"$data\" | jq -c --arg ct \"$ct\" '(.forecast[0].hourly | map(select(.time <= $ct)) | max_by(.time)) // .forecast[0].hourly[0]' 2>/dev/null); " +
+            "icon=$(echo \"$slot\" | jq -r '.icon // empty' 2>/dev/null); " +
+            "temp=$(echo \"$slot\" | jq -r '.temp // empty' 2>/dev/null); " +
+            "desc=$(echo \"$slot\" | jq -r '.desc // empty' 2>/dev/null); [ -z \"$desc\" ] && desc=$(echo \"$data\" | jq -r '.forecast[0].desc // empty' 2>/dev/null); " +
+            "feels=$(echo \"$data\" | jq -r '.forecast[0].feels_like  // empty' 2>/dev/null); " +
+            "hum=$(echo \"$data\"   | jq -r '.forecast[0].humidity    // empty' 2>/dev/null); " +
+            "wind=$(echo \"$data\"  | jq -r '.forecast[0].wind        // empty' 2>/dev/null); " +
+            "hi=$(echo \"$data\"    | jq -r '.forecast[0].max         // empty' 2>/dev/null); " +
+            "lo=$(echo \"$data\"    | jq -r '.forecast[0].min         // empty' 2>/dev/null); " +
+            "echo \"$icon|$temp|$desc|$feels|$hum|$wind|$hi|$lo\""
         ]
         stdout: StdioCollector {
             onStreamFinished: {
                 let parts = this.text.trim().split("|");
-                if (parts.length >= 2) {
-                    let icon = parts[0].trim();
-                    let temp = parts[1].trim();
-                    if (icon !== "" && icon !== "null") islandWindow.weatherIcon = icon;
-                    if (temp !== "" && temp !== "null" && temp !== "0.0") islandWindow.weatherTemp = temp + "°C";
-                }
+                const get = (i) => (parts.length > i && parts[i].trim() !== "" && parts[i].trim() !== "null") ? parts[i].trim() : ""
+                let icon = get(0), temp = get(1)
+                if (icon) islandWindow.weatherIcon = icon
+                if (temp && temp !== "0.0") islandWindow.weatherTemp = parseFloat(temp).toFixed(0) + "°"
+                const desc   = get(2); if (desc)   islandWindow.weatherDesc     = desc
+                const feels  = get(3); if (feels)  islandWindow.weatherFeels    = parseFloat(feels).toFixed(0) + "°"
+                const hum    = get(4); if (hum)    islandWindow.weatherHumidity = hum + "%"
+                const wind   = get(5); if (wind)   islandWindow.weatherWind     = wind + " km/h"
+                const hi     = get(6); if (hi)     islandWindow.weatherHi       = parseFloat(hi).toFixed(0) + "°"
+                const lo     = get(7); if (lo)     islandWindow.weatherLo       = parseFloat(lo).toFixed(0) + "°"
             }
         }
     }
@@ -1232,9 +1307,16 @@ PanelWindow {
                            : 0.40;
                     return Qt.rgba(g.r, g.g, g.b, ga);
                 }
-                let a = islandWindow.expanded ? 0.93
-                      : islandWindow.hovered  ? 0.95
-                      : islandWindow.isMediaActive ? 0.88 : 0.78;
+                // Light themes need lower alpha or the near-white base reads
+                // as a glaring slab against bright wallpapers; dark themes
+                // can afford higher fill since base is dark.
+                let a = Theme.isLight
+                    ? (islandWindow.expanded ? 0.78
+                        : islandWindow.hovered ? 0.82
+                        : islandWindow.isMediaActive ? 0.74 : 0.66)
+                    : (islandWindow.expanded ? 0.93
+                        : islandWindow.hovered  ? 0.95
+                        : islandWindow.isMediaActive ? 0.88 : 0.78);
                 return Qt.rgba(islandWindow.base.r, islandWindow.base.g, islandWindow.base.b, a);
             }
             Behavior on color { ColorAnimation { duration: 300 } }
@@ -1608,58 +1690,81 @@ PanelWindow {
         }
 
         // ============================================================
-        // NAVIGATION BAR: ‹ dots ›
+        // NAVIGATION: top page-dots + edge tap zones
         // ============================================================
-        Item {
-            id: navBar
-            anchors.bottom: parent.bottom; anchors.bottomMargin: s(14)
+        // Compact iOS-style page indicator pinned to the top of the
+        // expanded surface. No chevron buttons — page switching happens via
+        // edge taps (left/right strip) or keyboard arrows.
+        Row {
+            id: pageDots
+            anchors.top: parent.top; anchors.topMargin: s(10)
             anchors.horizontalCenter: parent.horizontalCenter
-            height: s(28); width: navRow.width + s(16)
-            opacity: islandWindow.expanded && !islandWindow.notifActive && islandWindow.availablePages.length > 1 ? 1.0 : 0.0
+            spacing: s(5)
+            opacity: islandWindow.expanded && !islandWindow.notifActive && islandWindow.availablePages.length > 1 ? 0.85 : 0.0
             visible: opacity > 0.001
             Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.InOutCubic } }
             z: 10
 
-            Row {
-                id: navRow; anchors.centerIn: parent; spacing: s(12)
-
+            Repeater {
+                model: islandWindow.availablePages.length
                 Rectangle {
-                    width: s(28); height: s(28); radius: s(14)
-                    color: leftArrowMouse.containsMouse ? Qt.rgba(islandWindow.surface1.r, islandWindow.surface1.g, islandWindow.surface1.b, 0.7) : "transparent"
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Text { anchors.centerIn: parent; text: "‹"; font.family: "JetBrains Mono"; font.pixelSize: s(20); font.weight: Font.Black; color: islandWindow.subtext0 }
-                    MouseArea { id: leftArrowMouse; anchors.fill: parent; hoverEnabled: true; onClicked: islandWindow.navigatePrev() }
-                }
+                    property bool isActive: islandWindow.availablePages[index] === islandWindow.currentPage
+                    width: isActive ? s(14) : s(5); height: s(5); radius: s(3)
+                    color: isActive ? islandWindow.mauve
+                                    : Qt.rgba(islandWindow.text.r, islandWindow.text.g, islandWindow.text.b, 0.25)
+                    Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutExpo } }
+                    Behavior on color { ColorAnimation { duration: 200 } }
+                    anchors.verticalCenter: parent.verticalCenter
 
-                Row {
-                    anchors.verticalCenter: parent.verticalCenter; spacing: s(5)
-                    Repeater {
-                        model: islandWindow.availablePages.length
-                        Rectangle {
-                            property bool isActive: islandWindow.availablePages[index] === islandWindow.currentPage
-                            width: isActive ? s(18) : s(6); height: s(6); radius: s(3)
-                            color: isActive ? islandWindow.mauve : islandWindow.surface2
-                            Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutExpo } }
-                            Behavior on color { ColorAnimation { duration: 200 } }
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.margins: -s(6)
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: islandWindow.currentPage = islandWindow.availablePages[index]
                     }
                 }
-
-                Rectangle {
-                    width: s(28); height: s(28); radius: s(14)
-                    color: rightArrowMouse.containsMouse ? Qt.rgba(islandWindow.surface1.r, islandWindow.surface1.g, islandWindow.surface1.b, 0.7) : "transparent"
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Text { anchors.centerIn: parent; text: "›"; font.family: "JetBrains Mono"; font.pixelSize: s(20); font.weight: Font.Black; color: islandWindow.subtext0 }
-                    MouseArea { id: rightArrowMouse; anchors.fill: parent; hoverEnabled: true; onClicked: islandWindow.navigateNext() }
-                }
             }
+        }
+
+        // Invisible left/right edge tap zones for prev/next page. Width is
+        // narrow enough to avoid hijacking taps inside content.
+        MouseArea {
+            id: leftEdgeNav
+            anchors.left: parent.left
+            anchors.top: parent.top; anchors.topMargin: s(28)
+            anchors.bottom: parent.bottom; anchors.bottomMargin: s(28)
+            width: s(36)
+            enabled: islandWindow.expanded && !islandWindow.notifActive && islandWindow.availablePages.length > 1
+            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+            z: 9
+            onClicked: islandWindow.navigatePrev()
+        }
+        MouseArea {
+            id: rightEdgeNav
+            anchors.right: parent.right
+            anchors.top: parent.top; anchors.topMargin: s(28)
+            anchors.bottom: parent.bottom; anchors.bottomMargin: s(28)
+            width: s(36)
+            enabled: islandWindow.expanded && !islandWindow.notifActive && islandWindow.availablePages.length > 1
+            cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+            z: 9
+            onClicked: islandWindow.navigateNext()
         }
 
         focus: islandWindow.expanded
         Keys.onEscapePressed: {
             if (islandWindow.editBarMode) { islandWindow.exitEditBarMode(); event.accepted = true; }
             else if (islandWindow.expanded) { islandWindow.expanded = false; event.accepted = true; }
+        }
+        Keys.onLeftPressed: {
+            if (islandWindow.expanded && !islandWindow.notifActive) {
+                islandWindow.navigatePrev(); event.accepted = true
+            }
+        }
+        Keys.onRightPressed: {
+            if (islandWindow.expanded && !islandWindow.notifActive) {
+                islandWindow.navigateNext(); event.accepted = true
+            }
         }
     }
 
@@ -1680,7 +1785,8 @@ PanelWindow {
         visible: Theme.bubbleEnabled("Notif") && Theme.pageEnabled("notifs")
         id: badgeBubble
         island: islandWindow
-        z: 10
+        primary: islandWindow.primaryBubbleId === "notif"
+        z: primary ? 12 : 10
         homeX: homeXFor("notif")
         homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
@@ -1690,7 +1796,8 @@ PanelWindow {
         visible: Theme.bubbleEnabled("Vpn")
         id: vpnBadge
         island: islandWindow
-        z: 10
+        primary: islandWindow.primaryBubbleId === "vpn"
+        z: primary ? 12 : 10
         homeX: homeXFor("vpn")
         homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
@@ -1700,7 +1807,8 @@ PanelWindow {
         visible: Theme.bubbleEnabled("Game") && Theme.pageEnabled("game")
         id: gameBubble
         island: islandWindow
-        z: 10
+        primary: islandWindow.primaryBubbleId === "game"
+        z: primary ? 12 : 10
         homeX: homeXFor("game")
         homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
@@ -1710,7 +1818,8 @@ PanelWindow {
         visible: Theme.bubbleEnabled("Music") && Theme.pageEnabled("music")
         id: musicBubble
         island: islandWindow
-        z: 10
+        primary: islandWindow.primaryBubbleId === "music"
+        z: primary ? 12 : 10
         homeX: homeXFor("music")
         homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
@@ -1720,7 +1829,8 @@ PanelWindow {
         visible: Theme.bubbleEnabled("Discord") && Theme.pageEnabled("discord")
         id: discordBubble
         island: islandWindow
-        z: 10
+        primary: islandWindow.primaryBubbleId === "discord"
+        z: primary ? 12 : 10
         homeX: homeXFor("discord")
         homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
@@ -1730,7 +1840,8 @@ PanelWindow {
         visible: Theme.bubbleEnabled("Recording") && Theme.pageEnabled("recording")
         id: recBubble
         island: islandWindow
-        z: 10
+        primary: islandWindow.primaryBubbleId === "rec"
+        z: primary ? 12 : 10
         homeX: homeXFor("rec")
         homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
@@ -1740,7 +1851,8 @@ PanelWindow {
         visible: Theme.bubbleEnabled("Stash") && Theme.pageEnabled("stash")
         id: stashBubble
         island: islandWindow
-        z: 10
+        primary: islandWindow.primaryBubbleId === "stash"
+        z: primary ? 12 : 10
         homeX: homeXFor("stash")
         homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
@@ -1750,7 +1862,8 @@ PanelWindow {
         visible: Theme.bubbleEnabled("Clock") && Theme.pageEnabled("clock")
         id: clockBubble
         island: islandWindow
-        z: 10
+        primary: islandWindow.primaryBubbleId === "clock"
+        z: primary ? 12 : 10
         homeX: homeXFor("clock")
         homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
@@ -1760,7 +1873,8 @@ PanelWindow {
         visible: Theme.bubbleEnabled("Timer") && Theme.pageEnabled("timer")
         id: timerBubble
         island: islandWindow
-        z: 10
+        primary: islandWindow.primaryBubbleId === "timer"
+        z: primary ? 12 : 10
         homeX: homeXFor("timer")
         homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
@@ -1770,7 +1884,8 @@ PanelWindow {
         visible: Theme.bubbleEnabled("Stopwatch")
         id: swBubble
         island: islandWindow
-        z: 10
+        primary: islandWindow.primaryBubbleId === "sw"
+        z: primary ? 12 : 10
         homeX: homeXFor("sw")
         homeY: s(4) + (islandShape.collapsedH - height) / 2
     }

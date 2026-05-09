@@ -1,0 +1,56 @@
+{
+  "bar": {
+    "tooltip": "Historico da area de transferencia"
+  },
+  "context": {
+    "toggle": "Alternar historico da area de transferencia",
+    "settings": "Abrir configuracoes"
+  },
+  "panel": {
+    "title": "Historico da area de transferencia",
+    "empty": "Nenhum historico de area de transferencia ainda",
+    "no-matches": "Sem correspondencias",
+    "search-placeholder": "Pesquisar...",
+    "delete": "Excluir entrada",
+    "pin": "Fixar entrada",
+    "unpin": "Desfixar entrada",
+    "wipe": "Limpar historico",
+    "close": "Fechar",
+    "settings": "Configuracoes",
+    "filter-text": "Texto",
+    "filter-images": "Imagens",
+    "filter-files": "Arquivos",
+    "filter-text-count": "Texto ({count})",
+    "filter-images-count": "Imagens ({count})",
+    "filter-files-count": "Arquivos ({count})"
+  },
+  "settings": {
+    "tab-general": "Geral",
+    "max-history-size": "Tamanho maximo do historico",
+    "max-history-size-description": "Numero de entradas da area de transferencia no historico. Entra em vigor na proxima atualizacao.",
+    "show-image-previews": "Mostrar pre-visualizacoes de imagens",
+    "show-image-previews-description": "Decodificar e exibir miniaturas para entradas de imagem. Desativar em sistemas com pouca memoria.",
+    "density": "Densidade",
+    "density-description": "Espacamento das entradas da area de transferencia no painel.",
+    "density-compact": "Compacto",
+    "density-comfortable": "Confortavel",
+    "density-spacious": "Espacoso"
+  },
+  "toast": {
+    "item-copied-text-title": "Texto copiado",
+    "item-copied-text-body": "Voce pode colar o texto da area de transferencia.",
+    "item-copied-image-title": "Imagem copiada",
+    "item-copied-image-body": "Voce pode colar a imagem da area de transferencia.",
+    "item-copied-file-title": "Arquivo copiado",
+    "item-copied-file-body": "Voce pode colar o arquivo da area de transferencia.",
+    "item-pinned": "Entrada fixada",
+    "item-unpinned": "Entrada desfixada",
+    "history-cleared": "Historico da area de transferencia limpo"
+  },
+  "time": {
+    "just-now": "agora mesmo",
+    "minutes-ago": "ha {minutes}m",
+    "hours-ago": "ha {hours}h",
+    "yesterday": "ontem"
+  }
+}

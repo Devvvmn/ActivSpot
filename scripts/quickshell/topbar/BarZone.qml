@@ -220,13 +220,16 @@ Item {
             Behavior on x     { NumberAnimation { duration: 160; easing.type: Easing.OutExpo } }
             Behavior on width { NumberAnimation { duration: 160; easing.type: Easing.OutExpo } }
 
-            // Mocha surface — crust color to compensate for HyprGlass brightening
+            // Solid surface — uses Theme.pillColor which adapts per theme
+            // (off-white translucent on light, opaque crust on dark).
             Rectangle {
                 anchors.fill: parent
                 radius: groupFrame._radius
-                color: Qt.rgba(barZone.bar.crust.r, barZone.bar.crust.g, barZone.bar.crust.b, 1.0)
+                color: barZone.bar ? barZone.bar.pillColor
+                                   : Qt.rgba(0, 0, 0, 0)
                 border.width: 1
-                border.color: Qt.rgba(barZone.bar.text.r, barZone.bar.text.g, barZone.bar.text.b, 0.10)
+                border.color: barZone.bar ? barZone.bar.pillBorderColor
+                                          : "transparent"
                 opacity: barZone.bar.glassTheme ? 0 : 1
                 visible: opacity > 0.001
                 Behavior on opacity { NumberAnimation { duration: 520; easing.type: Easing.InOutCubic } }

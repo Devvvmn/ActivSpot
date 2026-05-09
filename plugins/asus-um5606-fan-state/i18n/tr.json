@@ -1,0 +1,9 @@
+{
+  "tooltip": {
+    "standard": "Standart",
+    "quiet": "Sessiz",
+    "high": "Yüksek-Performans",
+    "full": "Tam",
+    "unknown": "Bilinmiyor"
+  }
+}

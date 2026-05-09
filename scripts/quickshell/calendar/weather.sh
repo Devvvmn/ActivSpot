@@ -88,14 +88,18 @@ resolve_location() {
 
 get_icon() {
     case $1 in
-        "50d"|"50n") icon=""; quote="Mist" ;;
-        "01d") icon=""; quote="Sunny" ;;
-        "01n") icon=""; quote="Clear" ;;
-        "02d"|"02n"|"03d"|"03n"|"04d"|"04n") icon=""; quote="Cloudy" ;;
-        "09d"|"09n"|"10d"|"10n") icon=""; quote="Rainy" ;;
-        "11d"|"11n") icon=""; quote="Storm" ;;
-        "13d"|"13n") icon=""; quote="Snow" ;;
-        *) icon=""; quote="Unknown" ;;
+        "01d") icon=$''; quote="Sunny" ;;
+        "01n") icon=$''; quote="Clear" ;;
+        "02d") icon=$''; quote="Partly Cloudy" ;;
+        "02n") icon=$''; quote="Partly Cloudy" ;;
+        "03d"|"03n") icon=$''; quote="Cloudy" ;;
+        "04d"|"04n") icon=$''; quote="Overcast" ;;
+        "09d"|"09n") icon=$''; quote="Showers" ;;
+        "10d"|"10n") icon=$''; quote="Rainy" ;;
+        "11d"|"11n") icon=$''; quote="Storm" ;;
+        "13d"|"13n") icon=$''; quote="Snow" ;;
+        "50d"|"50n") icon=$''; quote="Mist" ;;
+        *) icon=$''; quote="Unknown" ;;
     esac
     echo "$icon|$quote"
 }
@@ -276,8 +280,9 @@ get_data() {
                 s_code=$(echo "$slot_item" | jq -r ".weather[0].icon")
                 s_hex=$(get_hex "$s_code")
                 s_icon=$(get_icon "$s_code" | cut -d'|' -f1)
+                s_desc=$(echo "$slot_item" | jq -r ".weather[0].description" | sed -e "s/\b\(.\)/\u\1/g")
 
-                hourly_json="${hourly_json} {\"time\": \"${s_time}\", \"temp\": \"${s_temp}\", \"icon\": \"${s_icon}\", \"hex\": \"${s_hex}\"},"
+                hourly_json="${hourly_json} {\"time\": \"${s_time}\", \"temp\": \"${s_temp}\", \"icon\": \"${s_icon}\", \"hex\": \"${s_hex}\", \"desc\": \"${s_desc}\"},"
             done
             hourly_json="${hourly_json%,}]"
 

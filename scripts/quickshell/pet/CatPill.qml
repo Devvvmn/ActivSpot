@@ -1,8 +1,11 @@
 import QtQuick
+import QtQuick.Effects
 
-// Pixel cat in the collapsed island pill.
-// Style: solid silhouette + two eye-dots (like the reference sprite sheet).
-// Poses: sit · blink · walk · sleep · alert
+// Soft-pixel cat silhouette in the collapsed island pill. Pixel grid stays
+// (preserves character + simple animation) but each pixel is rounded and
+// anti-aliased, and an accent halo lifts the cat in active states (playing /
+// notif / alert). Reads as part of the pill+blur language rather than
+// 8-bit sprite work.
 Item {
     id: root
 
@@ -11,6 +14,8 @@ Item {
     property bool  showQuestion: false
     property color catColor:    "#cdd6f4"   // light on dark bg
     property color eyeColor:    "#1e1e2e"   // dark eye dot on light body
+    // Accent used for the halo glow on active states. Caller can override.
+    property color accentColor: "#cba6f7"
 
     implicitWidth:  24
     implicitHeight: 24
@@ -119,10 +124,28 @@ Item {
         Translate { y: root.bopY }
     ]
 
+    // ── Accent halo (lifts cat on active states) ─────────────
+    Rectangle {
+        z: -1
+        anchors.centerIn: parent
+        width: parent.width + 12
+        height: parent.height + 12
+        radius: height / 2
+        color: root.accentColor
+        readonly property bool _hot: root.playing || root.notifActive
+        opacity: _hot ? 0.32 : 0.0
+        visible: opacity > 0.001
+        layer.enabled: true
+        layer.effect: MultiEffect { blurEnabled: true; blurMax: 24; blur: 1.0 }
+        Behavior on opacity { NumberAnimation { duration: 320; easing.type: Easing.OutCubic } }
+    }
+
     // ── Canvas ───────────────────────────────────────────────
     Canvas {
         id: canvas
         anchors.fill: parent
+        antialiasing: true
+        smooth: true
 
         onPaint: {
             var ctx = getContext("2d");
@@ -132,6 +155,7 @@ Item {
             var sprite = seq[root.frameIdx % seq.length];
             if (!sprite) return;
             var p   = root.ps;
+            var r   = Math.max(1, p * 0.28);
             var bdy = root.catColor.toString();
             var eye = root.eyeColor.toString();
             for (var row = 0; row < sprite.length; row++) {
@@ -140,7 +164,21 @@ Item {
                     var ch = line[col];
                     if (ch === " ") continue;
                     ctx.fillStyle = (ch === "E") ? eye : bdy;
-                    ctx.fillRect(col * p, row * p, p, p);
+                    // Rounded square per pixel — anti-aliased edges merge
+                    // adjacent blocks into a softer silhouette.
+                    var x = col * p, y = row * p;
+                    ctx.beginPath();
+                    ctx.moveTo(x + r, y);
+                    ctx.lineTo(x + p - r, y);
+                    ctx.quadraticCurveTo(x + p, y, x + p, y + r);
+                    ctx.lineTo(x + p, y + p - r);
+                    ctx.quadraticCurveTo(x + p, y + p, x + p - r, y + p);
+                    ctx.lineTo(x + r, y + p);
+                    ctx.quadraticCurveTo(x, y + p, x, y + p - r);
+                    ctx.lineTo(x, y + r);
+                    ctx.quadraticCurveTo(x, y, x + r, y);
+                    ctx.closePath();
+                    ctx.fill();
                 }
             }
         }

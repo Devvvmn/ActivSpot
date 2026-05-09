@@ -8,6 +8,7 @@
 
 OUT_FILE="/tmp/qs_game_stats"
 MANGO_DIR="/tmp/mangohud"
+mkdir -p "$MANGO_DIR"
 GPU_BUSY="/sys/class/drm/card1/device/gpu_busy_percent"
 GPU_TEMP_RAW="/sys/class/drm/card1/device/hwmon/hwmon1/temp1_input"
 VRAM_USED="/sys/class/drm/card1/device/mem_info_vram_used"

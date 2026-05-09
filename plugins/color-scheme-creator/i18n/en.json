@@ -1,0 +1,27 @@
+{
+  "menu": {
+    "settings": "Widget settings"
+  },
+  "notifications": {
+    "save-error": "Failed to save scheme",
+    "saved": "Scheme saved successfully"
+  },
+  "panel": {
+    "dark": "Dark",
+    "light": "Light",
+    "preview": "Preview",
+    "reset": "Reset",
+    "save": "Save",
+    "scheme-name-placeholder": "My Theme",
+    "title": "Color Scheme Creator"
+  },
+  "settings": {
+    "iconColor": {
+      "desc": "Color of the icon in the bar.",
+      "label": "Icon color"
+    }
+  }, 
+  "widget": {
+    "tooltip": "Color Scheme Creator"
+  }
+}

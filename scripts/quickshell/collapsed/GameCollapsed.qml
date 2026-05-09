@@ -2,16 +2,14 @@ import QtQuick
 import "../themes"
 
 // Collapsed island state while a game is active.
-// Layout: [● ABR  144  |  GPU 76%  |  CPU 38%]
+// Layout: [● ABR  144fps  |  GPU 76%  |  CPU 38%  |  38°]
 Row {
     property var island
-    property int preferredWidth: island.s(320)
+    property int preferredWidth: island.s(340)
 
-    // Bind text/label colours to Theme directly so they never fall through
-    // to QML's default black if `island` is briefly undefined during init.
     readonly property color cText:    Theme.text
     readonly property color cMuted:   Theme.overlay0
-    readonly property color cDivider: Qt.rgba(Theme.text.r, Theme.text.g, Theme.text.b, 0.12)
+    readonly property color cDivider: Qt.rgba(Theme.text.r, Theme.text.g, Theme.text.b, 0.10)
 
     spacing: 0
     anchors.verticalCenter: parent !== null ? parent.verticalCenter : undefined
@@ -44,14 +42,14 @@ Row {
         Behavior on color { ColorAnimation { duration: 400 } }
         SequentialAnimation on opacity {
             running: true; loops: Animation.Infinite
-            NumberAnimation { to: 0.35; duration: 900; easing.type: Easing.InOutSine }
+            NumberAnimation { to: 0.30; duration: 900; easing.type: Easing.InOutSine }
             NumberAnimation { to: 1.0;  duration: 900; easing.type: Easing.InOutSine }
         }
     }
 
     Item { width: island.s(8); height: 1 }
 
-    // Game abbreviation (3 letters)
+    // Game abbreviation
     Text {
         text: parent.gameAbbrev
         font.family: "JetBrains Mono"; font.pixelSize: island.s(12); font.weight: Font.Black
@@ -70,44 +68,42 @@ Row {
         color: parent.healthColor; anchors.verticalCenter: parent.verticalCenter
         Behavior on color { ColorAnimation { duration: 400 } }
     }
+    Text {
+        text: "fps"
+        font.family: "JetBrains Mono"; font.pixelSize: island.s(8)
+        color: parent.cMuted; anchors.verticalCenter: parent.verticalCenter
+    }
 
     Item { width: island.s(10); height: 1 }
     Rectangle { width: 1; height: island.s(12); color: parent.cDivider; anchors.verticalCenter: parent.verticalCenter }
     Item { width: island.s(10); height: 1 }
 
     // GPU
-    Text {
-        text: "GPU"; font.family: "JetBrains Mono"; font.pixelSize: island.s(8); font.weight: Font.Black
-        color: parent.cMuted; anchors.verticalCenter: parent.verticalCenter
-    }
+    Text { text: "GPU"; font.family: "JetBrains Mono"; font.pixelSize: island.s(8); font.weight: Font.Black; color: parent.cMuted; anchors.verticalCenter: parent.verticalCenter }
     Item { width: island.s(3); height: 1 }
-    Text {
-        text: island.gameGpu
-        font.family: "JetBrains Mono"; font.pixelSize: island.s(13); font.weight: Font.Black
-        color: island.blue; anchors.verticalCenter: parent.verticalCenter
-    }
-    Text {
-        text: "%"; font.family: "JetBrains Mono"; font.pixelSize: island.s(8)
-        color: parent.cMuted; anchors.verticalCenter: parent.verticalCenter
-    }
+    Text { text: island.gameGpu; font.family: "JetBrains Mono"; font.pixelSize: island.s(13); font.weight: Font.Black; color: island.blue; anchors.verticalCenter: parent.verticalCenter }
+    Text { text: "%"; font.family: "JetBrains Mono"; font.pixelSize: island.s(8); color: parent.cMuted; anchors.verticalCenter: parent.verticalCenter }
 
     Item { width: island.s(10); height: 1 }
     Rectangle { width: 1; height: island.s(12); color: parent.cDivider; anchors.verticalCenter: parent.verticalCenter }
     Item { width: island.s(10); height: 1 }
 
     // CPU
-    Text {
-        text: "CPU"; font.family: "JetBrains Mono"; font.pixelSize: island.s(8); font.weight: Font.Black
-        color: parent.cMuted; anchors.verticalCenter: parent.verticalCenter
-    }
+    Text { text: "CPU"; font.family: "JetBrains Mono"; font.pixelSize: island.s(8); font.weight: Font.Black; color: parent.cMuted; anchors.verticalCenter: parent.verticalCenter }
     Item { width: island.s(3); height: 1 }
+    Text { text: island.gameCpu; font.family: "JetBrains Mono"; font.pixelSize: island.s(13); font.weight: Font.Black; color: island.mauve; anchors.verticalCenter: parent.verticalCenter }
+    Text { text: "%"; font.family: "JetBrains Mono"; font.pixelSize: island.s(8); color: parent.cMuted; anchors.verticalCenter: parent.verticalCenter }
+
+    Item { width: island.s(10); height: 1 }
+    Rectangle { width: 1; height: island.s(12); color: parent.cDivider; anchors.verticalCenter: parent.verticalCenter }
+    Item { width: island.s(10); height: 1 }
+
+    // GPU Temp
     Text {
-        text: island.gameCpu
-        font.family: "JetBrains Mono"; font.pixelSize: island.s(13); font.weight: Font.Black
-        color: island.mauve; anchors.verticalCenter: parent.verticalCenter
-    }
-    Text {
-        text: "%"; font.family: "JetBrains Mono"; font.pixelSize: island.s(8)
-        color: parent.cMuted; anchors.verticalCenter: parent.verticalCenter
+        text: island.gameGpuTemp + "°"
+        font.family: "JetBrains Mono"; font.pixelSize: island.s(12); font.weight: Font.Bold
+        color: island.gameGpuTemp > 85 ? island.peach : island.teal
+        anchors.verticalCenter: parent.verticalCenter
+        Behavior on color { ColorAnimation { duration: 400 } }
     }
 }

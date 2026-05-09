@@ -1,0 +1,49 @@
+{
+  "widget": { "tooltip": "Calidad del aire" },
+  "scale": { "us": "US AQI", "eu": "EU AQI" },
+  "location": { "custom": "Personalizada" },
+  "unit": { "ugm3": "µg/m³" },
+  "levels": {
+    "good": "Buena", "moderate": "Moderada",
+    "unhealthySensitive": "No saludable para grupos sensibles",
+    "unhealthy": "No saludable", "veryUnhealthy": "Muy perjudicial",
+    "hazardous": "Peligrosa", "fair": "Aceptable", "poor": "Mala",
+    "veryPoor": "Muy mala", "extremelyPoor": "Extremadamente mala", "unknown": "Desconocida"
+  },
+  "pollutants": {
+    "pm25": "PM2.5", "pm10": "PM10", "ozone": "O\u2083", "no2": "NO\u2082", "co": "CO", "so2": "SO\u2082",
+    "pm25Value": "PM2.5: {value} µg/m³", "pm10Value": "PM10: {value} µg/m³",
+    "ozoneValue": "O\u2083: {value} µg/m³", "no2Value": "NO\u2082: {value} µg/m³",
+    "coValue": "CO: {value} µg/m³", "so2Value": "SO\u2082: {value} µg/m³",
+    "pm25Short": "PM2.5: {value}", "pm10Short": "PM10: {value}"
+  },
+  "errors": {
+    "weatherDisabled": "Activa la ubicación en los ajustes de Noctalia o usa coordenadas personalizadas",
+    "locationUnavailable": "Ubicación no disponible todavía, reintentando...",
+    "aqicnTokenMissing": "AQICN seleccionado pero no hay ningún token de API configurado",
+    "aqicnApiFailed": "Error en la API de AQICN"
+  },
+  "panel": {
+    "title": "Calidad del aire", "lastUpdate": "Última actualización", "pollutants": "Contaminantes",
+    "refresh": "Actualizar", "settings": "Ajustes", "noData": "No hay datos disponibles", "loading": "Cargando..."
+  },
+  "settings": {
+    "aqiScale": "Escala AQI", "aqiScaleDesc": "Elige la escala del índice de calidad del aire",
+    "aqiScaleUs": "US AQI (EPA)", "aqiScaleEu": "AQI europeo",
+    "location": "Ubicación", "useNoctaliaLocation": "Usar la ubicación de Noctalia",
+    "useNoctaliaLocationDesc": "Usa la ubicación configurada en los ajustes de Noctalia",
+    "customLatitude": "Latitud", "customLongitude": "Longitud",
+    "customLocationDesc": "Introduce las coordenadas manualmente",
+    "refreshInterval": "Intervalo de actualización", "refreshIntervalDesc": "Minutos entre actualizaciones: ",
+    "boldText": "Texto en negrita", "boldTextDesc": "Mostrar el número AQI en negrita",
+    "dataSource": "Fuente de datos", "dataSourceDesc": "Elige de dónde provienen los datos de calidad del aire",
+    "dataSourceOpenMeteo": "Open-Meteo (sin clave necesaria)", "dataSourceAqicn": "AQICN (datos de estaciones reales)",
+    "aqicnToken": "Token de API de AQICN", "aqicnTokenDesc": "Obtén tu token gratuito en aqicn.org/data-platform/token",
+    "aqicnTokenPlaceholder": "Pega tu token aquí"
+  },
+  "desktop": {
+    "noData": "Sin datos", "tipLeft": "Clic izquierdo: Abrir panel",
+    "tipMiddle": "Clic central: Actualizar", "tipRight": "Clic derecho: Ajustes"
+  },
+  "context": { "refresh": "Actualizar", "settings": "Ajustes" }
+}

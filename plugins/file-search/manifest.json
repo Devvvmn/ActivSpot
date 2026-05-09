@@ -1,0 +1,31 @@
+{
+    "id": "file-search",
+    "name": "File Search",
+    "version": "1.0.3",
+    "minNoctaliaVersion": "4.1.2",
+    "author": "ericbreh",
+    "license": "MIT",
+    "repository": "https://github.com/noctalia-dev/noctalia-plugins",
+    "description": "File search from the launcher.",
+    "tags": [
+        "Launcher",
+        "Productivity"
+    ],
+    "entryPoints": {
+        "main": "Main.qml",
+        "launcherProvider": "LauncherProvider.qml",
+        "settings": "Settings.qml"
+    },
+    "dependencies": {
+        "plugins": []
+    },
+    "metadata": {
+        "defaultSettings": {
+            "showHidden": false,
+            "maxResults": 100,
+            "fileOpener": "xdg-open",
+            "searchDirectory": "~",
+            "fdCommand": "fd"
+        }
+    }
+}

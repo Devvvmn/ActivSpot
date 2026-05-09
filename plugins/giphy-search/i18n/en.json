@@ -1,0 +1,25 @@
+{
+    "settings": {
+        "apiKey": {
+            "label": "Giphy API Key",
+            "description": "Get your API key from developers.giphy.com"
+        },
+        "rating": {
+            "label": "Content Rating",
+            "description": "Filter results by content rating"
+        }
+    },
+    "launcher": {
+        "typeSomething": "Type something...",
+        "searchGiphy": "Search for GIFs on Giphy",
+        "search": "Search \"{query}\"",
+        "openOnGiphy": "Open on Giphy",
+        "noApiKey": "API Key Required",
+        "noApiKeyDescription": "Set your Giphy API key in plugin settings",
+        "untitled": "Untitled GIF",
+        "copyUrl": "Copy GIF URL to clipboard",
+        "command": {
+            "description": "Search for GIFs on Giphy"
+        }
+    }
+}

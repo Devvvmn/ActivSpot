@@ -1,0 +1,15 @@
+{
+  "common": {
+    "heads": "Heads",
+    "tails": "Tails"
+  },
+  "settings": {
+    "delay":{
+      "label": "Animation delay",
+      "description": "Delay between frames"
+    }
+  },
+  "widget": {
+    "tooltip": "Coin flip"
+  }
+}

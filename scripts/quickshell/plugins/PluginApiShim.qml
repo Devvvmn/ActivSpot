@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.Services.UI
 
 Item {
     id: root
@@ -17,12 +18,18 @@ Item {
 
     property var mainInstance: null
 
+    // Which screen the plugin panel was last opened on. Plugins read this to
+    // route closePanel() calls through PanelService.
+    property var panelOpenScreen: null
+
+    // Last-used anchor — lets togglePanel(screen) work when called from Main.qml
+    // (no widget reference available).
+    property var _lastAnchor: null
+
     // ── i18n ─────────────────────────────────────────────────────────────
     readonly property string _locale: Qt.locale().name.substring(0, 2)
     property var _i18n: ({})
 
-    // Resolve "some.nested.key" → value, replace {param} placeholders.
-    // Returns "" on miss so plugin-side `|| fallback` chains work.
     function tr(key, params) {
         if (!key) return ""
         let parts = key.split(".")
@@ -56,8 +63,53 @@ Item {
         }
     }
 
-    // Panel opener stub — TODO: open Panel.qml inside island pages
-    function openPanel(screen, anchor) {}
+    // ── Panel open/close/toggle ──────────────────────────────────────────
+    function _panelSource() {
+        let entry = manifest?.entryPoints?.panel
+        if (!entry || !pluginDir) return ""
+        return "file://" + pluginDir + "/" + entry
+    }
+
+    function openPanel(screen, anchor) {
+        let src = _panelSource()
+        if (!src) return false
+        if (anchor) root._lastAnchor = anchor
+        let pluginId = manifest?.id ?? ""
+        let ok = PanelService.openPluginPanel(
+            pluginId, src,
+            { "pluginApi": root, "screen": screen ?? null },
+            screen, anchor ?? root._lastAnchor)
+        if (ok) root.panelOpenScreen = screen ?? null
+        return ok
+    }
+
+    function closePanel(screen) {
+        let pluginId = manifest?.id ?? ""
+        let closed = PanelService.closePluginPanel(pluginId)
+        if (closed) root.panelOpenScreen = null
+        return closed
+    }
+
+    function togglePanel(screen, anchor) {
+        let pluginId = manifest?.id ?? ""
+        if (PanelService.isPanelOpenFor(pluginId)) {
+            return closePanel(screen)
+        }
+        return openPanel(screen, anchor ?? root._lastAnchor)
+    }
+
+    // Watch global panel state — if our panel was closed by something else
+    // (outside click, another plugin opening its panel), clear our flag.
+    Connections {
+        target: PanelService
+        function onPanelVisibleChanged() {
+            if (!PanelService.panelVisible) root.panelOpenScreen = null
+        }
+        function on_PanelPluginIdChanged() {
+            if (PanelService._panelPluginId !== (root.manifest?.id ?? ""))
+                root.panelOpenScreen = null
+        }
+    }
 
     // ── User settings ─────────────────────────────────────────────────────
     property var _userSettings: ({})

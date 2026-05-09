@@ -1,0 +1,56 @@
+{
+  "bar": {
+    "tooltip": "Історія буфера обміну"
+  },
+  "context": {
+    "toggle": "Перемкнути історію буфера обміну",
+    "settings": "Відкрити налаштування"
+  },
+  "panel": {
+    "title": "Історія буфера обміну",
+    "empty": "Історія буфера обміну порожня",
+    "no-matches": "Немає збігів",
+    "search-placeholder": "Пошук...",
+    "delete": "Видалити запис",
+    "pin": "Закріпити запис",
+    "unpin": "Відкріпити запис",
+    "wipe": "Очистити історію",
+    "close": "Закрити",
+    "settings": "Налаштування",
+    "filter-text": "Текст",
+    "filter-images": "Зображення",
+    "filter-files": "Файли",
+    "filter-text-count": "Текст ({count})",
+    "filter-images-count": "Зображення ({count})",
+    "filter-files-count": "Файли ({count})"
+  },
+  "settings": {
+    "tab-general": "Загальні",
+    "max-history-size": "Максимальний розмір історії",
+    "max-history-size-description": "Кількість записів буфера обміну в історії. Набуває чинності при наступному оновленні.",
+    "show-image-previews": "Показувати попередній перегляд зображень",
+    "show-image-previews-description": "Декодувати та відображати мініатюри для записів зображень. Вимкніть на системах з малим обсягом пам'яті.",
+    "density": "Щільність",
+    "density-description": "Відстань між записами буфера обміну на панелі.",
+    "density-compact": "Компактний",
+    "density-comfortable": "Комфортний",
+    "density-spacious": "Просторий"
+  },
+  "toast": {
+    "item-copied-text-title": "Текст скопійовано",
+    "item-copied-text-body": "Ви можете вставити текст з буфера обміну.",
+    "item-copied-image-title": "Зображення скопійовано",
+    "item-copied-image-body": "Ви можете вставити зображення з буфера обміну.",
+    "item-copied-file-title": "Файл скопійовано",
+    "item-copied-file-body": "Ви можете вставити файл з буфера обміну.",
+    "item-pinned": "Запис закріплено",
+    "item-unpinned": "Запис відкріплено",
+    "history-cleared": "Історію буфера обміну очищено"
+  },
+  "time": {
+    "just-now": "щойно",
+    "minutes-ago": "{minutes}хв тому",
+    "hours-ago": "{hours}год тому",
+    "yesterday": "вчора"
+  }
+}

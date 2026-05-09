@@ -13,7 +13,6 @@ Rectangle {
     property bool isActive:  bar.showEthernet ? (bar.ethStatus === "Connected") : bar.isWifiOn
 
     radius: bar.s(16)
-    border.width: 0
     color: bar.pillColor
 
     implicitWidth:  wifiRow.width + bar.s(24)

@@ -58,6 +58,6 @@ Row {
         width: island.s(24); height: island.s(24); anchors.verticalCenter: parent.verticalCenter
         playing: island.musicData.status === "Playing"
         notifActive: island.notifActive || island.notifBadgeVisible
-        showQuestion: false; catColor: island.text; eyeColor: island.base
+        showQuestion: false; catColor: island.text; eyeColor: island.base; accentColor: island.mauve
     }
 }

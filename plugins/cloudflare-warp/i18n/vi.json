@@ -1,0 +1,33 @@
+{
+  "context": {
+    "connect": "Kết nối",
+    "disconnect": "Ngắt kết nối"
+  },
+  "actions": {
+    "widget-settings": "Cài đặt tiện ích"
+  },
+  "panel": {
+    "title": "Cloudflare WARP",
+    "status": {
+      "connected": "Đã kết nối",
+      "disconnected": "Chưa kết nối"
+    },
+    "mode": "Chế độ",
+    "not-installed": "Không tìm thấy warp-cli. Hãy cài đặt Cloudflare WARP để sử dụng plugin này."
+  },
+  "settings": {
+    "title": "Cloudflare WARP",
+    "description": "Bật và tắt Cloudflare WARP từ thanh và tùy chỉnh giao diện.",
+    "connected-color": "Màu khi kết nối",
+    "connected-color-desc": "Màu biểu tượng khi WARP đang kết nối",
+    "disconnected-color": "Màu khi ngắt kết nối",
+    "disconnected-color-desc": "Màu biểu tượng khi WARP ngắt kết nối",
+    "refresh-interval": "Khoảng thời gian làm mới",
+    "refresh-interval-desc": "Tần suất truy vấn warp-cli để lấy trạng thái"
+  },
+  "toast": {
+    "title": "Cloudflare WARP",
+    "connected": "Đã kết nối WARP",
+    "disconnected": "Đã ngắt kết nối WARP"
+  }
+}

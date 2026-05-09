@@ -1,0 +1,49 @@
+{
+  "widget": { "tooltip": "空气质量" },
+  "scale": { "us": "US AQI", "eu": "EU AQI" },
+  "location": { "custom": "自定义" },
+  "unit": { "ugm3": "µg/m³" },
+  "levels": {
+    "good": "优", "moderate": "良",
+    "unhealthySensitive": "对敏感人群不健康",
+    "unhealthy": "不健康", "veryUnhealthy": "非常不健康",
+    "hazardous": "危险", "fair": "尚可", "poor": "差",
+    "veryPoor": "很差", "extremelyPoor": "极差", "unknown": "未知"
+  },
+  "pollutants": {
+    "pm25": "PM2.5", "pm10": "PM10", "ozone": "O\u2083", "no2": "NO\u2082", "co": "CO", "so2": "SO\u2082",
+    "pm25Value": "PM2.5: {value} µg/m³", "pm10Value": "PM10: {value} µg/m³",
+    "ozoneValue": "O\u2083: {value} µg/m³", "no2Value": "NO\u2082: {value} µg/m³",
+    "coValue": "CO: {value} µg/m³", "so2Value": "SO\u2082: {value} µg/m³",
+    "pm25Short": "PM2.5: {value}", "pm10Short": "PM10: {value}"
+  },
+  "errors": {
+    "weatherDisabled": "请在 Noctalia 设置中启用天气功能，或使用自定义坐标",
+    "locationUnavailable": "位置暂不可用，正在重试...",
+    "aqicnTokenMissing": "已选择 AQICN 但未配置 API 令牌",
+    "aqicnApiFailed": "AQICN API 错误"
+  },
+  "panel": {
+    "title": "空气质量", "lastUpdate": "最近更新", "pollutants": "污染物",
+    "refresh": "刷新", "settings": "设置", "noData": "暂无数据", "loading": "加载中..."
+  },
+  "settings": {
+    "aqiScale": "AQI 标准", "aqiScaleDesc": "选择空气质量指数标准",
+    "aqiScaleUs": "US AQI（EPA）", "aqiScaleEu": "欧洲 AQI",
+    "location": "位置", "useNoctaliaLocation": "使用 Noctalia 位置",
+    "useNoctaliaLocationDesc": "使用 Noctalia 设置中配置的位置",
+    "customLatitude": "纬度", "customLongitude": "经度",
+    "customLocationDesc": "手动输入坐标",
+    "refreshInterval": "刷新间隔", "refreshIntervalDesc": "更新间隔（分钟）：",
+    "boldText": "粗体文字", "boldTextDesc": "以粗体显示 AQI 数值",
+    "dataSource": "数据来源", "dataSourceDesc": "选择空气质量数据的来源",
+    "dataSourceOpenMeteo": "Open-Meteo（无需密钥）", "dataSourceAqicn": "AQICN（真实站点数据）",
+    "aqicnToken": "AQICN API 令牌", "aqicnTokenDesc": "在 aqicn.org/data-platform/token 获取免费令牌",
+    "aqicnTokenPlaceholder": "在此粘贴您的令牌"
+  },
+  "desktop": {
+    "noData": "无数据", "tipLeft": "左键单击：打开面板",
+    "tipMiddle": "中键单击：刷新", "tipRight": "右键单击：设置"
+  },
+  "context": { "refresh": "刷新", "settings": "设置" }
+}

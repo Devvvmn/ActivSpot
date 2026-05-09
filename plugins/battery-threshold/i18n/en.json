@@ -1,0 +1,16 @@
+{
+  "settings": {
+    "battery-device": "Battery Device",
+    "battery-device-desc": "Battery to configure threshold for",
+    "no-battery-device": "No configurable batteries are available on this system"
+  },
+  "actions": {
+    "widget-settings": "Widget Settings"
+  },
+  "panel": {
+    "title": "Battery Threshold",
+    "not-available": "Not available on this system",
+    "adjust-limit": "Drag slider to adjust limit",
+    "read-only": "Read-only: Install udev rule for write access"
+  }
+}

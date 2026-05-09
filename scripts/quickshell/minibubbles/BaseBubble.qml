@@ -1,4 +1,6 @@
 import QtQuick
+import QtQuick.Effects
+import "../themes"
 
 Item {
     id: root
@@ -8,6 +10,11 @@ Item {
     property real homeY: 0
     property bool snapSpring: false
     property bool initialized: false
+
+    // Apple-like priority hierarchy. The island flips primary among all
+    // currently-visible bubbles on a round-robin timer; tapping a non-primary
+    // bubble pins it as primary instead of firing the bubble's own action.
+    property bool primary: true
 
     signal tapped()
 
@@ -87,9 +94,57 @@ Item {
 
     TapHandler {
         id: tap
-        onTapped: root.tapped()
+        onTapped: {
+            // Non-primary bubble: tap pins it as primary instead of firing
+            // the bubble's native action. Apple Live Activities behavior.
+            if (root.island && !root.primary && root.island.pinBubble) {
+                root.island.pinBubble(root.bubbleId)
+                return
+            }
+            root.tapped()
+        }
     }
 
-    scale: tap.pressed ? 0.92 : 1.0
-    Behavior on scale { NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
+    // Elevation shadow — primary bubble appears to lift off the others.
+    // Halo "breathes" in: starts at bubble bounds and expands outward as the
+    // bubble becomes primary; collapses back to bubble size before fading out.
+    // Both ends animate together so the shadow morphs rather than pops.
+    property real _haloPad: root.primary ? 16 : 0
+    Behavior on _haloPad {
+        NumberAnimation { duration: 480; easing.type: Easing.InOutCubic }
+    }
+
+    Rectangle {
+        z: -1
+        readonly property real _padW: root.island ? root.island.s(root._haloPad) : root._haloPad
+        readonly property real _padH: root.island ? root.island.s(root._haloPad * 0.75) : root._haloPad * 0.75
+        readonly property real _yOff: root.island ? root.island.s(5) : 5
+        x: -_padW / 2
+        y: -_padH / 2 + _yOff
+        width:  parent.width  + _padW
+        height: parent.height + _padH
+        radius: height / 2
+        color: Theme.shadowColor
+        opacity: root.primary ? 0.25 : 0.0
+        visible: opacity > 0.001
+        layer.enabled: true
+        layer.effect: MultiEffect { blurEnabled: true; blurMax: 32; blur: 1.0 }
+        Behavior on opacity { NumberAnimation { duration: 480; easing.type: Easing.InOutCubic } }
+    }
+
+    // Primary scale applied via a separate transform so it composes with —
+    // and isn't overwritten by — each subclass's own `scale:` binding (e.g.
+    // shouldShow show/hide). Press feedback (0.92) lives here too.
+    // Single animated source feeds both axes so they morph in lock-step.
+    property real _primaryScale: tap.pressed ? 0.92 : (root.primary ? 1.0 : 0.82)
+    Behavior on _primaryScale {
+        NumberAnimation { duration: 480; easing.type: Easing.InOutCubic }
+    }
+    transform: Scale {
+        id: primaryScale
+        origin.x: root.width / 2
+        origin.y: root.height / 2
+        xScale: root._primaryScale
+        yScale: root._primaryScale
+    }
 }

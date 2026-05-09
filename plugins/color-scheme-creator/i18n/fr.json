@@ -1,0 +1,27 @@
+{
+  "menu": {
+    "settings": "Paramètres du widget"
+  },
+  "notifications": {
+    "save-error": "Échec de l'enregistrement du thème",
+    "saved": "Thème enregistré avec succès"
+  },
+  "panel": {
+    "dark": "Sombre",
+    "light": "Clair",
+    "preview": "Aperçu",
+    "reset": "Réinitialiser",
+    "save": "Enregistrer",
+    "scheme-name-placeholder": "Mon Thème",
+    "title": "Color Scheme Creator"
+  },
+  "settings": {
+    "iconColor": {
+      "desc": "Couleur de l'icône dans la barre.",
+      "label": "Couleur de l'icône"
+    }
+  }, 
+  "widget": {
+    "tooltip": "Color Scheme Creator"
+  }
+}

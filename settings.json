@@ -9,5 +9,58 @@
   "pinnedApps": [
     "kitty",
     "google-chrome"
-  ]
+  ],
+  "monitors": [
+    {
+      "name": "HDMI-A-1",
+      "resW": 1920,
+      "resH": 1080,
+      "rate": 60,
+      "x": 0,
+      "y": 0,
+      "scale": 1,
+      "transform": 0
+    }
+  ],
+  "theme": {
+    "mode": "mocha",
+    "overrides": {}
+  },
+  "minibubbles": {
+    "enabled": [
+      "Volume",
+      "Notif",
+      "Vpn",
+      "Timer",
+      "Music",
+      "Game",
+      "Stopwatch",
+      "Stash",
+      "Clock",
+      "Recording",
+      "Discord"
+    ],
+    "timing": {
+      "showMs": 0,
+      "hideMs": 180,
+      "easing": "easeOutCubic"
+    }
+  },
+  "pages": {
+    "enabled": [
+      "Music",
+      "Notifs",
+      "NotifExpanded",
+      "Stash",
+      "Recording",
+      "Game",
+      "Discord",
+      "Timer",
+      "Clock"
+    ],
+    "animations": {
+      "duration": 250,
+      "easing": "easeOutCubic"
+    }
+  }
 }

@@ -1,0 +1,31 @@
+{
+    "id": "cookie-clock",
+    "name": "Cookie Clock",
+    "version": "1.0.1",
+    "minNoctaliaVersion": "3.6.0",
+    "author": "elrondforwin",
+    "license": "GPLv3",
+    "repository": "https://github.com/noctalia-dev/noctalia-plugins",
+    "description": "An analog cookie-shaped clock desktop widget. Features a sine-wave cookie background, hour/minute/second hands, dial marks and date bubbless.",
+    "tags": ["Desktop", "Fun"],
+    "entryPoints": {
+        "desktopWidget": "DesktopWidget.qml",
+        "desktopWidgetSettings": "DesktopWidgetSettings.qml"
+    },
+    "dependencies": {
+        "plugins": []
+    },
+    "metadata": {
+        "defaultSettings": {
+            "sides": 9,
+            "dialStyle": "dots",
+            "hourHandStyle": "fill",
+            "minuteHandStyle": "medium",
+            "secondHandStyle": "dot",
+            "dateStyle": "bubble",
+            "showSeconds": true,
+            "showHourMarks": false,
+            "backgroundOpacity": 1.0
+        }
+    }
+}

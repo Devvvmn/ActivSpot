@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import "../pet"
+import "../themes"
 
 Row {
     id: row
@@ -31,8 +32,8 @@ Row {
     // Title + artist
     ColumnLayout {
         spacing: -1; anchors.verticalCenter: parent.verticalCenter
-        Text { text: island.musicData.title || "Unknown"; font.family: "JetBrains Mono"; font.pixelSize: island.s(12); font.weight: Font.Black; color: island.text; Layout.maximumWidth: island.s(200); elide: Text.ElideRight }
-        Text { text: island.musicData.artist || ""; visible: !!island.musicData.artist; font.family: "JetBrains Mono"; font.pixelSize: island.s(9); color: island.subtext0; Layout.maximumWidth: island.s(200); elide: Text.ElideRight }
+        Text { text: island.musicData.title || "Unknown"; font.family: Theme.fontUI; font.pixelSize: island.s(12); font.weight: Font.SemiBold; color: island.text; Layout.maximumWidth: island.s(200); elide: Text.ElideRight }
+        Text { text: island.musicData.artist || ""; visible: !!island.musicData.artist; font.family: Theme.fontUI; font.pixelSize: island.s(10); font.weight: Font.Regular; color: island.subtext0; Layout.maximumWidth: island.s(200); elide: Text.ElideRight }
     }
 
     // Playback controls
@@ -104,6 +105,6 @@ Row {
         playing: island.musicData.status === "Playing"
         notifActive: island.notifActive || island.notifBadgeVisible
         showQuestion: false
-        catColor: island.text; eyeColor: island.base
+        catColor: island.text; eyeColor: island.base; accentColor: island.mauve
     }
 }
