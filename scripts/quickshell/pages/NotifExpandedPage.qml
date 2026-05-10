@@ -38,13 +38,28 @@ Item {
                 border.width: 1; border.color: Qt.rgba(island.peach.r, island.peach.g, island.peach.b, 0.25)
                 Image {
                     id: notifIconImg; anchors.fill: parent; anchors.margins: island.s(5)
-                    source: {
-                        let ic = island.notifData ? (island.notifData.icon || "") : ""
-                        if (ic === "") return ""
-                        if (ic.startsWith("/") || ic.startsWith("file://") || ic.startsWith("http")) return ic
-                        return "image://theme/" + ic
-                    }
                     fillMode: Image.PreserveAspectFit; asynchronous: true
+
+                    property string iconName: island.notifData ? (island.notifData.icon || "") : ""
+                    readonly property bool iconIsPath: iconName !== "" && (
+                        iconName.startsWith("/") || iconName.startsWith("file://") || iconName.startsWith("http"))
+                    property int iconTry: 0
+                    onIconNameChanged: iconTry = 0
+
+                    source: {
+                        if (iconName === "") return ""
+                        if (iconIsPath)     return iconName
+                        switch (iconTry) {
+                        case 0: return "image://theme/" + iconName
+                        case 1: return "file:///var/lib/flatpak/exports/share/icons/hicolor/128x128/apps/" + iconName + ".png"
+                        case 2: return "file:///var/lib/flatpak/exports/share/icons/hicolor/256x256/apps/"  + iconName + ".png"
+                        case 3: return "file:///var/lib/flatpak/exports/share/icons/hicolor/scalable/apps/" + iconName + ".svg"
+                        default: return ""
+                        }
+                    }
+                    onStatusChanged: {
+                        if (status === Image.Error && !iconIsPath && iconTry < 3) iconTry++
+                    }
                 }
                 Text {
                     anchors.centerIn: parent; text: "󰵙"

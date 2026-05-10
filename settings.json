@@ -37,8 +37,8 @@
       "Stopwatch",
       "Stash",
       "Clock",
-      "Recording",
-      "Discord"
+      "Discord",
+      "Recording"
     ],
     "timing": {
       "showMs": 0,
@@ -55,7 +55,6 @@
       "Recording",
       "Game",
       "Discord",
-      "Timer",
       "Clock"
     ],
     "animations": {

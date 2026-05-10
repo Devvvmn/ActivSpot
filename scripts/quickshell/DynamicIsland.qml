@@ -541,7 +541,7 @@ PanelWindow {
         let items = [];
         for (let i = 0; i < Math.min(notifHistory.count, 100); i++) {
             let it = notifHistory.get(i);
-            items.push({ appName: it.appName, title: it.title, body: it.body, icon: it.icon });
+            items.push({ appName: it.appName, title: it.title, body: it.body, icon: it.icon, timestamp: it.timestamp || 0 });
         }
         Quickshell.execDetached(["bash", "-c",
             "mkdir -p ~/.cache/quickshell && printf '%s' \"$1\" > ~/.cache/quickshell/notifications.json",
@@ -1033,10 +1033,11 @@ PanelWindow {
                     if (Array.isArray(items)) {
                         for (let i = 0; i < Math.min(items.length, 100); i++) {
                             notifHistory.append({
-                                appName: items[i].appName || "System",
-                                title:   items[i].title   || "",
-                                body:    items[i].body    || "",
-                                icon:    items[i].icon    || ""
+                                appName:   items[i].appName   || "System",
+                                title:     items[i].title     || "",
+                                body:      items[i].body      || "",
+                                icon:      items[i].icon      || "",
+                                timestamp: items[i].timestamp || 0
                             });
                         }
                     }
@@ -1906,10 +1907,11 @@ PanelWindow {
                     try {
                         let n = JSON.parse(data);
                         let item = {
-                            appName: n.appName || "System",
-                            title:   n.title   || "",
-                            body:    n.body    || "",
-                            icon:    n.icon    || ""
+                            appName:   n.appName || "System",
+                            title:     n.title   || "",
+                            body:      n.body    || "",
+                            icon:      n.icon    || "",
+                            timestamp: Date.now()
                         };
 
                         // Always persist to history

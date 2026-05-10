@@ -28,13 +28,13 @@ Row {
         spacing: island.s(6); anchors.verticalCenter: parent.verticalCenter
         Text {
             text: island.weatherIcon; visible: island.weatherIcon !== ""
-            font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(18)
+            font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(22)
             color: island.mauve
             anchors.verticalCenter: parent.verticalCenter
         }
         Text {
             text: island.weatherTemp; visible: island.weatherTemp !== "--°"
-            font.family: "JetBrains Mono"; font.pixelSize: island.s(13); font.weight: Font.Black
+            font.family: "JetBrains Mono"; font.pixelSize: island.s(16); font.weight: Font.Black
             color: island.peach
             anchors.verticalCenter: parent.verticalCenter
         }

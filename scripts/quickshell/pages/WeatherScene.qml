@@ -101,9 +101,6 @@ Item {
             gradient: Gradient {
                 GradientStop {
                     position: 0.0
-                    // Heavy weather (storm/rain/snow/fog) overrides time-of-day
-                    // for atmosphere; clear and cloudy states inherit `_todTop`
-                    // so dawn/day/dusk/night reads distinctly.
                     color: {
                         switch (root.state) {
                         case "storm":          return Qt.rgba(0.08, 0.08, 0.16, 0.65)
@@ -112,8 +109,6 @@ Item {
                         case "fog":            return Qt.rgba(0.55, 0.57, 0.62, 0.35)
                         case "overcast":
                         case "overcast-night":
-                            // Overcast is mostly grey but inherits a hint of the
-                            // current time-of-day tint via alpha-mix.
                             return Qt.rgba(
                                 root._todTop.r * 0.4 + 0.32,
                                 root._todTop.g * 0.4 + 0.32,
@@ -151,6 +146,7 @@ Item {
                 width: island.s(1.5 + (index % 3)); height: width
                 radius: width / 2
                 color: "white"
+                z: 10
                 x: parent.width  * seedX * 0.95
                 y: parent.height * seedY * 0.55
                 opacity: star.starBase > 0 ? (star.starBase + (index % 5) * 0.10) : 0
@@ -170,7 +166,7 @@ Item {
         // parallax: back (slow, faint, large) → front (fast, opaque, small).
         Repeater {
             id: cloudRepeater
-            model: 4
+            model: 6
             delegate: Image {
                 readonly property bool show: root.state === "cloudy"     || root.state === "cloudy-night"
                                            || root.state === "overcast"  || root.state === "overcast-night"
@@ -184,13 +180,15 @@ Item {
                                                   : (tier === 1 ? 0.28 : 0.38)
 
                 source: "../assets/weather/cloudy.svg"
-                width: cloudW; height: cloudW * 0.55
+                width: cloudW; height: cloudW * 0.8
+                // SVG viewBox is 512×512 — match aspect to avoid blurry/pixelated
+                // edges from rasterizing a square SVG into a non-square buffer.
                 sourceSize.width: cloudW * 2
-                sourceSize.height: cloudW * 1.2
+                sourceSize.height: cloudW * 2
                 // Horizon strip: clouds sit between 2% and 14% of scene height.
                 y: parent.height * (0.02 + tier * 0.04 + (index % 2) * 0.02)
                 x: -cloudW + (root.width + cloudW * 2) * (index / 4)
-                z: tier
+                z: 10 + tier
                 fillMode: Image.PreserveAspectFit
                 smooth: true
                 opacity: show
@@ -238,6 +236,7 @@ Item {
             smooth: true
             x: parent.width  * 0.85 - width / 2
             y: parent.height * 0.13 - height / 2
+            z: 10
             opacity: _showHero ? 0.85 : 0.0
             visible: opacity > 0.001
 
@@ -369,16 +368,17 @@ Item {
         }
 
         // ── Content scrim ──────────────────────────────────────────────
-        // Darker mid + bottom so hero clock and weather text read cleanly
-        // over the parallax sky. Top stays clear so clouds remain visible.
-        Rectangle {
+        // Pre-baked PNG with the alpha ramp (0 → 0.75 of base) and a tiny
+        // gaussian dither (σ≈4) embedded at generation time. Banding is
+        // physically impossible — the file already contains randomized
+        // alpha around each step.
+        Image {
             anchors.fill: parent
-            gradient: Gradient {
-                GradientStop { position: 0.00; color: Qt.rgba(island.base.r, island.base.g, island.base.b, 0.0) }
-                GradientStop { position: 0.18; color: Qt.rgba(island.base.r, island.base.g, island.base.b, 0.10) }
-                GradientStop { position: 0.45; color: Qt.rgba(island.base.r, island.base.g, island.base.b, 0.55) }
-                GradientStop { position: 1.00; color: Qt.rgba(island.base.r, island.base.g, island.base.b, 0.78) }
-            }
+            source: "../assets/scrim.png"
+            fillMode: Image.Stretch
+            smooth: true
         }
+
+
     }
 }
