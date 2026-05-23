@@ -81,7 +81,7 @@ resolve_location() {
     if [ -f "$location_cache_file" ] && command -v jq >/dev/null 2>&1; then
         resolved_lat=$(jq -r '.latitude // .lat // empty' "$location_cache_file" 2>/dev/null)
         resolved_lon=$(jq -r '.longitude // .lon // empty' "$location_cache_file" 2>/dev/null)
-        resolved_tz=$(jq -r '.timezone // empty' "$location_cache_file" 2>/dev/null)
+        resolved_tz=$(jq -r 'if (.timezone | type) == "object" then (.timezone.id // .timezone.name // empty) else (.timezone // empty) end' "$location_cache_file" 2>/dev/null)
         resolved_city=$(jq -r '.city // empty' "$location_cache_file" 2>/dev/null)
     fi
 }
@@ -170,16 +170,19 @@ get_data() {
     # ---------------------------------------------------------
     if [ -n "$resolved_lat" ] && [ -n "$resolved_lon" ]; then
         forecast_url="https://api.openweathermap.org/data/2.5/forecast?APPID=${KEY}&lat=${resolved_lat}&lon=${resolved_lon}&units=${UNIT}"
+        current_url="https://api.openweathermap.org/data/2.5/weather?APPID=${KEY}&lat=${resolved_lat}&lon=${resolved_lon}&units=${UNIT}"
     else
         if [ -z "$ID" ]; then
             write_dummy_data "Location unavailable"
             return
         fi
         forecast_url="https://api.openweathermap.org/data/2.5/forecast?APPID=${KEY}&id=${ID}&units=${UNIT}"
+        current_url="https://api.openweathermap.org/data/2.5/weather?APPID=${KEY}&id=${ID}&units=${UNIT}"
     fi
 
     # Do not use curl -f here; we need API error JSON bodies (401/429/etc).
     raw_api=$(curl -s --max-time 10 "$forecast_url")
+    raw_current=$(curl -s --max-time 10 "$current_url")
 
     api_cod=$(echo "$raw_api" | jq -r '.cod // empty' 2>/dev/null)
     api_msg=$(echo "$raw_api" | jq -r '.message // empty' 2>/dev/null)
@@ -311,7 +314,27 @@ get_data() {
             city_name="$resolved_city"
         fi
 
-        echo "{ \"forecast\": ${final_json}, \"meta\": { \"timezone\": \"${target_tz}\", \"city\": \"${city_name}\" } }" > "${json_file}"
+        # ---- Current conditions block (live, not 3h-slot forecast) ----
+        current_json="null"
+        cur_cod=$(echo "$raw_current" | jq -r '.cod // empty' 2>/dev/null)
+        if [[ "$cur_cod" == "200" ]]; then
+            c_code=$(echo "$raw_current" | jq -r '.weather[0].icon // empty')
+            c_icon=$(get_icon "$c_code" | cut -d'|' -f1)
+            c_hex=$(get_hex "$c_code")
+            c_temp=$(printf "%.1f" "$(echo "$raw_current" | jq -r '.main.temp')")
+            c_feels=$(printf "%.1f" "$(echo "$raw_current" | jq -r '.main.feels_like')")
+            c_hum=$(echo "$raw_current"  | jq -r '.main.humidity // 0')
+            c_wind=$(echo "$raw_current" | jq -r '.wind.speed // 0 | round')
+            c_desc=$(echo "$raw_current" | jq -r '.weather[0].description // empty' | sed -e "s/\b\(.\)/\u\1/g")
+            c_dt=$(echo "$raw_current"   | jq -r '.dt // 0')
+            current_json=$(jq -nc \
+                --arg icon "$c_icon" --arg hex "$c_hex" --arg desc "$c_desc" \
+                --arg temp "$c_temp" --arg feels "$c_feels" \
+                --arg hum "$c_hum" --arg wind "$c_wind" --arg dt "$c_dt" \
+                '{icon:$icon, hex:$hex, desc:$desc, temp:$temp, feels_like:$feels, humidity:$hum, wind:$wind, dt:($dt|tonumber)}')
+        fi
+
+        echo "{ \"forecast\": ${final_json}, \"current\": ${current_json}, \"meta\": { \"timezone\": \"${target_tz}\", \"city\": \"${city_name}\" } }" > "${json_file}"
     fi
 }
 
@@ -320,7 +343,7 @@ if [[ "$1" == "--getdata" ]]; then
     get_data
 
 elif [[ "$1" == "--json" ]]; then
-    CACHE_LIMIT=900
+    CACHE_LIMIT=300
     PENDING_RETRY_LIMIT=3600
 
     env_changed=0

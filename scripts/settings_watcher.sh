@@ -10,8 +10,21 @@ mkdir -p "$(dirname "$SETTINGS_FILE")"
 
 echo "Started watching $SETTINGS_FILE for changes..."
 
-# Loop endlessly, triggering only when the file is saved (closed after writing)
-while inotifywait -q -e close_write "$SETTINGS_FILE"; do
+# Single-instance guard — don't stack watchers if exec-once fires twice
+PIDFILE="$HOME/.cache/quickshell/settings_watcher.pid"
+mkdir -p "$(dirname "$PIDFILE")"
+if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE" 2>/dev/null)" 2>/dev/null; then
+    echo "Another settings_watcher already running ($(cat "$PIDFILE")) — exiting."
+    exit 0
+fi
+echo $$ > "$PIDFILE"
+trap 'rm -f "$PIDFILE"' EXIT
+
+# Loop endlessly, triggering only when the file is saved (closed after writing).
+# `inotifywait` exits non-zero if the file is replaced via rename (e.g. atomic
+# editor writes) — keep the loop alive across those.
+while :; do
+    inotifywait -q -e close_write,move_self "$SETTINGS_FILE" >/dev/null 2>&1 || { sleep 0.5; continue; }
     echo "Settings updated! Applying changes..."
 
     # Extract values using jq 
@@ -41,6 +54,9 @@ while inotifywait -q -e close_write "$SETTINGS_FILE"; do
         # Add a hash to comment it out if it isn't already
         sed -i 's|^exec-once = ~/.config/hypr/scripts/qs_manager.sh toggle guide.*|# exec-once = ~/.config/hypr/scripts/qs_manager.sh toggle guide \&|' "$HYPR_CONF"
     fi
+
+    # Parallax: push live to running hyprlax via ctl set (no restart)
+    bash "$HOME/.config/hypr/scripts/hyprlax_apply.sh" &
 
     # 3. Update Wallpaper Directory
     if [ -n "$WP_DIR" ] && [ "$WP_DIR" != "null" ]; then

@@ -21,6 +21,9 @@ Item {
     property var    appletOrder:      []
     property bool   editMode:         false
     property bool   showGroupFrames:  true
+    // Subtle dark substrate behind applet groups. Independent of theme/wallpaper
+    // — sits at z:-1 so applet colors aren't tinted, just framed.
+    property bool   subtleBackdrop:   false
 
     // ── Applet component registry ──────────────────────────────────────
     Component { id: helpComp;    HelpApplet       { bar: barZone.bar; editMode: barZone.editMode } }
@@ -29,6 +32,7 @@ Item {
     Component { id: wifiComp;    WifiApplet       { bar: barZone.bar; editMode: barZone.editMode } }
     Component { id: btComp;      BluetoothApplet  { bar: barZone.bar; editMode: barZone.editMode } }
     Component { id: batComp;     BatteryApplet    { bar: barZone.bar; editMode: barZone.editMode } }
+    Component { id: pulseComp;   PulseApplet      { bar: barZone.bar; editMode: barZone.editMode } }
     Component { id: trayComp;    SystemTrayApplet { bar: barZone.bar; editMode: barZone.editMode } }
     Component { id: spacerComp;  SpacerApplet     { bar: barZone.bar; editMode: barZone.editMode } }
     Component { id: separatorComp; SeparatorApplet { bar: barZone.bar; editMode: barZone.editMode } }
@@ -45,6 +49,7 @@ Item {
         { id: "wifi",    comp: wifiComp,   label: "Network",     icon: "󰤨" },
         { id: "bt",      comp: btComp,     label: "Bluetooth",   icon: "󰂱" },
         { id: "battery", comp: batComp,    label: "Battery",     icon: "󰁹" },
+        { id: "pulse",   comp: pulseComp,   label: "Pulse",       icon: "󰏤" },
         { id: "tray",    comp: trayComp,   label: "System Tray", icon: "󱒔" },
         { id: "spacer",    comp: spacerComp,    label: "Spacer",    icon: "󱐋" },
         { id: "separator", comp: separatorComp, label: "Separator", icon: "│" },
@@ -199,6 +204,38 @@ Item {
             && (barZone.side === "left" || barZone.bar.isDataReady)
             && !barZone._showZone
         onTriggered: barZone._showZone = true
+    }
+
+    // ── Subtle dark backdrop (always-on, theme-independent) ────────────
+    // Sits at z:-1 behind applets; uses the same _groupBounds as showGroupFrames
+    // so spacer splits the right zone into two pills (tray | rest).
+    Repeater {
+        model: (barZone.subtleBackdrop && !barZone.editMode) ? barZone._groupBounds : []
+        delegate: Rectangle {
+            required property var modelData
+
+            x: modelData.gx - modelData.lp - barZone.bar.s(6)
+            y: (barZone.height - height) / 2 + barZone.bar.s(1)
+            width:  modelData.gw + modelData.lp + modelData.rp + barZone.bar.s(12)
+            height: barZone.bar ? barZone.bar.barHeight : 36
+            radius: height / 2
+
+            color: Qt.rgba(0, 0, 0, 0.06)
+
+            opacity: barZone._showZone ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
+            Behavior on x      { NumberAnimation { duration: 160; easing.type: Easing.OutExpo } }
+            Behavior on width  { NumberAnimation { duration: 160; easing.type: Easing.OutExpo } }
+
+            z: -1
+
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                blurEnabled: true
+                blurMax:     14
+                blur:        0.65
+            }
+        }
     }
 
     // ── Group background frames (split by spacer, right zone only) ────

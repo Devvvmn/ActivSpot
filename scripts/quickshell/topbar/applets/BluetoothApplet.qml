@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 
 Rectangle {
@@ -41,12 +42,21 @@ Rectangle {
         id: btRow
         anchors.centerIn: parent
         spacing: bar.s(8)
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.55)
+            shadowBlur: 0.5
+            shadowHorizontalOffset: 0
+            shadowVerticalOffset: 1
+        }
         Text {
             anchors.verticalCenter: parent.verticalCenter
             text: bar.btIcon
             font.family: "Iosevka Nerd Font"
             font.pixelSize: bar.s(16)
-            color: bar.isBtOn ? bar.base : bar.subtext0
+            color: bar.isBtOn ? bar.base : bar.adaptiveSubtext
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
@@ -55,7 +65,7 @@ Rectangle {
             font.family: "JetBrains Mono"
             font.pixelSize: bar.s(13)
             font.weight: Font.DemiBold
-            color: bar.isBtOn ? bar.base : bar.text
+            color: bar.isBtOn ? bar.base : bar.adaptiveText
             width: Math.min(implicitWidth, bar.s(100))
             elide: Text.ElideRight
         }

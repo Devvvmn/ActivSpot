@@ -23,11 +23,23 @@ Row {
         width: island.s(26); height: island.s(26); radius: island.s(7); clip: true
         color: island.surface0; anchors.verticalCenter: parent.verticalCenter
         Image {
-            anchors.fill: parent
+          id: collapsedArt
+          anchors.fill: parent
             source: island.musicData.artUrl || ""
             fillMode: Image.PreserveAspectCrop; asynchronous: true
         }
-    }
+        Item{
+          anchors.fill: parent
+          visible: collapsedArt.status !== Image.Ready
+          Text{
+            anchors.centerIn: parent
+            text: "󰝛"
+            font.family: "Iosevka Nerd Font"
+            font.pixelSize: island.s(14)
+            color: island.subtext0
+          }
+        }
+      }
 
     // Title + artist
     ColumnLayout {

@@ -9,9 +9,10 @@ import { MonitorsSection } from "./sections/MonitorsSection";
 import { PinnedAppsSection } from "./sections/PinnedAppsSection";
 import { KeyboardSection } from "./sections/KeyboardSection";
 import { BindingsSection } from "./sections/BindingsSection";
+import { ParallaxSection } from "./sections/ParallaxSection";
 import { RawSection } from "./sections/RawSection";
 
-type Tab = "theme" | "bubbles" | "pages" | "monitors" | "pinned" | "keyboard" | "bindings" | "raw";
+type Tab = "theme" | "bubbles" | "pages" | "monitors" | "pinned" | "keyboard" | "bindings" | "parallax" | "raw";
 
 const NAV: { id: Tab; label: string; sub: string; icon: string }[] = [
   { id: "theme",    label: "Theme",    sub: "Catppuccin · palette",   icon: "palette" },
@@ -21,6 +22,7 @@ const NAV: { id: Tab; label: string; sub: string; icon: string }[] = [
   { id: "pinned",   label: "Apps",     sub: "Dock pins",              icon: "pin" },
   { id: "keyboard", label: "Keyboard", sub: "Layouts · XKB",          icon: "keyboard" },
   { id: "bindings", label: "Bindings", sub: "hyprland.conf",          icon: "key" },
+  { id: "parallax", label: "Parallax", sub: "Wallpaper motion",       icon: "monitor" },
   { id: "raw",      label: "Raw JSON", sub: "settings.json",          icon: "code" },
 ];
 
@@ -194,6 +196,7 @@ export function App() {
               {tab === "pinned"    && <PinnedAppsSection s={draft} set={set} />}
               {tab === "keyboard"  && <KeyboardSection s={draft} set={set} />}
               {tab === "bindings"  && <BindingsSection />}
+              {tab === "parallax"  && <ParallaxSection s={draft} set={set} />}
               {tab === "raw"       && <RawSection     s={draft} set={setAll} />}
             </div>
 

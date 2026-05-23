@@ -44,6 +44,18 @@ export interface PagesCfg {
   animations: { duration: number; easing: string };
 }
 
+export interface ParallaxCfg {
+  shift: number;        // % of screen per workspace (hyprlax --shift, default 0.3)
+  duration: number;     // seconds (hyprlax --duration, default 1.0)
+  easing: string;       // linear|quad|cubic|quart|quint|sine|expo|circ|back|elastic|bounce|snap
+  fps: number;          // hyprlax --fps, default 60
+  input: string;        // hyprlax --input, e.g. "workspace" or "cursor:0.3,workspace"
+}
+
+export const PARALLAX_EASINGS = [
+  "linear","quad","cubic","quart","quint","sine","expo","circ","back","elastic","bounce","snap",
+] as const;
+
 export interface Settings {
   uiScale: number;
   openGuideAtStartup: boolean;
@@ -57,6 +69,7 @@ export interface Settings {
   theme?: ThemeCfg;
   minibubbles?: BubbleCfg;
   pages?: PagesCfg;
+  parallax?: ParallaxCfg;
   [k: string]: unknown;
 }
 
@@ -77,8 +90,9 @@ export interface Keybind {
   raw: string;
 }
 
-export const defaults: Required<Pick<Settings, "theme" | "minibubbles" | "pages">> = {
+export const defaults: Required<Pick<Settings, "theme" | "minibubbles" | "pages" | "parallax">> = {
   theme: { mode: "mocha", overrides: {} },
   minibubbles: { enabled: [], timing: { showMs: 220, hideMs: 180, easing: "easeOutCubic" } },
   pages: { enabled: [], animations: { duration: 250, easing: "easeOutCubic" } },
+  parallax: { shift: 0.3, duration: 1.0, easing: "cubic", fps: 60, input: "cursor:0.0001,workspace" },
 };

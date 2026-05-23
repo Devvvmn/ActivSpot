@@ -53,7 +53,7 @@ PACMAN_PKGS=(
     inotify-tools ffmpeg socat brightnessctl nmap
 
     # Wallpaper & colour
-    matugen
+    matugen imagemagick
 
     # Media & audio
     playerctl cava pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber
@@ -96,7 +96,7 @@ fi
 header "AUR packages ($AUR)"
 AUR_PKGS=(
     quickshell-git
-    awww
+    hyprlax-git
     ttf-martian-mono-nerd
     ttf-iosevka-nerd
     localsend-bin

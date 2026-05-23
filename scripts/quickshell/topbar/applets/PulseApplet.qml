@@ -7,22 +7,22 @@ Rectangle {
     property var bar
     property bool editMode: false
 
-    property bool isHovered: batMouse.containsMouse
+    property bool isHovered: pulseMouse.containsMouse
 
     color: "transparent"
     border.width: 0
 
     implicitHeight: bar.barHeight
-    implicitWidth:  batRow.width + bar.s(16)
+    implicitWidth:  pulseRow.width + bar.s(16)
     clip: true
 
     Behavior on implicitWidth { NumberAnimation { duration: 240; easing.type: Easing.OutQuint } }
 
-    scale: batMouse.pressed ? 0.95 : (isHovered ? 1.04 : 1.0)
+    scale: pulseMouse.pressed ? 0.95 : (isHovered ? 1.04 : 1.0)
     Behavior on scale { NumberAnimation { duration: 130; easing.type: Easing.OutCubic } }
 
     Row {
-        id: batRow
+        id: pulseRow
         anchors.centerIn: parent
         spacing: bar.s(6)
 
@@ -37,18 +37,15 @@ Rectangle {
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: bar.batCap <= 20 && !bar.isCharging ? "󰂃" : bar.batIcon
+            text: bar.pulseIcon || "󰏤"
             font.family: "Iosevka Nerd Font"
             font.pixelSize: bar.s(16)
-            color: bar.batCap <= 20 && !bar.isCharging ? bar.red
-                 : bar.isCharging ? bar.green
-                 : bar.adaptiveText
+            color: bar.adaptiveText
             Behavior on color { ColorAnimation { duration: 250 } }
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            visible: !bar.isDesktop
-            text: bar.batPercent
+            text: bar.pulseRate || "72"
             font.family: "JetBrains Mono"
             font.pixelSize: bar.s(12)
             font.weight: Font.DemiBold
@@ -58,10 +55,10 @@ Rectangle {
     }
 
     MouseArea {
-        id: batMouse
+        id: pulseMouse
         anchors.fill: parent
         hoverEnabled: true
         enabled: !root.editMode
-        onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle battery"])
+        onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle pulse"])
     }
 }

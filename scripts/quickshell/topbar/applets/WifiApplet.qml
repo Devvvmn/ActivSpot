@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 
 Rectangle {
@@ -6,33 +7,17 @@ Rectangle {
     property var bar
     property bool editMode: false
 
-    height: bar.barHeight - bar.s(8)
-    implicitHeight: height
-
     property bool isHovered: wifiMouse.containsMouse
     property bool isActive:  bar.showEthernet ? (bar.ethStatus === "Connected") : bar.isWifiOn
 
-    radius: bar.s(16)
-    color: bar.pillColor
+    color: "transparent"
+    border.width: 0
 
-    implicitWidth:  wifiRow.width + bar.s(24)
-    border.width: 1
-    border.color: bar.pillBorderColor
+    implicitHeight: bar.barHeight
+    implicitWidth:  wifiRow.width + bar.s(16)
     clip: true
 
     Behavior on implicitWidth { NumberAnimation { duration: 240; easing.type: Easing.OutQuint } }
-    Behavior on color         { ColorAnimation  { duration: 200 } }
-
-    Rectangle {
-        anchors.fill: parent
-        radius: bar.s(14)
-        opacity: root.isActive ? 1.0 : 0.0
-        Behavior on opacity { NumberAnimation { duration: 180 } }
-        color: bar.glassTheme
-            ? Qt.rgba(bar.mauve.r, bar.mauve.g, bar.mauve.b, 0.12)
-            : bar.base
-        Behavior on color { ColorAnimation { duration: 260; easing.type: Easing.InOutCubic } }
-    }
 
     scale: wifiMouse.pressed ? 0.95 : (isHovered ? 1.04 : 1.0)
     Behavior on scale { NumberAnimation { duration: 130; easing.type: Easing.OutCubic } }
@@ -40,13 +25,24 @@ Rectangle {
     Row {
         id: wifiRow
         anchors.centerIn: parent
-        spacing: bar.s(8)
+        spacing: bar.s(6)
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.55)
+            shadowBlur: 0.5
+            shadowHorizontalOffset: 0
+            shadowVerticalOffset: 1
+        }
+
         Text {
             anchors.verticalCenter: parent.verticalCenter
             text: bar.showEthernet ? "󰈀" : bar.wifiIcon
             font.family: "Iosevka Nerd Font"
             font.pixelSize: bar.s(16)
-            color: root.isActive ? bar.text : bar.subtext0
+            color: root.isActive ? bar.adaptiveText : bar.adaptiveSubtext
+            Behavior on color { ColorAnimation { duration: 250 } }
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
@@ -55,11 +51,12 @@ Rectangle {
                 : (bar.isWifiOn ? (bar.wifiSsid !== "" ? bar.wifiSsid : "On") : "Off")
             visible: text !== ""
             font.family: "JetBrains Mono"
-            font.pixelSize: bar.s(13)
+            font.pixelSize: bar.s(12)
             font.weight: Font.DemiBold
-            color: root.isActive ? bar.text : bar.text
-            width: Math.min(implicitWidth, bar.s(100))
+            color: root.isActive ? bar.adaptiveText : bar.adaptiveSubtext
+            width: Math.min(implicitWidth, bar.s(90))
             elide: Text.ElideRight
+            Behavior on color { ColorAnimation { duration: 250 } }
         }
     }
 

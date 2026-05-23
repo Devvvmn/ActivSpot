@@ -36,9 +36,9 @@
       "Game",
       "Stopwatch",
       "Stash",
-      "Clock",
       "Discord",
-      "Recording"
+      "Recording",
+      "Clock"
     ],
     "timing": {
       "showMs": 0,
@@ -58,8 +58,15 @@
       "Clock"
     ],
     "animations": {
-      "duration": 250,
+      "duration": 300,
       "easing": "easeOutCubic"
     }
+  },
+  "parallax": {
+    "shift": 0.3,
+    "duration": 1,
+    "easing": "cubic",
+    "fps": 60,
+    "input": "cursor:0.00001,workspace"
   }
 }

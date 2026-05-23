@@ -26,8 +26,9 @@ PanelWindow {
 
     // ─── State ───────────────────────────────────────────────────────────────
 
-    property bool open:     false
-    property bool _showing: false
+    property bool open:            false
+    property bool _showing:        false
+    property bool webSearchSelected: false
 
     Timer {
         id: hideTimer; interval: 600
@@ -75,7 +76,17 @@ PanelWindow {
         return qi === q.length ? 1 : 0
     }
 
+    function openWebSearch() {
+        let q = searchInput.text.trim()
+        if (!q) return
+        webSearchProc.searchQuery = q
+        webSearchProc.running = false
+        webSearchProc.running = true
+        open = false
+    }
+
     function filterApps(query) {
+        webSearchSelected = false
         filteredModel.clear()
         let q = query.trim()
         if (!q) {
@@ -129,6 +140,15 @@ PanelWindow {
         id: launchProc
         property string launchCmd: ""
         command: ["bash", "-c", "nohup sh -c " + JSON.stringify(launchCmd) + " >/dev/null 2>&1 &"]
+    }
+
+    Process {
+        id: webSearchProc
+        property string searchQuery: ""
+        command: ["bash", "-c",
+            "xdg-open $(python3 -c 'import sys,urllib.parse;print(\"https://www.google.com/search?q=\"+urllib.parse.quote(sys.argv[1]))' " +
+            JSON.stringify(searchQuery) + ") >/dev/null 2>&1 &"
+        ]
     }
 
     // ─── IPC ──────────────────────────────────────────────────────────────────
@@ -186,7 +206,7 @@ PanelWindow {
         id: card
 
         // Final open height (used to compute target y before animation ends)
-        property int openH: s(70) + Math.min(filteredModel.count, 9) * s(54)
+        property int openH: s(70) + (searchInput.text.length > 0 ? s(54) : 0) + Math.min(filteredModel.count, 9) * s(54)
 
         width:  launcherRoot.open ? s(660) : s(230)
         height: launcherRoot.open ? openH  : s(40)
@@ -238,7 +258,7 @@ PanelWindow {
 
                         Text {
                             visible: searchInput.text.length === 0
-                            text: "Search apps..."
+                            text: "Search apps or web..."
                             font.family: "Ubuntu"; font.pixelSize: s(15)
                             color: Qt.rgba(theme.subtext0.r, theme.subtext0.g, theme.subtext0.b, 0.7)
                             anchors.verticalCenter: parent.verticalCenter
@@ -254,9 +274,32 @@ PanelWindow {
 
                             onTextChanged: launcherRoot.filterApps(text)
 
-                            Keys.onUpPressed:     function(event) { appList.decrementCurrentIndex(); event.accepted = true }
-                            Keys.onDownPressed:   function(event) { appList.incrementCurrentIndex(); event.accepted = true }
-                            Keys.onReturnPressed: function(event) { launcherRoot.launchApp(appList.currentIndex); event.accepted = true }
+                            Keys.onUpPressed: function(event) {
+                                if (webSearchSelected) {
+                                    webSearchSelected = false
+                                    if (filteredModel.count > 0) appList.currentIndex = filteredModel.count - 1
+                                } else {
+                                    appList.decrementCurrentIndex()
+                                }
+                                event.accepted = true
+                            }
+                            Keys.onDownPressed: function(event) {
+                                if (!webSearchSelected && searchInput.text.length > 0 &&
+                                        (filteredModel.count === 0 || appList.currentIndex >= filteredModel.count - 1)) {
+                                    webSearchSelected = true
+                                } else if (!webSearchSelected) {
+                                    appList.incrementCurrentIndex()
+                                }
+                                event.accepted = true
+                            }
+                            Keys.onReturnPressed: function(event) {
+                                if (webSearchSelected || (filteredModel.count === 0 && searchInput.text.length > 0)) {
+                                    launcherRoot.openWebSearch()
+                                } else {
+                                    launcherRoot.launchApp(appList.currentIndex)
+                                }
+                                event.accepted = true
+                            }
                             Keys.onEscapePressed: function(event) { launcherRoot.open = false; event.accepted = true }
                         }
                     }
@@ -334,17 +377,51 @@ PanelWindow {
                     }
                 }
 
-                Item {
-                    visible: filteredModel.count === 0 && searchInput.text.length > 0
-                    width: parent.width
-                    height: s(100)
-                    Text {
-                        anchors.centerIn: parent
-                        text: "No matches"
-                        font.family: "JetBrains Mono"
-                        font.pixelSize: s(13)
-                        color: theme.subtext0
-                        opacity: 0.6
+                // ── Web search row ───────────────────────────────────────────
+                Rectangle {
+                    visible: searchInput.text.length > 0
+                    width: parent.width; height: s(54)
+                    radius: s(12)
+                    color: webSearchSelected
+                        ? Qt.rgba(theme.surface0.r, theme.surface0.g, theme.surface0.b, 0.85)
+                        : "transparent"
+                    Behavior on color { ColorAnimation { duration: 100 } }
+
+                    Rectangle {
+                        visible: filteredModel.count > 0
+                        anchors { top: parent.top; left: parent.left; right: parent.right }
+                        height: 1
+                        color: Qt.rgba(theme.surface2.r, theme.surface2.g, theme.surface2.b, 0.2)
+                    }
+
+                    Row {
+                        anchors { left: parent.left; right: parent.right; margins: s(10); verticalCenter: parent.verticalCenter }
+                        spacing: s(10)
+
+                        Text {
+                            text: "󰖟"; font.family: "Iosevka Nerd Font"; font.pixelSize: s(20)
+                            color: webSearchSelected ? theme.mauve : theme.subtext0
+                            anchors.verticalCenter: parent.verticalCenter
+                            Behavior on color { ColorAnimation { duration: 100 } }
+                        }
+
+                        Text {
+                            width: parent.width - s(32) - s(10)
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "Search web for \"" + searchInput.text + "\""
+                            font.family: "Ubuntu"; font.pixelSize: s(14); font.weight: Font.DemiBold
+                            color: webSearchSelected ? theme.text : theme.subtext0
+                            elide: Text.ElideRight
+                            Behavior on color { ColorAnimation { duration: 100 } }
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onClicked: launcherRoot.openWebSearch()
+                        onEntered: launcherRoot.webSearchSelected = true
+                        onExited:  launcherRoot.webSearchSelected = false
                     }
                 }
             }

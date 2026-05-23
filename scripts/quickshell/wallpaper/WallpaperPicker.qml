@@ -97,14 +97,10 @@ Item {
         }
 
         const escapeBash = (str) => String(str).replace(/(["\\$`])/g, '\\$1');
-        
-        // 2. HARDWARE ADAPTATION: Force Vulkan rendering
-        // FIX: Hardcoded to bypass the Quickshell.env check since the backend is required.
-        const renderOverride = "env WGPU_BACKEND=vulkan ";
-        const randomTransition = window.transitions[Math.floor(Math.random() * window.transitions.length)];
-        
-        // 3. AUTO-REVIVE COMMAND: Ensure daemon is alive before sending IPC commands
-        const ensureDaemonCmd = `if ! pgrep -x "awww-daemon" > /dev/null; then awww-daemon >/dev/null 2>&1 & sleep 0.2; fi`;
+
+        // Apply wallpaper via hyprlax — delegate to hyprlax_start.sh which
+        // reads parallax options from settings.json and handles pkill/relaunch.
+        const applyHyprlaxCmd = `bash "$HOME/.config/hypr/scripts/hyprlax_start.sh" "$WALL_FILE"`;
         
         if (window.currentFilter === "Search" && window.hasSearched) {
             let alreadyExists = window.isDownloaded(safeFileName);
@@ -125,21 +121,13 @@ Item {
                         
                         cp "$DEST_FILE" /tmp/lock_bg.png || true
                         pkill mpvpaper || true
-                        
-                        ${ensureDaemonCmd}
-                        
-                        # Run matugen completely detached so it doesn't block awww execution
+
                         ( matugen image "$FINAL_THUMB" || true; bash "$RELOAD_SCRIPT" || true ) &
                         MATUGEN_PID=$!
-                        
-                        # DETERMINISTIC LOOP
-                        for i in {1..20}; do
-                            if ${renderOverride}awww img "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >/dev/null 2>&1; then
-                                break
-                            fi
-                            sleep 0.05
-                        done
-                        
+
+                        export WALL_FILE="$DEST_FILE"
+                        ${applyHyprlaxCmd}
+
                         wait $MATUGEN_PID
                     ) </dev/null >/dev/null 2>&1 & disown
                 `;
@@ -161,7 +149,9 @@ Item {
                         if [ -n "$URL" ]; then
                             curl -s -L -A "Mozilla/5.0" "$URL" -o "$DEST_FILE.tmp"
                             
-                            if file "$DEST_FILE.tmp" | grep -iq "webp"; then
+                            # Detect WebP by magic bytes (RIFF....WEBP) — grep on file(1)
+                                # output is unreliable because the filename itself can match.
+                                if head -c 12 "$DEST_FILE.tmp" | grep -aq WEBP; then
                                 magick "$DEST_FILE.tmp" "$DEST_FILE"
                                 rm -f "$DEST_FILE.tmp"
                             else
@@ -175,20 +165,13 @@ Item {
                             
                             cp "$DEST_FILE" /tmp/lock_bg.png || true
                             pkill mpvpaper || true
-                            
-                            ${ensureDaemonCmd}
-                            
+
                             ( matugen image "$FINAL_THUMB" || true; bash "$RELOAD_SCRIPT" || true ) &
                             MATUGEN_PID=$!
-                            
-                            # DETERMINISTIC LOOP
-                            for i in {1..20}; do
-                                if ${renderOverride}awww img "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >/dev/null 2>&1; then
-                                    break
-                                fi
-                                sleep 0.05
-                            done
-                            
+
+                            export WALL_FILE="$DEST_FILE"
+                            ${applyHyprlaxCmd}
+
                             wait $MATUGEN_PID
                         fi
                     ) </dev/null >/dev/null 2>&1 & disown
@@ -212,15 +195,7 @@ Item {
             wallpaperCmd = `mpvpaper -o 'loop --no-audio --hwdec=auto --profile=high-quality --video-sync=display-resample --interpolation --tscale=oversample' '*' "$WALL_FILE"`
             lockBgCmd = `cp "$THUMB_FILE" /tmp/lock_bg.png`
         } else {
-            wallpaperCmd = `
-                ${ensureDaemonCmd}
-                for i in {1..20}; do
-                    if ${renderOverride}awww img "$WALL_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >/dev/null 2>&1; then
-                        break
-                    fi
-                    sleep 0.05
-                done
-            `
+            wallpaperCmd = applyHyprlaxCmd
             lockBgCmd = `cp "$WALL_FILE" /tmp/lock_bg.png`
         }
 

@@ -465,6 +465,7 @@ Item {
     ListModel {
         id: modulesDataModel
         ListElement { title: "Battery & Power"; target: "battery"; icon: "󰁹"; desc: "Uptime tracking, power profiles, \nand battery health metrics."; preview: "previews/preview_battery.png" }
+        ListElement { title: "Pulse Rate"; target: "pulse"; icon: "󰏤"; desc: "Real-time heart rate monitoring \nplaceholder widget."; preview: "previews/preview_pulse.png" }
         ListElement { title: "Network Hub"; target: "network"; icon: "󰤨"; desc: "Wi-Fi and Bluetooth connection \nmanagement via nmcli/bluez."; preview: "previews/preview_network.png" }
         ListElement { title: "FocusTime"; target: "focustime"; icon: "󰄉"; desc: "Built-in Pomodoro timer daemon \nwith session tracking."; preview: "previews/preview_focustime.png" }
         ListElement { title: "Wallpaper Picker"; target: "wallpaper"; icon: ""; desc: "Live awww backend rendering \nwith Matugen color generation."; preview: "previews/preview_wallpaper.png" }
@@ -475,8 +476,6 @@ Item {
         dynamicKeybindsModel.clear();
         let binds = [
             { k1: "SUPER", k2: "RETURN", action: "Open Terminal (Kitty)", cmd: "kitty" },
-            { k1: "SUPER", k2: "D", action: "App Launcher (Drun)", cmd: "bash ~/.config/hypr/scripts/rofi_show.sh drun" },
-            { k1: "ALT", k2: "TAB", action: "Window Switcher", cmd: "bash ~/.config/hypr/scripts/rofi_show.sh window" },
             { k1: "SUPER", k2: "C", action: "Clipboard History", cmd: "bash ~/.config/hypr/scripts/rofi_clipboard.sh" },
             { k1: "SUPER", k2: "F", action: "Open Firefox", cmd: "firefox" },
             { k1: "SUPER", k2: "E", action: "Open Nautilus", cmd: "nautilus" },

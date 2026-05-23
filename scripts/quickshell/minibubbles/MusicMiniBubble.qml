@@ -72,10 +72,22 @@ BaseBubble {
             anchors.verticalCenter: parent.verticalCenter
 
             Image {
+                id: bubbleArt
                 anchors.fill: parent
                 source: island.musicData.artUrl || ""
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
+            }
+            Item{
+              anchors.fill: parent
+              visible: bubbleArt.status !== Image.Ready
+              Text{
+                anchors.centerIn: parent
+                text: "󰝛"
+                font.family: "Iosevka Nerd Font"
+                font.pixelSize: island.s(14)
+                color: island.subtext0
+              }
             }
         }
 

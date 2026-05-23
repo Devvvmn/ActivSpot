@@ -325,20 +325,56 @@ Item {
                             Rectangle {
                                 anchors.fill: parent
                                 color: island.surface1; radius: island.s(8); clip: true
+                                border.color: delegateMouse.containsMouse ? island.mauve : "transparent"
+                                border.width: island.s(1)
+                                Behavior on border.color { ColorAnimation { duration: 150 } }
 
                                 Image {
                                     id: imgPreview
                                     anchors.fill: parent
-                                    source: isDir ? "" : fileURL
+                                    property var imgExts: ['jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'bmp', 'ico']
+                                    property bool isImage: !isDir && imgExts.indexOf(filePath.split('.').pop().toLowerCase()) !== -1
+                                    source: isImage ? fileURL : ""
                                     fillMode: Image.PreserveAspectCrop
-                                    visible: !isDir && status === Image.Ready
+                                    visible: isImage && status === Image.Ready
                                     layer.enabled: true
                                     layer.effect: MultiEffect {
                                         maskEnabled: true
                                         maskSource: ShaderEffectSource {
-                                            sourceItem: Rectangle { width: imgPreview.width; height: imgPreview.height; radius: island.s(8) }
-                                            hideSource: true
+                                            sourceItem: Rectangle {
+                                                width: imgPreview.width
+                                                height: imgPreview.height
+                                                radius: island.s(8)
+                                                color: "black"
+                                            }
                                         }
+                                    }
+                                }
+
+                                Text {
+                                    id: textFilePreview
+                                    anchors.fill: parent
+                                    anchors.margins: island.s(8)
+                                    anchors.bottomMargin: island.s(28)
+                                    font.family: "JetBrains Mono"
+                                    font.pixelSize: island.s(6)
+                                    color: island.text
+                                    wrapMode: Text.WrapAnywhere
+                                    elide: Text.ElideRight
+                                    text: ""
+                                    visible: text !== "" && !isDir && !imgPreview.isImage
+                                    opacity: 0.6
+                                }
+
+                                Process {
+                                    id: textLoader
+                                    property var textExts: ['txt', 'md', 'js', 'qml', 'py', 'cpp', 'h', 'css', 'html', 'json', 'sh', 'conf', 'lua', 'yml', 'yaml', 'rs', 'go', 'ts', 'java', 'c', 'desktop', 'ini', 'xml']
+                                    property bool isText: !isDir && textExts.indexOf(filePath.split('.').pop().toLowerCase()) !== -1
+                                    command: ["bash", "-c", "head -c 600 \"$1\" | tr -cd '[:print:]\\n\\t'", "--", filePath]
+                                    running: isText && !isDir
+                                    onRunningChanged: if (running) textFilePreview.text = "";
+                                    stdout: SplitParser {
+                                        onRead: (line) => textFilePreview.text += line + "\n"
                                     }
                                 }
 
@@ -346,7 +382,7 @@ Item {
                                     anchors.centerIn: parent
                                     text: {
                                         if (isDir) return filePath.indexOf("/group_") !== -1 ? "" : "󰉋"
-                                        if (imgPreview.status === Image.Ready) return ""
+                                        if ((imgPreview.isImage && imgPreview.status === Image.Ready) || textFilePreview.text !== "") return ""
                                         var ext = filePath.split('.').pop().toLowerCase()
                                         if (['pdf'].includes(ext))                        return "󰈦"
                                         if (['txt','md','log','csv'].includes(ext))       return "󰈙"
@@ -356,7 +392,26 @@ Item {
                                         return "󰈔"
                                     }
                                     color: island.text; font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(48)
-                                    visible: isDir || (imgPreview.status !== Image.Ready && imgPreview.status !== Image.Loading)
+                                    visible: (isDir || (!imgPreview.isImage && textFilePreview.text === ""))
+                                }
+
+                                Rectangle {
+                                    anchors.bottom: parent.bottom
+                                    width: parent.width
+                                    height: island.s(22)
+                                    color: Qt.rgba(island.surface0.r, island.surface0.g, island.surface0.b, 0.8)
+                                    
+                                    Text {
+                                        anchors.fill: parent
+                                        anchors.margins: island.s(4)
+                                        text: filePath.split('/').pop()
+                                        color: island.text
+                                        font.family: "JetBrains Mono"
+                                        font.pixelSize: island.s(9)
+                                        elide: Text.ElideMiddle
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
                                 }
 
                                 Item {

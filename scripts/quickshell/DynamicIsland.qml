@@ -245,6 +245,24 @@ PanelWindow {
     ListModel { id: stashModelList }
     property alias stashModel: stashModelList
 
+    // Workspace dots model — mirrors /tmp/qs_workspaces.json
+    ListModel { id: wsDotModel }
+
+    // Per-dot luminance values (index = dot index)
+    property var _dotLuminances: [0, 0, 0, 0, 0, 0, 0, 0]
+    // Bitfield: bit i=1 → dark bg behind dot i. All-ones default = all dark.
+    // Int property is fully reactive; array-index bindings on var aren't.
+    property int _dotOnDarkBits: 0xFF
+    // Average luminance shared with TopBar via /tmp/qs_bg_luminance
+    property int _bgLuminance: 0
+
+    function _updateDotOnDarks(lums) {
+        let bits = 0
+        for (let i = 0; i < lums.length; i++)
+            if (lums[i] < 128) bits |= (1 << i)
+        _dotOnDarkBits = bits
+    }
+
     Process {
         id: stashScanner
         command: ["bash", "-c", "mkdir -p \"$HOME/Downloads/qs_stash\" && ls -1p \"$HOME/Downloads/qs_stash/\" 2>/dev/null | grep -v 'drop_debug.txt' | grep -v 'drop_log.txt' | sed \"s|^|$HOME/Downloads/qs_stash/|\""]
@@ -274,6 +292,7 @@ PanelWindow {
     }
     Component.onCompleted: {
         stashScanner.running = true;
+        wsDotReader.running  = true;
     }
 
     // Pulse animations — lifted to island level so pages can bind to them
@@ -586,7 +605,7 @@ PanelWindow {
         { name: "clock",        expandedH: 420, comp: clockPageComp        },
         { name: "recording",    expandedH: 320, comp: recordingPageComp    },
         { name: "discord",      expandedH: 270, comp: discordPageComp      },
-        { name: "music",        expandedH: 630, comp: musicPageComp        },
+        { name: "music",        expandedH: 248, comp: musicPageComp        },
         { name: "game",         expandedH: 480, comp: gamePageComp         },
         { name: "notifs",       expandedH: 450, comp: notifsPageComp       },
         { name: "timer",        expandedH: 380, comp: timerPageComp        },
@@ -1232,6 +1251,9 @@ PanelWindow {
             if (islandWindow.currentPage === "stash") {
                 return Math.min(s(750), Screen.width - s(32));
             }
+            if (islandWindow.currentPage === "music") {
+                return Math.min(s(420), Screen.width - s(32));
+            }
             return Math.min(s(760), Screen.width - s(32));
         }
         property int expandedH: {
@@ -1459,8 +1481,13 @@ PanelWindow {
                         islandWindow.playSound("volume");
                 }
             }
-            onClicked: {
-                if (!wasDragging) islandWindow.expanded = true;
+            acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+            onClicked: (mouse) => {
+                if (mouse.button === Qt.MiddleButton) {
+                    Quickshell.execDetached(["bash", "-c", "echo 'music' > /tmp/qs_widget_state"]);
+                } else if (!wasDragging) {
+                    islandWindow.expanded = true;
+                }
             }
         }
 
@@ -2027,6 +2054,170 @@ PanelWindow {
                 else if (cmd === "edit")     islandWindow.editBarMode ? islandWindow.exitEditBarMode() : islandWindow.enterEditBarMode();
                 ipcWatcher.running = false;
                 ipcWatcher.running = true;
+            }
+        }
+    }
+
+    // =========================================================
+    // Workspace dots — reads same /tmp/qs_workspaces.json as TopBar
+    // =========================================================
+    Process {
+        id: wsDotReader
+        command: ["cat", "/tmp/qs_workspaces.json"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let txt = this.text.trim()
+                if (txt === "") return
+                try {
+                    let data = JSON.parse(txt)
+                    if (wsDotModel.count !== data.length) {
+                        wsDotModel.clear()
+                        for (let i = 0; i < data.length; i++)
+                            wsDotModel.append({ "wsId": data[i].id.toString(), "wsState": data[i].state })
+                    } else {
+                        for (let i = 0; i < data.length; i++) {
+                            if (wsDotModel.get(i).wsState !== data[i].state)
+                                wsDotModel.setProperty(i, "wsState", data[i].state)
+                            if (wsDotModel.get(i).wsId !== data[i].id.toString())
+                                wsDotModel.setProperty(i, "wsId", data[i].id.toString())
+                        }
+                    }
+                } catch(e) { console.warn("wsDotReader:", e) }
+            }
+        }
+    }
+
+    Process {
+        id: wsDotWatcher
+        running: true
+        command: ["bash", "-c", "inotifywait -qq -e close_write,modify /tmp/qs_workspaces.json"]
+        onExited: { wsDotReader.running = true; running = true }
+    }
+
+    // Samples screen pixels behind dots every 2s — line 1: per-dot, line 2: average for TopBar
+    Process {
+        id: bgLumReader
+        command: ["bash", "-c",
+            "OUT=$(bash /home/dxvmxn/.config/hypr/scripts/quickshell/watchers/bg_luminance.sh " +
+            Screen.width + " " + Screen.height + "); " +
+            "echo \"$OUT\"; echo \"$OUT\" | tail -1 > /tmp/qs_bg_luminance"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let lines = this.text.trim().split("\n")
+                if (lines.length >= 1) {
+                    let nums = lines[0].trim().split(/\s+/).map(s => parseInt(s)).filter(n => !isNaN(n))
+                    if (nums.length > 0) {
+                        islandWindow._dotLuminances = nums
+                        islandWindow._updateDotOnDarks(nums)
+                    }
+                }
+                if (lines.length >= 2) {
+                    let avg = parseInt(lines[1].trim())
+                    if (!isNaN(avg)) islandWindow._bgLuminance = avg
+                }
+            }
+        }
+    }
+
+    Timer {
+        id: bgLumTimer
+        interval: 2000
+        repeat: true
+        running: !islandWindow._hideForFullscreen
+        triggeredOnStart: true
+        onTriggered: bgLumReader.running = true
+    }
+
+    // ── Ambient workspace dots — centered below the collapsed pill ────────
+    Item {
+        id: wsDots
+        x: 0
+        y: islandShape.y + islandShape.collapsedH + s(6)
+        width:  Screen.width
+        height: s(14)
+        z: 9
+
+        opacity: (!islandWindow.expanded
+                  && !islandWindow._hideForFullscreen
+                  && !islandWindow.editBarMode
+                  && wsDotModel.count > 0) ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+
+        // Shadow cast by the dots — offset downward so it reads as a real shadow
+        Rectangle {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter:   parent.verticalCenter
+            anchors.verticalCenterOffset: s(3)
+            width:  dotsRow.width + s(24)
+            height: s(10)
+            radius: height / 2
+            color:  Qt.rgba(0, 0, 0, 0.55)
+            Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutExpo } }
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                blurEnabled: true
+                blurMax:     28
+                blur:        0.75
+            }
+        }
+
+        Row {
+            id: dotsRow
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter:   parent.verticalCenter
+            spacing: s(6)
+
+            Repeater {
+                model: wsDotModel
+                delegate: Item {
+                    id: dotSlot
+                    required property var    model
+                    required property int    index
+
+                    property bool isActive:   model.wsState === "active"
+                    property bool isOccupied: model.wsState === "occupied" || isActive
+                    property bool isHovered:  dotHit.containsMouse
+
+                    readonly property real dotD: isActive ? s(10) : (isOccupied ? s(8) : s(6))
+
+                    width:  s(10)
+                    height: s(10)
+
+                    Rectangle {
+                        id: dot
+                        anchors.centerIn: parent
+                        width:  dotSlot.dotD
+                        height: dotSlot.dotD
+                        radius: width / 2
+
+                        Behavior on width  { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                        Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+
+                        // Active: mauve accent. Occupied/inactive: white with varying alpha.
+                        color: dotSlot.isActive
+                            ? Qt.rgba(islandWindow.mauve.r, islandWindow.mauve.g, islandWindow.mauve.b, 1.0)
+                            : Qt.rgba(1.0, 1.0, 1.0,
+                                  dotSlot.isOccupied ? 0.70
+                                : dotSlot.isHovered  ? 0.65
+                                :                      0.40)
+                        Behavior on color { ColorAnimation { duration: 300; easing.type: Easing.OutCubic } }
+
+                        scale: dotSlot.isHovered && !dotSlot.isActive ? 1.3 : 1.0
+                        Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
+                    }
+
+                    // Extended hit area so tiny dots are easily clickable
+                    MouseArea {
+                        id: dotHit
+                        anchors.centerIn: parent
+                        width:  s(20)
+                        height: s(20)
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: Quickshell.execDetached(["bash", "-c",
+                            "~/.config/hypr/scripts/qs_manager.sh " + dotSlot.model.wsId])
+                    }
+                }
             }
         }
     }

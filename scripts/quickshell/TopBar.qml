@@ -221,7 +221,7 @@ Variants {
                 return scaler.s(val);
             }
 
-            property int barHeight: s(36)
+            property int barHeight: s(40)
 
             height: barHeight
             margins {
@@ -230,7 +230,7 @@ Variants {
                 left: s(4)
                 right: s(4)
             }
-            exclusiveZone: barHeight + s(8)   // s(4) above + barHeight + s(4) below
+            exclusiveZone: barHeight + s(18)   // s(4) above + barHeight + extra room for ws dots
             color: "transparent"
 
             // ── Theme ─────────────────────────────────────────────────
@@ -240,8 +240,25 @@ Variants {
             readonly property bool glassTheme: Theme.isGlass
             readonly property string surfaceStyle: Theme.surfaceStyle
 
-            readonly property color pillColor: Theme.pillColor
-            readonly property color pillBorderColor: Theme.pillBorderColor
+            // Background luminance from /tmp/qs_bg_luminance (written by DynamicIsland every 2s)
+            property int  bgLum: 0
+            readonly property bool _onDark: bgLum < 128
+
+            // Adaptive foreground: white on dark wallpaper, near-black on light wallpaper
+            readonly property color adaptiveText: _onDark
+                ? Qt.rgba(1.0,  1.0,  1.0,  0.92)
+                : Qt.rgba(0.08, 0.08, 0.08, 0.92)
+            readonly property color adaptiveSubtext: _onDark
+                ? Qt.rgba(1.0,  1.0,  1.0,  0.45)
+                : Qt.rgba(0.08, 0.08, 0.08, 0.45)
+
+            // Pill surface adapts to wallpaper luminance for guaranteed readability
+            readonly property color pillColor: _onDark
+                ? (glassTheme ? Qt.rgba(1, 1, 1, 0.09) : Qt.rgba(Theme.mantle.r, Theme.mantle.g, Theme.mantle.b, 1.0))
+                : (glassTheme ? Qt.rgba(0, 0, 0, 0.08) : Qt.rgba(Theme.base.r,   Theme.base.g,   Theme.base.b,   0.88))
+            readonly property color pillBorderColor: _onDark
+                ? Qt.rgba(1, 1, 1, glassTheme ? 0.18 : 0.10)
+                : Qt.rgba(0, 0, 0, glassTheme ? 0.14 : 0.18)
 
             readonly property color base: Theme.base
             readonly property color mantle: Theme.mantle
@@ -362,8 +379,10 @@ Variants {
             property string batIcon: "󰁹"
             property string batStatus: "Unknown"
 
-            property string kbLayout: "us"
+            property string pulseRate: "72"
+            property string pulseIcon: "󰏤"
 
+            property string kbLayout: "us"
             ListModel {
                 id: workspacesModel
             }
@@ -395,10 +414,33 @@ Variants {
             // ── Applet layout order ───────────────────────────────────
             // Persisted to ~/.cache/quickshell/topbar_layout.json
             property var leftAppletOrder: ["help", "ws"]
-            property var rightAppletOrder: ["tray", "spacer", "kb", "wifi", "bt", "battery"]
-
+            property var rightAppletOrder: ["tray", "spacer", "kb", "wifi", "bt", "battery", "pulse"]
+            // Gate auto-save until layoutLoader has restored the cached layout.
+            // Otherwise the default-value assignments above fire onChanged before
+            // the async cache read completes, and Qt.callLater(saveLayout) clobbers
+            // the saved file with defaults on every shell reload.
+            property bool _layoutLoaded: false
             // ── Edit mode — toggled by double-tap on island ───────────
             property bool barEditMode: false
+
+            // Reads bg luminance written by DynamicIsland every 2s
+            Process {
+                id: bgLumBarReader
+                command: ["cat", "/tmp/qs_bg_luminance"]
+                stdout: StdioCollector {
+                    onStreamFinished: {
+                        let v = parseInt(this.text.trim())
+                        if (!isNaN(v)) barWindow.bgLum = v
+                    }
+                }
+            }
+            Process {
+                id: bgLumBarWatcher
+                running: true
+                command: ["bash", "-c", "inotifywait -qq -e close_write,modify /tmp/qs_bg_luminance 2>/dev/null"]
+                onExited: { bgLumBarReader.running = true; running = true }
+            }
+            Component.onCompleted: bgLumBarReader.running = true
 
             // IPC: island writes "1"/"0" to /tmp/qs_bar_edit
             Process {
@@ -442,30 +484,35 @@ Variants {
                     onStreamFinished: {
                         try {
                             let d = JSON.parse(this.text.trim());
+                            let hasSaved = d.left && Array.isArray(d.left) && d.left.length > 0;
                             if (d.left && Array.isArray(d.left))
                                 barWindow.leftAppletOrder = d.left;
                             if (d.right && Array.isArray(d.right))
                                 barWindow.rightAppletOrder = d.right;
-                            // Merge any applet IDs not yet present in saved layout
-                            let all = barWindow.leftAppletOrder.concat(barWindow.rightAppletOrder);
-                            let r = barWindow.rightAppletOrder.slice();
-                            let l = barWindow.leftAppletOrder.slice();
-                            for (let id of ["kb", "wifi", "battery"]) {
-                                if (all.indexOf(id) < 0)
-                                    r.push(id);
+                            // Only merge defaults on first run (no saved layout yet)
+                            if (!hasSaved) {
+                                let all = barWindow.leftAppletOrder.concat(barWindow.rightAppletOrder);
+                                let r = barWindow.rightAppletOrder.slice();
+                                let l = barWindow.leftAppletOrder.slice();
+                                for (let id of ["kb", "wifi", "battery"]) {
+                                    if (all.indexOf(id) < 0)
+                                        r.push(id);
+                                }
+                                for (let id of ["help", "ws"]) {
+                                    if (all.indexOf(id) < 0)
+                                        l.unshift(id);
+                                }
+                                barWindow.leftAppletOrder = l;
+                                barWindow.rightAppletOrder = r;
                             }
-                            for (let id of ["help", "ws"]) {
-                                if (all.indexOf(id) < 0)
-                                    l.unshift(id);
-                            }
-                            barWindow.leftAppletOrder = l;
-                            barWindow.rightAppletOrder = r;
                         } catch (e) {}
+                        barWindow._layoutLoaded = true;
                     }
                 }
             }
 
             function saveLayout() {
+                if (!barWindow._layoutLoaded) return;
                 Quickshell.execDetached(["bash", "-c", "mkdir -p ~/.cache/quickshell && printf '%s' \"$1\" > ~/.cache/quickshell/topbar_layout.json", "qs_save", JSON.stringify({
                         left: barWindow.leftAppletOrder,
                         right: barWindow.rightAppletOrder
@@ -800,6 +847,36 @@ Variants {
                 onExited: batteryPoller.running = true
             }
 
+            // --- PULSE ---
+            Process {
+                id: pulsePoller
+                running: true
+                command: ["bash", "-c", "~/.config/hypr/scripts/quickshell/watchers/pulse_fetch.sh"]
+                stdout: StdioCollector {
+                    onStreamFinished: {
+                        let txt = this.text.trim();
+                        if (txt !== "") {
+                            try {
+                                let data = JSON.parse(txt);
+                                console.log("[TopBar] Pulse Update:", data.rate);
+                                if (barWindow.pulseRate !== data.rate)
+                                    barWindow.pulseRate = data.rate;
+                                if (barWindow.pulseIcon !== data.icon)
+                                    barWindow.pulseIcon = data.icon;
+                            } catch (e) {
+                                console.warn(e);
+                            }
+                        }
+                        pulseWaiter.running = true;
+                    }
+                }
+            }
+            Process {
+                id: pulseWaiter
+                command: ["bash", "-c", "~/.config/hypr/scripts/quickshell/watchers/pulse_wait.sh"]
+                onExited: pulsePoller.running = true
+            }
+
             // Native Qt Time Formatting
             Timer {
                 interval: 1000
@@ -928,6 +1005,7 @@ Variants {
                     appletOrder: barWindow.leftAppletOrder
                     editMode: barWindow.barEditMode
                     showGroupFrames: false
+                    subtleBackdrop: true
                     anchors.left: parent.left
                     anchors.right: centerBox.left
                     anchors.rightMargin: barWindow.s(12)
@@ -942,6 +1020,8 @@ Variants {
                     bar: barWindow
                     appletOrder: barWindow.rightAppletOrder
                     editMode: barWindow.barEditMode
+                    showGroupFrames: false
+                    subtleBackdrop: true
                     anchors.right: parent.right
                     anchors.left: centerBox.right
                     anchors.leftMargin: barWindow.s(12)

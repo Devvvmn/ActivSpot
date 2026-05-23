@@ -83,8 +83,12 @@ handle_wallpaper_prep() {
         CURRENT_SRC=$(basename "$CURRENT_SRC")
     fi
 
-    if [ -z "$CURRENT_SRC" ] && command -v swww >/dev/null; then
-        CURRENT_SRC=$(swww query 2>/dev/null | grep -o "$SRC_DIR/[^ ]*" | head -n1)
+    if [ -z "$CURRENT_SRC" ] && [ -f "$HOME/.cache/wallpaper_picker/current" ]; then
+        CURRENT_SRC=$(basename "$(cat "$HOME/.cache/wallpaper_picker/current" 2>/dev/null)")
+    fi
+
+    if [ -z "$CURRENT_SRC" ] && pgrep -x hyprlax >/dev/null; then
+        CURRENT_SRC=$(pgrep -af hyprlax | grep -oE "$SRC_DIR/[^ ]*" | head -n1)
         CURRENT_SRC=$(basename "$CURRENT_SRC")
     fi
 
@@ -142,6 +146,11 @@ if ! pgrep -f "quickshell.*ClipboardViewer\.qml" >/dev/null; then
     disown
 fi
 
+if ! pgrep -f "scripts/pulse-backend/server.mjs" >/dev/null; then
+    node "$HOME/.config/hypr/scripts/pulse-backend/server.mjs" >/dev/null 2>&1 &
+    disown
+fi
+
 # -----------------------------------------------------------------------------
 # IPC ROUTING
 # -----------------------------------------------------------------------------
@@ -183,10 +192,9 @@ if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
         exit 0
     fi
 
-    # Music: route through the DynamicIsland (expand/collapse the island itself)
-    # instead of opening a separate popup window.
+    # Music: open/toggle the standalone music popup window.
     if [[ "$TARGET" == "music" ]]; then
-        echo "toggle" > /tmp/qs_island_toggle
+        echo "music" > "$IPC_FILE"
         exit 0
     fi
 

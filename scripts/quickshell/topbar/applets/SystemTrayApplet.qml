@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Services.SystemTray
 
@@ -25,6 +26,15 @@ Rectangle {
         id: trayRow
         anchors.centerIn: parent
         spacing: bar.s(10)
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.55)
+            shadowBlur: 0.5
+            shadowHorizontalOffset: 0
+            shadowVerticalOffset: 1
+        }
 
         Repeater {
             id: trayRepeater

@@ -94,6 +94,7 @@ Item {
 
     TapHandler {
         id: tap
+        acceptedButtons: Qt.LeftButton
         onTapped: {
             // Non-primary bubble: tap pins it as primary instead of firing
             // the bubble's native action. Apple Live Activities behavior.
@@ -102,6 +103,16 @@ Item {
                 return
             }
             root.tapped()
+        }
+    }
+
+    // Right-click anywhere on a bubble: drop its focus (unpin + advance
+    // primary past it). Works on both primary and satellite bubbles.
+    TapHandler {
+        acceptedButtons: Qt.RightButton
+        onTapped: {
+            if (root.island && root.island.unfocusBubble)
+                root.island.unfocusBubble(root.bubbleId)
         }
     }
 
