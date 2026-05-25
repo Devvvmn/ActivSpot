@@ -97,11 +97,39 @@ QtObject {
         teal: "#8fbcbb"
     })
 
+    // Carbon + Silver — minimal premium dark palette. True graphite base,
+    // silver accent, desaturated status colours so nothing fights for attention.
+    readonly property var _carbonPalette: ({
+        base: "#111111", mantle: "#1a1a1a", crust: "#0a0a0a",
+        text: "#f5f5f5", subtext0: "#a1a1aa", subtext1: "#d4d4d8",
+        surface0: "#242424", surface1: "#2e2e2e", surface2: "#3a3a3a",
+        overlay0: "#52525b", overlay1: "#71717a", overlay2: "#a1a1aa",
+        blue: "#60a5fa", sapphire: "#93c5fd", peach: "#fdba74",
+        green: "#86efac", red: "#fca5a5", mauve: "#d4d4d8",
+        pink: "#f0abfc", yellow: "#fde68a", maroon: "#fb923c",
+        teal: "#5eead4"
+    })
+
+    // Midnight Indigo — deep space black base, electric indigo accent,
+    // cool-white text. Vision Pro / Figma-grade dark aesthetic.
+    readonly property var _midnightPalette: ({
+        base: "#08080f", mantle: "#0f0f1a", crust: "#04040a",
+        text: "#e2e2ff", subtext0: "#9898c8", subtext1: "#c4c4f0",
+        surface0: "#16162a", surface1: "#1e1e38", surface2: "#272748",
+        overlay0: "#4040a0", overlay1: "#5858b8", overlay2: "#7878d0",
+        blue: "#4fc3f7", sapphire: "#93c5fd", peach: "#fdba74",
+        green: "#4ade80", red: "#f87171", mauve: "#7c7cf5",
+        pink: "#e879f9", yellow: "#fde68a", maroon: "#fb923c",
+        teal: "#2dd4bf"
+    })
+
     function _staticPalette(id) {
         switch (id) {
-            case "apple":   return _applePalette
-            case "nord":    return _nordPalette
-            default:        return _mochaPalette
+            case "apple":    return _applePalette
+            case "nord":     return _nordPalette
+            case "carbon":   return _carbonPalette
+            case "midnight": return _midnightPalette
+            default:         return _mochaPalette
         }
     }
 

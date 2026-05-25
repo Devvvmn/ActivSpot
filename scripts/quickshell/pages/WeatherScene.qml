@@ -45,8 +45,8 @@ Item {
         if (d.indexOf("snow")     !== -1) return "snow"
         if (d.indexOf("rain")     !== -1 || d.indexOf("shower") !== -1) return "rain"
         if (d.indexOf("mist")     !== -1 || d.indexOf("fog")    !== -1) return "fog"
-        if (d === "clear")                return "night-clear"
-        if (d === "sunny")                return "sunny"
+        if (d.indexOf("clear") !== -1 || d.indexOf("sunny") !== -1)
+                                          return isNight ? "night-clear" : "sunny"
         if (d.indexOf("overcast") !== -1) return isNight ? "overcast-night" : "overcast"
         if (d.indexOf("cloud")    !== -1) return isNight ? "cloudy-night" : "cloudy"
         return "default"
@@ -216,6 +216,150 @@ Item {
                     let nx = c.x + c.speed * dt
                     if (nx > root.width + c.cloudW) nx = -c.cloudW
                     c.x = nx
+                }
+            }
+        }
+
+        // ── Clear-day sun glow + rotating rays ────────────────────────
+        Item {
+            id: sunScene
+            anchors.fill: parent
+            z: 9
+            opacity: root.state === "sunny" ? 1.0 : 0.0
+            visible: opacity > 0.001
+            Behavior on opacity { NumberAnimation { duration: 700 } }
+
+            readonly property real cx: parent.width  * 0.85
+            readonly property real cy: parent.height * 0.13
+            readonly property real r:  island.s(48)
+
+            // Warm glow halos
+            Repeater {
+                model: 4
+                delegate: Rectangle {
+                    readonly property real sc: 2.2 + index * 0.85
+                    width: sunScene.r * sc; height: width; radius: width / 2
+                    x: sunScene.cx - width  / 2
+                    y: sunScene.cy - height / 2
+                    color: Qt.rgba(1.0, 0.88, 0.30, Math.max(0, 0.11 - index * 0.025))
+                }
+            }
+
+            // Rotating ray bundle
+            Item {
+                x: sunScene.cx; y: sunScene.cy
+                RotationAnimation on rotation {
+                    running: !root.reduceMotion && root.state === "sunny"
+                    loops: Animation.Infinite; from: 0; to: 360; duration: 50000
+                }
+                Repeater {
+                    model: 12
+                    delegate: Rectangle {
+                        readonly property real rayLen: island.s(20 + (index % 3) * 7)
+                        width: island.s(1.8); height: rayLen; radius: width / 2
+                        color: Qt.rgba(1.0, 0.95, 0.55, 0.38)
+                        x: -width / 2
+                        y: -(sunScene.r * 1.30 + rayLen)
+                        transform: Rotation {
+                            origin.x: width / 2
+                            origin.y: sunScene.r * 1.30 + rayLen
+                            angle:    (index / 12) * 360
+                        }
+                    }
+                }
+            }
+        }
+
+        // ── Night-clear moon glow ──────────────────────────────────────
+        Item {
+            id: moonScene
+            anchors.fill: parent
+            z: 9
+            opacity: root.state === "night-clear" ? 1.0 : 0.0
+            visible: opacity > 0.001
+            Behavior on opacity { NumberAnimation { duration: 700 } }
+
+            readonly property real cx: parent.width  * 0.85
+            readonly property real cy: parent.height * 0.13
+            readonly property real r:  island.s(48)
+
+            // Cool blue-white halo rings
+            Repeater {
+                model: 4
+                delegate: Rectangle {
+                    readonly property real sc: 2.0 + index * 0.90
+                    width: moonScene.r * sc; height: width; radius: width / 2
+                    x: moonScene.cx - width  / 2
+                    y: moonScene.cy - height / 2
+                    color: Qt.rgba(0.72, 0.82, 1.0, Math.max(0, 0.10 - index * 0.022))
+                }
+            }
+        }
+
+        // ── Shooting star (night-clear) ────────────────────────────────
+        Canvas {
+            id: shootingStarCanvas
+            anchors.fill: parent
+            z: 11
+            visible: root.state === "night-clear"
+
+            property real prog: -1
+            property real sx:    0
+            property real sy:    0
+            property real dx:    0
+            property real dy:    0
+
+            function launch() {
+                sx   = Math.random() * width  * 0.55 + width * 0.05
+                sy   = Math.random() * height * 0.28
+                const ang = (26 + Math.random() * 24) * Math.PI / 180
+                dx   = Math.cos(ang)
+                dy   = Math.sin(ang)
+                prog = 0
+            }
+
+            onPaint: {
+                const ctx = getContext("2d")
+                ctx.clearRect(0, 0, width, height)
+                if (prog < 0.01 || prog > 0.98) return
+                const span = 90
+                const hx = sx + dx * span * prog
+                const hy = sy + dy * span * prog
+                const tail = Math.min(55, span * prog)
+                const g = ctx.createLinearGradient(hx - dx * tail, hy - dy * tail, hx, hy)
+                g.addColorStop(0, "rgba(255,255,240,0)")
+                g.addColorStop(1, "rgba(255,255,240,0.90)")
+                ctx.strokeStyle = g
+                ctx.lineWidth = 1.6
+                ctx.beginPath()
+                ctx.moveTo(hx - dx * tail, hy - dy * tail)
+                ctx.lineTo(hx, hy)
+                ctx.stroke()
+            }
+
+            onProgChanged: requestPaint()
+
+            Timer {
+                id: streakTimer
+                interval: 16
+                repeat: true
+                onTriggered: {
+                    shootingStarCanvas.prog += 0.038
+                    if (shootingStarCanvas.prog >= 1.0) {
+                        shootingStarCanvas.prog = -1
+                        running = false
+                    }
+                }
+            }
+
+            Timer {
+                running: root.state === "night-clear" && !root.reduceMotion
+                repeat: true
+                interval: 8000
+                onTriggered: {
+                    interval = 7000 + Math.random() * 10000
+                    shootingStarCanvas.launch()
+                    streakTimer.running = true
                 }
             }
         }

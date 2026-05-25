@@ -5,7 +5,7 @@
   "wallpaperDir": "/home/dxvmxn/Pictures/Wallpapers/",
   "language": "us,ru",
   "kbOptions": "grp:caps_toggle",
-  "topbarTheme": "mocha",
+  "topbarTheme": "carbon",
   "pinnedApps": [
     "kitty",
     "google-chrome"

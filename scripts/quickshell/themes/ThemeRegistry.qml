@@ -4,11 +4,12 @@ QtObject {
     id: root
 
     readonly property var themes: [
-        { id: "mocha",   label: "Mocha",   icon: "󰸌" },
-        { id: "glass",   label: "Glass",   icon: "󰈈" },
-        { id: "matugen", label: "Matugen", icon: "󰸉" },
-        { id: "apple",   label: "Apple",   icon: "" },
-        { id: "nord",    label: "Nord",    icon: "󰔎" },
+        { id: "mocha",    label: "Mocha",    icon: "󰸌" },
+        { id: "matugen",  label: "Matugen",  icon: "󰸉" },
+        { id: "apple",    label: "Apple",    icon: "" },
+        { id: "nord",     label: "Nord",     icon: "󰔎" },
+        { id: "carbon",   label: "Carbon",   icon: "󰚩" },
+        { id: "midnight", label: "Midnight", icon: "󰖔" },
     ]
 
     function themeLabel(id) {
