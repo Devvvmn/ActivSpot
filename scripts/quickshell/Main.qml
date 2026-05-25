@@ -279,15 +279,23 @@ PanelWindow {
             }
         } else {
             if (currentActive === "hidden") {
-                masterWindow.morphDuration = 400; // Snappy but smooth
-                masterWindow.exitDuration = 300;
-                masterWindow.disableMorph = false;
-                
-                // Polymorphic start point: top center where the island is
-                masterWindow.animX = Math.floor(Screen.width / 2);
-                masterWindow.animY = 35; 
-                masterWindow.animW = 1;
-                masterWindow.animH = 1;
+                if (newWidget === "powermenu") {
+                    masterWindow.morphDuration = 1;
+                    masterWindow.exitDuration = 280;
+                    masterWindow.disableMorph = true;
+                    masterWindow.animX = 0;
+                    masterWindow.animY = 0;
+                    masterWindow.animW = Screen.width;
+                    masterWindow.animH = Screen.height;
+                } else {
+                    masterWindow.morphDuration = 400;
+                    masterWindow.exitDuration = 300;
+                    masterWindow.disableMorph = false;
+                    masterWindow.animX = Math.floor(Screen.width / 2);
+                    masterWindow.animY = 35;
+                    masterWindow.animW = 1;
+                    masterWindow.animH = 1;
+                }
 
                 prepTimer.newWidget = newWidget;
                 prepTimer.newArg = arg;

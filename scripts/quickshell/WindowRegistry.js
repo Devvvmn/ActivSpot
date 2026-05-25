@@ -27,7 +27,8 @@ function getLayout(name, mx, my, mw, mh, userScale) {
 
     let base = {
         // Right-aligned: pinned 20px from the right edge dynamically
-        "battery":   { w: s(801, scale), h: s(760, scale), rx: mw - s(821, scale), ry: s(70, scale), comp: "battery/BatteryPopup.qml" },
+        "battery":   { w: s(801, scale), h: s(680, scale), rx: mw - s(821, scale), ry: s(70, scale), comp: "battery/BatteryPopup.qml" },
+        "powermenu": { w: mw, h: mh, rx: 0, ry: 0, comp: "power/PowerMenuOverlay.qml" },
         "pulse":     { w: s(400, scale), h: s(300, scale), rx: mw - s(420, scale), ry: s(70, scale), comp: "pulse/PulsePopup.qml" },
         //"volume":    { w: s(480, scale), h: s(760, scale), rx: mw - s(500, scale), ry: s(70, scale), comp: "volume/VolumePopup.qml" },
         

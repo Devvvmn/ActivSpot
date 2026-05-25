@@ -32,6 +32,7 @@ Item {
     Component { id: wifiComp;    WifiApplet       { bar: barZone.bar; editMode: barZone.editMode } }
     Component { id: btComp;      BluetoothApplet  { bar: barZone.bar; editMode: barZone.editMode } }
     Component { id: batComp;     BatteryApplet    { bar: barZone.bar; editMode: barZone.editMode } }
+    Component { id: powerComp;   PowerApplet      { bar: barZone.bar; editMode: barZone.editMode } }
     Component { id: pulseComp;   PulseApplet      { bar: barZone.bar; editMode: barZone.editMode } }
     Component { id: trayComp;    SystemTrayApplet { bar: barZone.bar; editMode: barZone.editMode } }
     Component { id: spacerComp;  SpacerApplet     { bar: barZone.bar; editMode: barZone.editMode } }
@@ -49,6 +50,7 @@ Item {
         { id: "wifi",    comp: wifiComp,   label: "Network",     icon: "󰤨" },
         { id: "bt",      comp: btComp,     label: "Bluetooth",   icon: "󰂱" },
         { id: "battery", comp: batComp,    label: "Battery",     icon: "󰁹" },
+        { id: "power",   comp: powerComp,  label: "Power Menu",  icon: "⏻" },
         { id: "pulse",   comp: pulseComp,   label: "Pulse",       icon: "󰏤" },
         { id: "tray",    comp: trayComp,   label: "System Tray", icon: "󱒔" },
         { id: "spacer",    comp: spacerComp,    label: "Spacer",    icon: "󱐋" },

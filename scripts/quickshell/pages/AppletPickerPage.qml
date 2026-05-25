@@ -33,6 +33,7 @@ Item {
         { id: "wifi",    label: "Network",     icon: "󰤨" },
         { id: "bt",      label: "Bluetooth",   icon: "󰂱" },
         { id: "battery", label: "Battery",     icon: "󰁹" },
+        { id: "power",   label: "Power Menu",  icon: "⏻" },
         { id: "pulse",   label: "Pulse",       icon: "󰏤" },
         { id: "tray",    label: "System Tray", icon: "󱒔" },
         { id: "spacer",    label: "Spacer",      icon: "󱐋" },

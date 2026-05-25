@@ -173,7 +173,6 @@ Item {
     property real introTop: 0
     property real introCore: 0
     property real introSliders: 0
-    property real introActions: 0
     property real introProfiles: 0
 
     ParallelAnimation {
@@ -192,23 +191,9 @@ Item {
             NumberAnimation { target: window; property: "introSliders"; from: 0; to: 1.0; duration: 800; easing.type: Easing.OutQuart }
         }
         SequentialAnimation {
-            PauseAnimation { duration: 450 }
-            NumberAnimation { target: window; property: "introActions"; from: 0; to: 1.0; duration: 800; easing.type: Easing.OutExpo }
-        }
-        SequentialAnimation {
             PauseAnimation { duration: 550 }
             NumberAnimation { target: window; property: "introProfiles"; from: 0; to: 1.0; duration: 850; easing.type: Easing.OutBack; easing.overshoot: 0.8 }
         }
-    }
-
-    ParallelAnimation {
-        id: exitAnim
-        NumberAnimation { target: window; property: "introMain"; to: 0; duration: 400; easing.type: Easing.InQuart }
-        NumberAnimation { target: window; property: "introTop"; to: 0; duration: 300; easing.type: Easing.InQuart }
-        NumberAnimation { target: window; property: "introCore"; to: 0; duration: 350; easing.type: Easing.InQuart }
-        NumberAnimation { target: window; property: "introSliders"; to: 0; duration: 250; easing.type: Easing.InQuart }
-        NumberAnimation { target: window; property: "introActions"; to: 0; duration: 200; easing.type: Easing.InQuart }
-        NumberAnimation { target: window; property: "introProfiles"; to: 0; duration: 150; easing.type: Easing.InQuart }
     }
 
     // -------------------------------------------------------------------------
@@ -394,7 +379,7 @@ Item {
                             Text {
                                 font.family: "Iosevka Nerd Font"; font.pixelSize: window.s(18)
                                 color: logoutMa.containsMouse ? window.red : window.overlay0
-                                text: "󰍃"
+                                text: ""
                                 anchors.verticalCenter: parent.verticalCenter
                                 Behavior on color { ColorAnimation { duration: 150 } }
                             }
@@ -403,10 +388,8 @@ Item {
                         MouseArea {
                             id: logoutMa
                             anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                            onClicked: { 
-                                exitAnim.start(); 
-                                Quickshell.execDetached(["sh", "-c", "loginctl terminate-user $USER"]); 
-                                Quickshell.execDetached(["sh", "-c", "echo 'close' > /tmp/qs_widget_state"]); 
+                            onClicked: {
+                                Quickshell.execDetached(["sh", "-c", "echo 'powermenu' > /tmp/qs_widget_state"])
                             }
                         }
                     }
@@ -711,186 +694,6 @@ Item {
                                     }
                                 }
 
-                            }
-                        }
-
-                        // 2. SYSTEM ACTIONS DOCK
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: window.s(62)
-                            spacing: window.s(8)
-
-                            Repeater {
-                                model: ListModel {
-                                    ListElement { cmd: "bash ~/.config/hypr/scripts/lock.sh"; icon: ""; label: "Lock"; baseColor: "mauve"; weight: 1.0 }
-                                    ListElement { cmd: "bash ~/.config/hypr/scripts/lock.sh & systemctl suspend"; icon: "󰤄"; label: "Sleep"; baseColor: "blue"; weight: 1.0 }
-                                    ListElement { cmd: "systemctl reboot"; icon: "󰑓"; label: "Reboot"; baseColor: "yellow"; weight: 2.5 }
-                                    ListElement { cmd: "systemctl poweroff -i"; icon: ""; label: "Shutdown"; baseColor: "red"; weight: 3.5 }
-                                }
-
-                                delegate: Rectangle {
-                                    id: actionCapsule
-                                    Layout.fillWidth: true
-                                    Layout.fillHeight: true
-                                    radius: window.s(12)
-
-                                    opacity: introActions
-                                    transform: Translate { y: window.s(20) * (1.0 - introActions) }
-
-                                    property color c1: window[baseColor] || window.surface1
-                                    property color c2: Qt.lighter(c1, 1.2)
-
-                                    color: actionMa.containsMouse ? window.surface1 : window.surface0
-                                    border.color: actionMa.containsMouse ? c1 : window.surface1
-                                    border.width: 1
-                                    Behavior on color { ColorAnimation { duration: 200 } }
-                                    Behavior on border.color { ColorAnimation { duration: 200 } }
-
-                                    scale: actionMa.pressed ? 0.94 : (actionMa.containsMouse ? 1.04 : 1.0)
-                                    Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutQuart } }
-
-                                    property real fillLevel: 0.0
-                                    property bool triggered: false
-                                    property real flashOpacity: 0.0
-
-                                    Canvas {
-                                        id: actionWaveCanvas
-                                        anchors.fill: parent
-
-                                        property real wavePhase: 0.0
-                                        NumberAnimation on wavePhase {
-                                            running: actionCapsule.fillLevel > 0.0 && actionCapsule.fillLevel < 1.0
-                                            loops: Animation.Infinite
-                                            from: 0; to: Math.PI * 2; duration: 800
-                                        }
-                                        onWavePhaseChanged: requestPaint()
-                                        Connections { target: actionCapsule; function onFillLevelChanged() { actionWaveCanvas.requestPaint() } }
-
-                                        onPaint: {
-                                            var ctx = getContext("2d");
-                                            ctx.clearRect(0, 0, width, height);
-                                            if (actionCapsule.fillLevel <= 0.001) return;
-
-                                            var r = window.s(12);
-                                            var fillY = height * (1.0 - actionCapsule.fillLevel);
-                                            ctx.save();
-                                            ctx.beginPath();
-                                            ctx.moveTo(r, 0); ctx.lineTo(width - r, 0); ctx.arcTo(width, 0, width, r, r);
-                                            ctx.lineTo(width, height - r); ctx.arcTo(width, height, width - r, height, r);
-                                            ctx.lineTo(r, height); ctx.arcTo(0, height, 0, height - r, r);
-                                            ctx.lineTo(0, r); ctx.arcTo(0, 0, r, 0, r); ctx.closePath(); ctx.clip();
-
-                                            ctx.beginPath();
-                                            ctx.moveTo(0, fillY);
-                                            if (actionCapsule.fillLevel < 0.99) {
-                                                var waveAmp = window.s(8) * Math.sin(actionCapsule.fillLevel * Math.PI);
-                                                var cp1y = fillY + Math.sin(wavePhase) * waveAmp;
-                                                var cp2y = fillY + Math.cos(wavePhase + Math.PI) * waveAmp;
-                                                ctx.bezierCurveTo(width * 0.33, cp2y, width * 0.66, cp1y, width, fillY);
-                                                ctx.lineTo(width, height); ctx.lineTo(0, height);
-                                            } else {
-                                                ctx.lineTo(width, 0); ctx.lineTo(width, height); ctx.lineTo(0, height);
-                                            }
-                                            ctx.closePath();
-
-                                            var grad = ctx.createLinearGradient(0, 0, 0, height);
-                                            grad.addColorStop(0, actionCapsule.c1.toString()); grad.addColorStop(1, actionCapsule.c2.toString());
-                                            ctx.fillStyle = grad; ctx.fill(); ctx.restore();
-                                        }
-                                    }
-
-                                    Rectangle {
-                                        anchors.fill: parent; radius: window.s(12); color: "#ffffff"
-                                        opacity: actionCapsule.flashOpacity
-                                        PropertyAnimation on opacity { id: cardFlashAnim; to: 0; duration: 500; easing.type: Easing.OutExpo }
-                                    }
-
-                                    ColumnLayout {
-                                        anchors.centerIn: parent
-                                        spacing: window.s(2)
-                                        Text {
-                                            Layout.alignment: Qt.AlignHCenter
-                                            font.family: "Iosevka Nerd Font"
-                                            font.pixelSize: window.s(20)
-                                            color: actionMa.containsMouse ? window.text : window.subtext0
-                                            text: icon
-                                            Behavior on color { ColorAnimation { duration: 150 } }
-                                        }
-                                        Text {
-                                            Layout.alignment: Qt.AlignHCenter
-                                            font.family: "JetBrains Mono"; font.weight: Font.Bold
-                                            font.pixelSize: window.s(9)
-                                            color: actionMa.containsMouse ? window.subtext0 : window.overlay0
-                                            text: label
-                                            Behavior on color { ColorAnimation { duration: 150 } }
-                                        }
-                                    }
-
-                                    Item {
-                                        anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom
-                                        height: actionCapsule.height * actionCapsule.fillLevel
-                                        clip: true
-
-                                        ColumnLayout {
-                                            anchors.horizontalCenter: parent.horizontalCenter
-                                            y: (actionCapsule.height / 2) - (height / 2) - (actionCapsule.height - parent.height)
-                                            spacing: window.s(2)
-                                            Text {
-                                                Layout.alignment: Qt.AlignHCenter
-                                                font.family: "Iosevka Nerd Font"
-                                                font.pixelSize: window.s(20)
-                                                color: window.crust
-                                                text: icon
-                                            }
-                                            Text {
-                                                Layout.alignment: Qt.AlignHCenter
-                                                font.family: "JetBrains Mono"; font.weight: Font.Bold
-                                                font.pixelSize: window.s(9)
-                                                color: window.crust
-                                                text: label
-                                            }
-                                        }
-                                    }
-
-                                    MouseArea {
-                                        id: actionMa
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        cursorShape: actionCapsule.triggered ? Qt.ArrowCursor : Qt.PointingHandCursor
-
-                                        onPressed: {
-                                            if (!actionCapsule.triggered) {
-                                                drainAnim.stop();
-                                                fillAnim.start();
-                                            }
-                                        }
-                                        onReleased: {
-                                            if (!actionCapsule.triggered && actionCapsule.fillLevel < 1.0) {
-                                                fillAnim.stop();
-                                                drainAnim.start();
-                                            }
-                                        }
-                                    }
-
-                                    NumberAnimation {
-                                        id: fillAnim; target: actionCapsule; property: "fillLevel"; to: 1.0
-                                        duration: (550 * weight) * (1.0 - actionCapsule.fillLevel); easing.type: Easing.InSine
-                                        onFinished: {
-                                            actionCapsule.triggered = true; actionCapsule.flashOpacity = 0.6; cardFlashAnim.start();
-                                            exitAnim.start(); exitTimer.start();
-                                        }
-                                    }
-
-                                    NumberAnimation {
-                                        id: drainAnim; target: actionCapsule; property: "fillLevel"; to: 0.0
-                                        duration: 1500 * actionCapsule.fillLevel; easing.type: Easing.OutQuad
-                                    }
-
-                                    Timer {
-                                        id: exitTimer; interval: 500
-                                        onTriggered: { Quickshell.execDetached(["sh", "-c", cmd]); Quickshell.execDetached(["sh", "-c", "echo 'close' > /tmp/qs_widget_state"]); }
-                                    }
-                                }
                             }
                         }
 
