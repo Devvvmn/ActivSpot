@@ -5,6 +5,7 @@ import Quickshell
 Rectangle {
     id: root
     property var bar
+    property var barZone
     property bool editMode: false
 
     property bool isHovered: wifiMouse.containsMouse
@@ -41,7 +42,7 @@ Rectangle {
             text: bar.showEthernet ? "󰈀" : bar.wifiIcon
             font.family: "Iosevka Nerd Font"
             font.pixelSize: bar.s(16)
-            color: root.isActive ? bar.adaptiveText : bar.adaptiveSubtext
+            color: root.isActive ? barZone.adaptiveText : barZone.adaptiveSubtext
             Behavior on color { ColorAnimation { duration: 250 } }
         }
         Text {
@@ -53,7 +54,7 @@ Rectangle {
             font.family: "JetBrains Mono"
             font.pixelSize: bar.s(12)
             font.weight: Font.DemiBold
-            color: root.isActive ? bar.adaptiveText : bar.adaptiveSubtext
+            color: root.isActive ? barZone.adaptiveText : barZone.adaptiveSubtext
             width: Math.min(implicitWidth, bar.s(90))
             elide: Text.ElideRight
             Behavior on color { ColorAnimation { duration: 250 } }

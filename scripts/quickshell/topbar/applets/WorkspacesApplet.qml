@@ -4,6 +4,7 @@ import Quickshell
 Rectangle {
     id: root
     property var bar
+    property var barZone
     property bool editMode: false
 
     radius: bar.s(16)

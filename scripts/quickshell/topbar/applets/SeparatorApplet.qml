@@ -6,6 +6,7 @@ import QtQuick
 Item {
     id: root
     property var bar
+    property var barZone
     property bool editMode: false
 
     implicitWidth:  bar ? bar.s(10) : 12

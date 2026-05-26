@@ -242,15 +242,50 @@ Variants {
 
             // Background luminance from /tmp/qs_bg_luminance (written by DynamicIsland every 2s)
             property int  bgLum: 0
-            readonly property bool _onDark: bgLum < 128
+            // Per-zone luminance samples from /tmp/qs_bar_lum (4 left + 4 right)
+            property var  barLums: [128, 128, 128, 128, 128, 128, 128, 128]
+            readonly property int leftBgLum:  (barLums[0] + barLums[1] + barLums[2] + barLums[3]) / 4
+            readonly property int rightBgLum: (barLums[4] + barLums[5] + barLums[6] + barLums[7]) / 4
 
-            // Adaptive foreground: white on dark wallpaper, near-black on light wallpaper
-            readonly property color adaptiveText: _onDark
-                ? Qt.rgba(1.0,  1.0,  1.0,  0.92)
-                : Qt.rgba(0.08, 0.08, 0.08, 0.92)
-            readonly property color adaptiveSubtext: _onDark
-                ? Qt.rgba(1.0,  1.0,  1.0,  0.45)
-                : Qt.rgba(0.08, 0.08, 0.08, 0.45)
+            // Hysteresis avoids flicker when a zone average teeters around 128.
+            // Flip to "light" only above 140, back to "dark" only below 116.
+            // All three start at true (white text) — correct for dark themes by default.
+            // They are corrected on the first bgLum/barLums data read.
+            property bool _onDark:      true
+            property bool _leftOnDark:  true
+            property bool _rightOnDark: true
+            // True once barLumReader has received real zone data
+            property bool _barLumsLoaded: false
+            function _applyHysteresis(lum, state) {
+                if (state && lum > 140)   return false
+                if (!state && lum < 116)  return true
+                return state
+            }
+            onBgLumChanged: {
+                _onDark = _applyHysteresis(bgLum, _onDark)
+                // Seed per-zone states from global avg until real zone data arrives
+                if (!_barLumsLoaded) {
+                    _leftOnDark  = _applyHysteresis(bgLum, _leftOnDark)
+                    _rightOnDark = _applyHysteresis(bgLum, _rightOnDark)
+                }
+            }
+            onLeftBgLumChanged:  _leftOnDark  = _applyHysteresis(leftBgLum,  _leftOnDark)
+            onRightBgLumChanged: _rightOnDark = _applyHysteresis(rightBgLum, _rightOnDark)
+
+            function _adaptiveText(onDark, alpha) {
+                return onDark ? Qt.rgba(1.0, 1.0, 1.0, alpha)
+                              : Qt.rgba(0.08, 0.08, 0.08, alpha)
+            }
+
+            // Adaptive foreground (overall avg — fallback / legacy)
+            readonly property color adaptiveText:    _adaptiveText(_onDark, 0.92)
+            readonly property color adaptiveSubtext: _adaptiveText(_onDark, 0.45)
+
+            // Per-zone foregrounds — BarZone picks the one for its `side`
+            readonly property color leftAdaptiveText:     _adaptiveText(_leftOnDark,  0.92)
+            readonly property color leftAdaptiveSubtext:  _adaptiveText(_leftOnDark,  0.45)
+            readonly property color rightAdaptiveText:    _adaptiveText(_rightOnDark, 0.92)
+            readonly property color rightAdaptiveSubtext: _adaptiveText(_rightOnDark, 0.45)
 
             // Pill surface adapts to wallpaper luminance for guaranteed readability
             readonly property color pillColor: _onDark
@@ -413,7 +448,7 @@ Variants {
 
             // ── Applet layout order ───────────────────────────────────
             // Persisted to ~/.cache/quickshell/topbar_layout.json
-            property var leftAppletOrder: ["help", "ws"]
+            property var leftAppletOrder: ["ws"]
             property var rightAppletOrder: ["tray", "spacer", "kb", "wifi", "bt", "battery", "pulse"]
             // Gate auto-save until layoutLoader has restored the cached layout.
             // Otherwise the default-value assignments above fire onChanged before
@@ -440,7 +475,32 @@ Variants {
                 command: ["bash", "-c", "inotifywait -qq -e close_write,modify /tmp/qs_bg_luminance 2>/dev/null"]
                 onExited: { bgLumBarReader.running = true; running = true }
             }
-            Component.onCompleted: bgLumBarReader.running = true
+
+            // Per-zone bar luminances (4 left + 4 right) — written by DynamicIsland
+            Process {
+                id: barLumReader
+                command: ["cat", "/tmp/qs_bar_lum"]
+                stdout: StdioCollector {
+                    onStreamFinished: {
+                        let nums = this.text.trim().split(/\s+/)
+                            .map(s => parseInt(s)).filter(n => !isNaN(n))
+                        if (nums.length === 8) {
+                            barWindow.barLums = nums
+                            barWindow._barLumsLoaded = true
+                        }
+                    }
+                }
+            }
+            Process {
+                id: barLumWatcher
+                running: true
+                command: ["bash", "-c", "inotifywait -qq -e close_write,modify /tmp/qs_bar_lum 2>/dev/null"]
+                onExited: { barLumReader.running = true; running = true }
+            }
+            Component.onCompleted: {
+                bgLumBarReader.running = true
+                barLumReader.running   = true
+            }
 
             // IPC: island writes "1"/"0" to /tmp/qs_bar_edit
             Process {
@@ -498,7 +558,7 @@ Variants {
                                     if (all.indexOf(id) < 0)
                                         r.push(id);
                                 }
-                                for (let id of ["help", "ws"]) {
+                                for (let id of ["ws"]) {
                                     if (all.indexOf(id) < 0)
                                         l.unshift(id);
                                 }

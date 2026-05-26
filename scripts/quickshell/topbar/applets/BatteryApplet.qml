@@ -5,6 +5,7 @@ import Quickshell
 Rectangle {
     id: root
     property var bar
+    property var barZone
     property bool editMode: false
 
     property bool isHovered: batMouse.containsMouse
@@ -42,7 +43,7 @@ Rectangle {
             font.pixelSize: bar.s(16)
             color: bar.batCap <= 20 && !bar.isCharging ? bar.red
                  : bar.isCharging ? bar.green
-                 : bar.adaptiveText
+                 : barZone.adaptiveText
             Behavior on color { ColorAnimation { duration: 250 } }
         }
         Text {
@@ -52,7 +53,7 @@ Rectangle {
             font.family: "JetBrains Mono"
             font.pixelSize: bar.s(12)
             font.weight: Font.DemiBold
-            color: bar.adaptiveText
+            color: barZone.adaptiveText
             Behavior on color { ColorAnimation { duration: 250 } }
         }
     }

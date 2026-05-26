@@ -27,7 +27,6 @@ Item {
 
     // Built-in applets (must match BarZone.appletDefs)
     readonly property var _builtinRegistry: [
-        { id: "help",    label: "Help",        icon: "󰋗" },
         { id: "ws",      label: "Workspaces",  icon: "󰕰" },
         { id: "kb",      label: "Keyboard",    icon: "󰌌" },
         { id: "wifi",    label: "Network",     icon: "󰤨" },

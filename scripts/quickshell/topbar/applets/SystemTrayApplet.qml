@@ -6,6 +6,7 @@ import Quickshell.Services.SystemTray
 Rectangle {
     id: root
     property var bar
+    property var barZone
     property bool editMode: false
 
     radius: bar.s(14)

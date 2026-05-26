@@ -248,6 +248,16 @@ PanelWindow {
     // Workspace dots model — mirrors /tmp/qs_workspaces.json
     ListModel { id: wsDotModel }
 
+    // Index of the last dot that is active or occupied; dots beyond it are trailing empties.
+    readonly property int wsDotLastOccupied: {
+        var last = 0;
+        for (var i = 0; i < wsDotModel.count; i++) {
+            var st = wsDotModel.get(i).wsState;
+            if (st === "active" || st === "occupied") last = i;
+        }
+        return last;
+    }
+
     // Per-dot luminance values (index = dot index)
     property var _dotLuminances: [0, 0, 0, 0, 0, 0, 0, 0]
     // Bitfield: bit i=1 → dark bg behind dot i. All-ones default = all dark.
@@ -2094,13 +2104,18 @@ PanelWindow {
         onExited: { wsDotReader.running = true; running = true }
     }
 
-    // Samples screen pixels behind dots every 2s — line 1: per-dot, line 2: average for TopBar
+    // Samples wallpaper every 2s. Script emits 3 lines:
+    //   1: 8 per-dot luminances (under the dots row)
+    //   2: 8 bar-zone luminances (4 left + 4 right of the island)
+    //   3: overall average (for legacy /tmp/qs_bg_luminance consumers)
     Process {
         id: bgLumReader
         command: ["bash", "-c",
             "OUT=$(bash /home/dxvmxn/.config/hypr/scripts/quickshell/watchers/bg_luminance.sh " +
             Screen.width + " " + Screen.height + "); " +
-            "echo \"$OUT\"; echo \"$OUT\" | tail -1 > /tmp/qs_bg_luminance"]
+            "echo \"$OUT\"; " +
+            "printf '%s' \"$(echo \"$OUT\" | sed -n '3p')\" > /tmp/qs_bg_luminance; " +
+            "printf '%s' \"$(echo \"$OUT\" | sed -n '2p')\" > /tmp/qs_bar_lum"]
         stdout: StdioCollector {
             onStreamFinished: {
                 let lines = this.text.trim().split("\n")
@@ -2111,8 +2126,8 @@ PanelWindow {
                         islandWindow._updateDotOnDarks(nums)
                     }
                 }
-                if (lines.length >= 2) {
-                    let avg = parseInt(lines[1].trim())
+                if (lines.length >= 3) {
+                    let avg = parseInt(lines[2].trim())
                     if (!isNaN(avg)) islandWindow._bgLuminance = avg
                 }
             }
@@ -2143,21 +2158,21 @@ PanelWindow {
                   && wsDotModel.count > 0) ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
 
-        // Shadow cast by the dots — offset downward so it reads as a real shadow
+        // Subtle shadow behind the dots — tight blur so it doesn't bleed downward
         Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter:   parent.verticalCenter
-            anchors.verticalCenterOffset: s(3)
-            width:  dotsRow.width + s(24)
-            height: s(10)
+            anchors.verticalCenterOffset: s(1)
+            width:  dotsRow.width + s(16)
+            height: s(8)
             radius: height / 2
-            color:  Qt.rgba(0, 0, 0, 0.55)
-            Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutExpo } }
+            color:  Qt.rgba(0, 0, 0, 0.45)
+            Behavior on width { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
             layer.enabled: true
             layer.effect: MultiEffect {
                 blurEnabled: true
-                blurMax:     28
-                blur:        0.75
+                blurMax:     12
+                blur:        0.8
             }
         }
 
@@ -2165,27 +2180,36 @@ PanelWindow {
             id: dotsRow
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter:   parent.verticalCenter
-            spacing: s(6)
+            spacing: 0
 
             Repeater {
                 model: wsDotModel
                 delegate: Item {
                     id: dotSlot
-                    required property var    model
-                    required property int    index
+                    required property var model
+                    required property int index
 
-                    property bool isActive:   model.wsState === "active"
-                    property bool isOccupied: model.wsState === "occupied" || isActive
-                    property bool isHovered:  dotHit.containsMouse
+                    property bool isActive:        model.wsState === "active"
+                    property bool isOccupied:      model.wsState === "occupied" || isActive
+                    property bool isHovered:       dotHit.containsMouse
+                    property bool isTrailingEmpty: !isOccupied && index > islandWindow.wsDotLastOccupied
 
                     readonly property real dotD: isActive ? s(10) : (isOccupied ? s(8) : s(6))
 
-                    width:  s(10)
+                    // Width bakes in the right-side gap so Row spacing can stay 0.
+                    // Trailing empties collapse to 0, pulling the Row inward smoothly.
+                    width: isTrailingEmpty ? 0 : s(16)
+                    Behavior on width { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
                     height: s(10)
+                    clip: true
 
                     Rectangle {
                         id: dot
-                        anchors.centerIn: parent
+                        // Horizontally pinned to left of slot so it stays put while
+                        // the slot collapses rightward; vertically centered.
+                        x: 0
+                        anchors.verticalCenter: parent.verticalCenter
+
                         width:  dotSlot.dotD
                         height: dotSlot.dotD
                         radius: width / 2
@@ -2193,20 +2217,41 @@ PanelWindow {
                         Behavior on width  { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
                         Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
 
-                        // Active: mauve accent. Occupied/inactive: white with varying alpha.
+                        // Per-dot adaptive tint — white on dark wallpaper patches,
+                        // near-black on bright ones, so dots never wash out.
+                        readonly property bool _onDark:
+                            (islandWindow._dotOnDarkBits & (1 << dotSlot.index)) !== 0
+                        readonly property real _baseAlpha:
+                            dotSlot.isOccupied ? 0.78
+                          : dotSlot.isHovered  ? 0.65
+                          :                      0.45
                         color: dotSlot.isActive
                             ? Qt.rgba(islandWindow.mauve.r, islandWindow.mauve.g, islandWindow.mauve.b, 1.0)
-                            : Qt.rgba(1.0, 1.0, 1.0,
-                                  dotSlot.isOccupied ? 0.70
-                                : dotSlot.isHovered  ? 0.65
-                                :                      0.40)
+                            : (_onDark
+                                ? Qt.rgba(1.0, 1.0, 1.0, _baseAlpha)
+                                : Qt.rgba(0.08, 0.08, 0.08, Math.min(1.0, _baseAlpha + 0.15)))
                         Behavior on color { ColorAnimation { duration: 300; easing.type: Easing.OutCubic } }
 
-                        scale: dotSlot.isHovered && !dotSlot.isActive ? 1.3 : 1.0
-                        Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
+                        opacity: dotSlot.isTrailingEmpty ? 0.0 : 1.0
+                        Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+
+                        // Two independent scales composed via multiplication:
+                        //   _presenceScale — dot pops in (OutBack) / fades out (OutCubic)
+                        //   _hoverScale    — hover spring, unchanged
+                        property real _presenceScale: dotSlot.isTrailingEmpty ? 0.0 : 1.0
+                        Behavior on _presenceScale {
+                            NumberAnimation { duration: 240; easing.type: Easing.OutBack }
+                        }
+
+                        property real _hoverScale: dotSlot.isHovered && !dotSlot.isActive ? 1.3 : 1.0
+                        Behavior on _hoverScale {
+                            NumberAnimation { duration: 200; easing.type: Easing.OutBack }
+                        }
+
+                        scale: Math.max(0.0, _presenceScale * _hoverScale)
+                        transformOrigin: Item.Left
                     }
 
-                    // Extended hit area so tiny dots are easily clickable
                     MouseArea {
                         id: dotHit
                         anchors.centerIn: parent

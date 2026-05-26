@@ -14,7 +14,7 @@ import "../plugins"
 //   2. Add Component + appletDefs entry here.
 
 Item {
-    id: barZone
+    id: bz
 
     property var    bar
     property string side:             "left"
@@ -25,26 +25,30 @@ Item {
     // — sits at z:-1 so applet colors aren't tinted, just framed.
     property bool   subtleBackdrop:   false
 
+    // Per-zone adaptive colors — applets bind to bz.adaptiveText so the
+    // left and right halves of the bar can independently invert against the
+    // patch of wallpaper directly behind them.
+    readonly property color adaptiveText:    side === "left" ? bar.leftAdaptiveText    : bar.rightAdaptiveText
+    readonly property color adaptiveSubtext: side === "left" ? bar.leftAdaptiveSubtext : bar.rightAdaptiveSubtext
+
     // ── Applet component registry ──────────────────────────────────────
-    Component { id: helpComp;    HelpApplet       { bar: barZone.bar; editMode: barZone.editMode } }
-    Component { id: wsComp;      WorkspacesApplet { bar: barZone.bar; editMode: barZone.editMode } }
-    Component { id: kbComp;      KeyboardApplet   { bar: barZone.bar; editMode: barZone.editMode } }
-    Component { id: wifiComp;    WifiApplet       { bar: barZone.bar; editMode: barZone.editMode } }
-    Component { id: btComp;      BluetoothApplet  { bar: barZone.bar; editMode: barZone.editMode } }
-    Component { id: batComp;     BatteryApplet    { bar: barZone.bar; editMode: barZone.editMode } }
-    Component { id: powerComp;   PowerApplet      { bar: barZone.bar; editMode: barZone.editMode } }
-    Component { id: pulseComp;   PulseApplet      { bar: barZone.bar; editMode: barZone.editMode } }
-    Component { id: trayComp;    SystemTrayApplet { bar: barZone.bar; editMode: barZone.editMode } }
-    Component { id: spacerComp;  SpacerApplet     { bar: barZone.bar; editMode: barZone.editMode } }
-    Component { id: separatorComp; SeparatorApplet { bar: barZone.bar; editMode: barZone.editMode } }
-    Component { id: pluginComp; PluginApplet { bar: barZone.bar; editMode: barZone.editMode } }
+    Component { id: wsComp;      WorkspacesApplet { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
+    Component { id: kbComp;      KeyboardApplet   { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
+    Component { id: wifiComp;    WifiApplet       { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
+    Component { id: btComp;      BluetoothApplet  { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
+    Component { id: batComp;     BatteryApplet    { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
+    Component { id: powerComp;   PowerApplet      { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
+    Component { id: pulseComp;   PulseApplet      { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
+    Component { id: trayComp;    SystemTrayApplet { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
+    Component { id: spacerComp;  SpacerApplet     { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
+    Component { id: separatorComp; SeparatorApplet { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
+    Component { id: pluginComp; PluginApplet { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
 
     function isSpacer(id)    { return typeof id === "string" && id.indexOf("spacer")    === 0 }
     function isSeparator(id) { return typeof id === "string" && id.indexOf("separator") === 0 }
     function isPlugin(id)    { return typeof id === "string" && id.indexOf("plugin-")   === 0 }
 
     readonly property var appletDefs: [
-        { id: "help",    comp: helpComp,   label: "Help",        icon: "󰋗" },
         { id: "ws",      comp: wsComp,     label: "Workspaces",  icon: "󰕰" },
         { id: "kb",      comp: kbComp,     label: "Keyboard",    icon: "󰌌" },
         { id: "wifi",    comp: wifiComp,   label: "Network",     icon: "󰤨" },
@@ -141,7 +145,7 @@ Item {
 
         if (side === "right") {
             // Start from right edge, offset by total width
-            let x = barZone.width - _totalW
+            let x = bz.width - _totalW
             for (let i = 0; i < idx; i++) x += (_widths[order[i]] || 0) + sp
             return x
         } else {
@@ -164,7 +168,7 @@ Item {
                     tot += (_widths[order[j]] || 0)
                     if (j < order.length - 1) tot += sp
                 }
-                let x = barZone.width - tot
+                let x = bz.width - tot
                 for (let j = 0; j < i; j++) x += (_widths[order[j]] || 0) + sp
                 return x
             } else {
@@ -192,39 +196,39 @@ Item {
     Behavior on opacity { NumberAnimation { duration: 600; easing.type: Easing.OutCubic } }
 
     transform: Translate {
-        x: barZone._showZone ? 0
-         : (barZone.side === "left" ? barZone.bar.s(-30) : barZone.bar.s(30))
+        x: bz._showZone ? 0
+         : (bz.side === "left" ? bz.bar.s(-30) : bz.bar.s(30))
         Behavior on x {
             NumberAnimation { duration: 800; easing.type: Easing.OutBack; easing.overshoot: 1.1 }
         }
     }
 
     Timer {
-        interval: barZone.side === "right" ? 250 : 10
-        running:  barZone.bar
-            && barZone.bar.isStartupReady
-            && (barZone.side === "left" || barZone.bar.isDataReady)
-            && !barZone._showZone
-        onTriggered: barZone._showZone = true
+        interval: bz.side === "right" ? 250 : 10
+        running:  bz.bar
+            && bz.bar.isStartupReady
+            && (bz.side === "left" || bz.bar.isDataReady)
+            && !bz._showZone
+        onTriggered: bz._showZone = true
     }
 
     // ── Subtle dark backdrop (always-on, theme-independent) ────────────
     // Sits at z:-1 behind applets; uses the same _groupBounds as showGroupFrames
     // so spacer splits the right zone into two pills (tray | rest).
     Repeater {
-        model: (barZone.subtleBackdrop && !barZone.editMode) ? barZone._groupBounds : []
+        model: (bz.subtleBackdrop && !bz.editMode) ? bz._groupBounds : []
         delegate: Rectangle {
             required property var modelData
 
-            x: modelData.gx - modelData.lp - barZone.bar.s(6)
-            y: (barZone.height - height) / 2 + barZone.bar.s(1)
-            width:  modelData.gw + modelData.lp + modelData.rp + barZone.bar.s(12)
-            height: barZone.bar ? barZone.bar.barHeight : 36
+            x: modelData.gx - modelData.lp - bz.bar.s(6)
+            y: (bz.height - height) / 2 + bz.bar.s(1)
+            width:  modelData.gw + modelData.lp + modelData.rp + bz.bar.s(12)
+            height: bz.bar ? bz.bar.barHeight : 36
             radius: height / 2
 
             color: Qt.rgba(0, 0, 0, 0.06)
 
-            opacity: barZone._showZone ? 1 : 0
+            opacity: bz._showZone ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
             Behavior on x      { NumberAnimation { duration: 160; easing.type: Easing.OutExpo } }
             Behavior on width  { NumberAnimation { duration: 160; easing.type: Easing.OutExpo } }
@@ -242,19 +246,19 @@ Item {
 
     // ── Group background frames (split by spacer, right zone only) ────
     Repeater {
-        model: (barZone.showGroupFrames && !barZone.editMode) ? barZone._groupBounds : []
+        model: (bz.showGroupFrames && !bz.editMode) ? bz._groupBounds : []
         delegate: Item {
             id: groupFrame
             required property var modelData
 
-            property real _radius: barZone.bar ? barZone.bar.s(16) : 16
+            property real _radius: bz.bar ? bz.bar.s(16) : 16
 
             x: modelData.gx - modelData.lp
-            y: (barZone.height - height) / 2
+            y: (bz.height - height) / 2
             width:  modelData.gw + modelData.lp + modelData.rp
-            height: barZone.bar ? barZone.bar.barHeight : 36
+            height: bz.bar ? bz.bar.barHeight : 36
 
-            opacity: barZone._showZone ? 1 : 0
+            opacity: bz._showZone ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
             Behavior on x     { NumberAnimation { duration: 160; easing.type: Easing.OutExpo } }
             Behavior on width { NumberAnimation { duration: 160; easing.type: Easing.OutExpo } }
@@ -264,12 +268,12 @@ Item {
             Rectangle {
                 anchors.fill: parent
                 radius: groupFrame._radius
-                color: barZone.bar ? barZone.bar.pillColor
+                color: bz.bar ? bz.bar.pillColor
                                    : Qt.rgba(0, 0, 0, 0)
                 border.width: 1
-                border.color: barZone.bar ? barZone.bar.pillBorderColor
+                border.color: bz.bar ? bz.bar.pillBorderColor
                                           : "transparent"
-                opacity: barZone.bar.glassTheme ? 0 : 1
+                opacity: bz.bar.glassTheme ? 0 : 1
                 visible: opacity > 0.001
                 Behavior on opacity { NumberAnimation { duration: 520; easing.type: Easing.InOutCubic } }
             }
@@ -277,9 +281,9 @@ Item {
             // Glass surface
             GlassSurface {
                 anchors.fill: parent
-                bar:    barZone.bar
+                bar:    bz.bar
                 radius: groupFrame._radius
-                opacity: barZone.bar && barZone.bar.glassTheme ? 1 : 0
+                opacity: bz.bar && bz.bar.glassTheme ? 1 : 0
                 visible: opacity > 0.001
                 Behavior on opacity { NumberAnimation { duration: 520; easing.type: Easing.InOutCubic } }
             }
@@ -289,7 +293,7 @@ Item {
     // ── Slot delegates ─────────────────────────────────────────────────
     Repeater {
         id: slotRepeater
-        model: barZone.appletOrder
+        model: bz.appletOrder
 
         delegate: Item {
             id: slotItem
@@ -297,8 +301,8 @@ Item {
             required property int    index
 
             // homeX re-evaluates automatically when _widths / appletOrder / width change
-            property real homeX: barZone.homeXFor(modelData)
-            property real homeY: (barZone.height - height) / 2
+            property real homeX: bz.homeXFor(modelData)
+            property real homeY: (bz.height - height) / 2
 
             property bool snapSpring: false
             Timer { id: snapTimer; interval: 600; onTriggered: slotItem.snapSpring = false }
@@ -321,18 +325,18 @@ Item {
 
             // Size tracks loaded applet
             width:  appletLoader.item ? appletLoader.item.width  : 0
-            height: appletLoader.item ? appletLoader.item.height : (barZone.bar ? barZone.bar.barHeight : 48)
+            height: appletLoader.item ? appletLoader.item.height : (bz.bar ? bz.bar.barHeight : 48)
 
             // Report width changes to zone so homeX recalculates for siblings
-            onWidthChanged: barZone._reportWidth(slotItem.modelData, width)
+            onWidthChanged: bz._reportWidth(slotItem.modelData, width)
 
             Loader {
                 id: appletLoader
                 anchors.centerIn: parent
-                sourceComponent: barZone.compFor(modelData)
+                sourceComponent: bz.compFor(modelData)
                 onLoaded: {
-                    barZone._reportWidth(slotItem.modelData, item.width)
-                    if (barZone.isPlugin(slotItem.modelData)) {
+                    bz._reportWidth(slotItem.modelData, item.width)
+                    if (bz.isPlugin(slotItem.modelData)) {
                         let pluginId = slotItem.modelData.slice(7) // strip "plugin-"
                         let plugin = PluginLoader.findPlugin(pluginId)
                         item._pluginId = pluginId  // always set so retry can work
@@ -347,19 +351,19 @@ Item {
             // ── Edit mode drag ─────────────────────────────────────────
             DragHandler {
                 id: dragger
-                enabled: barZone.editMode
+                enabled: bz.editMode
                 yAxis.minimum: slotItem.homeY
                 yAxis.maximum: slotItem.homeY
                 target: slotItem
 
                 onActiveChanged: {
                     if (!active) {
-                        let isCross = (barZone.side === "left"  && slotItem.x + slotItem.width > barZone.width) ||
-                                      (barZone.side === "right" && slotItem.x < 0)
+                        let isCross = (bz.side === "left"  && slotItem.x + slotItem.width > bz.width) ||
+                                      (bz.side === "right" && slotItem.x < 0)
                         if (isCross) {
-                            barZone.bar.crossZoneDrop(slotItem.modelData, barZone.side)
+                            bz.bar.crossZoneDrop(slotItem.modelData, bz.side)
                         } else {
-                            barZone.snapApplet(slotItem.modelData, slotItem.x + slotItem.width / 2)
+                            bz.snapApplet(slotItem.modelData, slotItem.x + slotItem.width / 2)
                         }
                         slotItem.snapSpring = true
                         snapTimer.restart()
@@ -369,28 +373,28 @@ Item {
 
             // Tap-to-remove for spacers: simpler than dragging a thin line off-zone
             TapHandler {
-                enabled: barZone.editMode && barZone.isSpacer(slotItem.modelData) && !dragger.active
-                onTapped: barZone.bar.removeApplet(slotItem.modelData)
+                enabled: bz.editMode && bz.isSpacer(slotItem.modelData) && !dragger.active
+                onTapped: bz.bar.removeApplet(slotItem.modelData)
             }
 
             // Right-click in edit mode removes any applet (incl. spacers).
             TapHandler {
-                enabled: barZone.editMode && !dragger.active
+                enabled: bz.editMode && !dragger.active
                 acceptedButtons: Qt.RightButton
-                onTapped: barZone.bar.removeApplet(slotItem.modelData)
+                onTapped: bz.bar.removeApplet(slotItem.modelData)
             }
 
             // ── Edit mode overlay: border + grab icon ──────────────────
             Rectangle {
                 id: editOverlay
                 anchors.fill: parent
-                visible: barZone.editMode && !barZone.isSpacer(slotItem.modelData) && !barZone.isSeparator(slotItem.modelData)
+                visible: bz.editMode && !bz.isSpacer(slotItem.modelData) && !bz.isSeparator(slotItem.modelData)
                 color: dragger.active
-                    ? Qt.rgba(barZone.bar.mauve.r, barZone.bar.mauve.g, barZone.bar.mauve.b, 0.18)
+                    ? Qt.rgba(bz.bar.mauve.r, bz.bar.mauve.g, bz.bar.mauve.b, 0.18)
                     : "transparent"
-                radius: barZone.bar.s(14)
+                radius: bz.bar.s(14)
                 border.width: 1
-                border.color: Qt.rgba(barZone.bar.mauve.r, barZone.bar.mauve.g, barZone.bar.mauve.b,
+                border.color: Qt.rgba(bz.bar.mauve.r, bz.bar.mauve.g, bz.bar.mauve.b,
                                       dragger.active ? 0.7 : 0.35)
                 Behavior on color { ColorAnimation { duration: 150 } }
                 Behavior on border.color { ColorAnimation { duration: 150 } }
@@ -398,7 +402,7 @@ Item {
                 // Gentle wiggle in edit mode (iOS-style)
                 SequentialAnimation on rotation {
                     id: wiggleAnim
-                    running: barZone.editMode && !dragger.active && !barZone.isSpacer(slotItem.modelData) && !barZone.isSeparator(slotItem.modelData)
+                    running: bz.editMode && !dragger.active && !bz.isSpacer(slotItem.modelData) && !bz.isSeparator(slotItem.modelData)
                     loops: Animation.Infinite
                     NumberAnimation { to:  1.2; duration: 180 + (slotItem.index * 37) % 80; easing.type: Easing.InOutSine }
                     NumberAnimation { to: -1.2; duration: 180 + (slotItem.index * 37) % 80; easing.type: Easing.InOutSine }

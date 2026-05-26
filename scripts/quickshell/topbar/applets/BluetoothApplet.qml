@@ -5,6 +5,7 @@ import Quickshell
 Rectangle {
     id: root
     property var bar
+    property var barZone
     property bool editMode: false
 
     property bool isHovered: btMouse.containsMouse
@@ -56,7 +57,7 @@ Rectangle {
             text: bar.btIcon
             font.family: "Iosevka Nerd Font"
             font.pixelSize: bar.s(16)
-            color: bar.isBtOn ? bar.base : bar.adaptiveSubtext
+            color: bar.isBtOn ? bar.base : barZone.adaptiveSubtext
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
@@ -65,7 +66,7 @@ Rectangle {
             font.family: "JetBrains Mono"
             font.pixelSize: bar.s(13)
             font.weight: Font.DemiBold
-            color: bar.isBtOn ? bar.base : bar.adaptiveText
+            color: bar.isBtOn ? bar.base : barZone.adaptiveText
             width: Math.min(implicitWidth, bar.s(100))
             elide: Text.ElideRight
         }

@@ -279,7 +279,7 @@ PanelWindow {
             }
         } else {
             if (currentActive === "hidden") {
-                if (newWidget === "powermenu") {
+                if (newWidget === "powermenu" || newWidget === "hello") {
                     masterWindow.morphDuration = 1;
                     masterWindow.exitDuration = 280;
                     masterWindow.disableMorph = true;

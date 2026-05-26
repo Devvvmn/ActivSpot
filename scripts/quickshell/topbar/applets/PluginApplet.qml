@@ -5,6 +5,7 @@ Item {
     id: root
 
     property var    bar
+    property var    barZone
     property bool   editMode:       false
     property var    pluginManifest: null
     property string pluginDir:      ""

@@ -5,6 +5,7 @@ import Quickshell
 Rectangle {
     id: root
     property var bar
+    property var barZone
     property bool editMode: false
 
     color: "transparent"
@@ -22,7 +23,7 @@ Rectangle {
         text: "⏻"
         font.family: "Iosevka Nerd Font"
         font.pixelSize: bar.s(16)
-        color: ma.containsMouse ? bar.red : bar.adaptiveText
+        color: ma.containsMouse ? bar.red : barZone.adaptiveText
         Behavior on color { ColorAnimation { duration: 200 } }
 
         layer.enabled: true

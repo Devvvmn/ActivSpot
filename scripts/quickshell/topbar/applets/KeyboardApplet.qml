@@ -5,6 +5,7 @@ import Quickshell
 Rectangle {
     id: root
     property var bar
+    property var barZone
     property bool editMode: false
 
     property bool isHovered: kbMouse.containsMouse
@@ -41,7 +42,7 @@ Rectangle {
             text: "󰌌"
             font.family: "Iosevka Nerd Font"
             font.pixelSize: bar.s(16)
-            color: root.isHovered ? bar.adaptiveText : bar.adaptiveSubtext
+            color: root.isHovered ? barZone.adaptiveText : barZone.adaptiveSubtext
             Behavior on color { ColorAnimation { duration: 200 } }
         }
         Text {
@@ -50,7 +51,7 @@ Rectangle {
             font.family: "JetBrains Mono"
             font.pixelSize: bar.s(13)
             font.weight: Font.DemiBold
-            color: bar.adaptiveText
+            color: barZone.adaptiveText
             Behavior on color { ColorAnimation { duration: 200 } }
         }
     }
