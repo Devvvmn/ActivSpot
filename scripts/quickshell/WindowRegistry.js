@@ -42,6 +42,7 @@ function getLayout(name, mx, my, mw, mh, userScale) {
         "network":   { w: s(900, scale), h: s(700, scale), rx: mw - s(920, scale), ry: s(70, scale), comp: "network/NetworkPopup.qml" },
         
         "monitors":  { w: s(850, scale), h: s(580, scale), rx: Math.floor((mw/2)-(s(850, scale)/2)), ry: Math.floor((mh/2)-(s(580, scale)/2)), comp: "monitors/MonitorPopup.qml" },
+        "sysinfo":   { w: s(500, scale), h: s(640, scale), rx: Math.floor((mw/2)-(s(500, scale)/2)), ry: Math.floor((mh/2)-(s(640, scale)/2)), comp: "sysinfo/SysInfoCard.qml" },
         "focustime": { w: s(900, scale), h: s(720, scale), rx: Math.floor((mw/2)-(s(900, scale)/2)), ry: Math.floor((mh/2)-(s(720, scale)/2)), comp: "focustime/FocusTimePopup.qml" },
         "hello":     { w: mw, h: mh, rx: 0, ry: 0, comp: "hello/HelloPopup.qml" },
 

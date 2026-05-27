@@ -42,7 +42,8 @@ Item {
     Component { id: trayComp;    SystemTrayApplet { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
     Component { id: spacerComp;  SpacerApplet     { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
     Component { id: separatorComp; SeparatorApplet { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
-    Component { id: pluginComp; PluginApplet { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
+    Component { id: pluginComp; PluginApplet  { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
+    Component { id: avatarComp; AvatarApplet { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
 
     function isSpacer(id)    { return typeof id === "string" && id.indexOf("spacer")    === 0 }
     function isSeparator(id) { return typeof id === "string" && id.indexOf("separator") === 0 }
@@ -59,12 +60,14 @@ Item {
         { id: "tray",    comp: trayComp,   label: "System Tray", icon: "󱒔" },
         { id: "spacer",    comp: spacerComp,    label: "Spacer",    icon: "󱐋" },
         { id: "separator", comp: separatorComp, label: "Separator", icon: "│" },
+        { id: "avatar",    comp: avatarComp,    label: "Profile",   icon: "󰀄" },
     ]
 
     function compFor(id) {
         if (isSpacer(id))    return spacerComp
         if (isSeparator(id)) return separatorComp
         if (isPlugin(id))    return pluginComp
+        if (id === "avatar") return avatarComp
         for (let d of appletDefs) { if (d.id === id) return d.comp }
         return null
     }

@@ -37,6 +37,7 @@ Item {
         { id: "tray",    label: "System Tray", icon: "󱒔" },
         { id: "spacer",    label: "Spacer",      icon: "󱐋" },
         { id: "separator", label: "Separator",   icon: "│" },
+        { id: "avatar",    label: "Profile",     icon: "󰀄" },
     ]
 
     // Full registry: built-ins + installed plugins
