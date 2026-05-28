@@ -1,0 +1,3845 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "9634153682db6ec8e377ad319c115b55fef7f4e7",
+  "generatedAt": "2026-05-27T12:36:09.938Z",
+  "files": {
+    ".understand-anything/.understandignore": {
+      "filePath": ".understand-anything/.understandignore",
+      "contentHash": "6cd489937858bc1490f1c26aba611496a8be41952295d5e61809d83c5e8b7b50",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 35,
+      "hasStructuralAnalysis": false
+    },
+    ".understand-anything/config.json": {
+      "filePath": ".understand-anything/config.json",
+      "contentHash": "92a57d40119389447c9d824b1710815556af58055f633e0b4d7d84e96a63e9da",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    ".understandignore": {
+      "filePath": ".understandignore",
+      "contentHash": "239d70ce5dda74e14ef13bc7b690f33aaea49a80a74b5ad963b9a95bc5636808",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 9,
+      "hasStructuralAnalysis": false
+    },
+    "config-ui/index.html": {
+      "filePath": "config-ui/index.html",
+      "contentHash": "0f3a20d46a06939757554479ae0f2f6494fd1f0ba14977906eb39799d81670a8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 19,
+      "hasStructuralAnalysis": false
+    },
+    "config-ui/package.json": {
+      "filePath": "config-ui/package.json",
+      "contentHash": "55fabe05d0bd3a356d98a7499b8ef144c1baac9915522eb5a7ecf9334a38a6ed",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/server/server.mjs": {
+      "filePath": "config-ui/server/server.mjs",
+      "contentHash": "6a9378b6bb157b1e2dc957bf505c87bf3b6e341d3e0fa9a1165c0ac012a1e164",
+      "functions": [
+        {
+          "name": "send",
+          "params": [
+            "res",
+            "status",
+            "body"
+          ],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "readJson",
+          "params": [
+            "path"
+          ],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "listQml",
+          "params": [
+            "dir"
+          ],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "inventory",
+          "params": [],
+          "exported": false,
+          "lineCount": 21
+        },
+        {
+          "name": "humanize",
+          "params": [
+            "name",
+            "suffix"
+          ],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "parseKeybinds",
+          "params": [],
+          "exported": false,
+          "lineCount": 27
+        },
+        {
+          "name": "colorsPalette",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "reloadShell",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "readBody",
+          "params": [
+            "req"
+          ],
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "serveStatic",
+          "params": [
+            "req",
+            "res",
+            "urlPath"
+          ],
+          "exported": false,
+          "lineCount": 20
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:http",
+          "specifiers": [
+            "createServer"
+          ]
+        },
+        {
+          "source": "node:fs/promises",
+          "specifiers": [
+            "readFile",
+            "writeFile",
+            "readdir",
+            "stat"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "existsSync"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "extname",
+            "join",
+            "resolve",
+            "dirname"
+          ]
+        },
+        {
+          "source": "node:url",
+          "specifiers": [
+            "fileURLToPath"
+          ]
+        },
+        {
+          "source": "node:child_process",
+          "specifiers": [
+            "exec"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "os"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 243,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/src/api.ts": {
+      "filePath": "config-ui/src/api.ts",
+      "contentHash": "85a9538def459cbede6554f8c749d3504f8b29362dd34f2ce090da10b339ebe7",
+      "functions": [
+        {
+          "name": "j",
+          "params": [
+            "url",
+            "opts"
+          ],
+          "returnType": "Promise<T>",
+          "exported": false,
+          "lineCount": 8
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "api",
+        "PARALLAX_EASINGS",
+        "defaults"
+      ],
+      "totalLines": 99,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/src/App.tsx": {
+      "filePath": "config-ui/src/App.tsx",
+      "contentHash": "81798450c16179c7a4f3ab21ce4621425780570a04127497b8f1f0d108afc035",
+      "functions": [
+        {
+          "name": "pad",
+          "params": [
+            "n"
+          ],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "App",
+          "params": [],
+          "exported": true,
+          "lineCount": 209
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React",
+            "useEffect",
+            "useMemo",
+            "useState"
+          ]
+        },
+        {
+          "source": "./api",
+          "specifiers": [
+            "api",
+            "Settings",
+            "Inventory"
+          ]
+        },
+        {
+          "source": "./components/Icon",
+          "specifiers": [
+            "Icon"
+          ]
+        },
+        {
+          "source": "./components/Preview",
+          "specifiers": [
+            "PreviewIsland",
+            "PaletteCard",
+            "ShortcutsCard"
+          ]
+        },
+        {
+          "source": "./sections/ThemeSection",
+          "specifiers": [
+            "ThemeSection"
+          ]
+        },
+        {
+          "source": "./sections/MinibubblesSection",
+          "specifiers": [
+            "MinibubblesSection"
+          ]
+        },
+        {
+          "source": "./sections/PagesSection",
+          "specifiers": [
+            "PagesSection"
+          ]
+        },
+        {
+          "source": "./sections/MonitorsSection",
+          "specifiers": [
+            "MonitorsSection"
+          ]
+        },
+        {
+          "source": "./sections/PinnedAppsSection",
+          "specifiers": [
+            "PinnedAppsSection"
+          ]
+        },
+        {
+          "source": "./sections/KeyboardSection",
+          "specifiers": [
+            "KeyboardSection"
+          ]
+        },
+        {
+          "source": "./sections/BindingsSection",
+          "specifiers": [
+            "BindingsSection"
+          ]
+        },
+        {
+          "source": "./sections/ParallaxSection",
+          "specifiers": [
+            "ParallaxSection"
+          ]
+        },
+        {
+          "source": "./sections/RawSection",
+          "specifiers": [
+            "RawSection"
+          ]
+        }
+      ],
+      "exports": [
+        "App"
+      ],
+      "totalLines": 240,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/src/components/Icon.tsx": {
+      "filePath": "config-ui/src/components/Icon.tsx",
+      "contentHash": "69831a9cede51a12d72c3a96c0cabaee72e36e461f12ee3ad119a4c2985e0354",
+      "functions": [
+        {
+          "name": "Icon",
+          "params": [
+            "{\n  name,\n  size = 16,\n  style,\n  ...rest\n}"
+          ],
+          "exported": true,
+          "lineCount": 20
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React"
+          ]
+        }
+      ],
+      "exports": [
+        "Icon",
+        "BUBBLE_META"
+      ],
+      "totalLines": 75,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/src/components/Preview.tsx": {
+      "filePath": "config-ui/src/components/Preview.tsx",
+      "contentHash": "2e7ca0eda78a1041d5d35fc2ce402be6d0971020df4461895332817008bd54cb",
+      "functions": [
+        {
+          "name": "useNow",
+          "params": [],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "PreviewIsland",
+          "params": [
+            "{ s, inv }"
+          ],
+          "exported": true,
+          "lineCount": 73
+        },
+        {
+          "name": "PaletteCard",
+          "params": [
+            "{\n  s,\n  palette,\n}"
+          ],
+          "exported": true,
+          "lineCount": 66
+        },
+        {
+          "name": "ShortcutsCard",
+          "params": [],
+          "exported": true,
+          "lineCount": 23
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React",
+            "useEffect",
+            "useState"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "Settings",
+            "Inventory"
+          ]
+        },
+        {
+          "source": "./Icon",
+          "specifiers": [
+            "Icon",
+            "BUBBLE_META"
+          ]
+        }
+      ],
+      "exports": [
+        "PreviewIsland",
+        "PaletteCard",
+        "ShortcutsCard"
+      ],
+      "totalLines": 185,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/src/components/UI.tsx": {
+      "filePath": "config-ui/src/components/UI.tsx",
+      "contentHash": "c289f1b23f39fdd43a5faeb0cd48eb6cea0fab760cdea2c207f9782ea853f062",
+      "functions": [
+        {
+          "name": "Toggle",
+          "params": [
+            "{ on, onChange }"
+          ],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "Row",
+          "params": [
+            "{\n  label,\n  hint,\n  code,\n  children,\n}"
+          ],
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "Sub",
+          "params": [
+            "{\n  num,\n  title,\n  desc,\n  right,\n  children,\n}"
+          ],
+          "exported": true,
+          "lineCount": 29
+        },
+        {
+          "name": "Chip",
+          "params": [
+            "{\n  active,\n  onClick,\n  onRemove,\n  children,\n}"
+          ],
+          "exported": true,
+          "lineCount": 28
+        },
+        {
+          "name": "Slider",
+          "params": [
+            "{\n  value,\n  min,\n  max,\n  step,\n  unit,\n  onChange,\n}"
+          ],
+          "exported": true,
+          "lineCount": 33
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React"
+          ]
+        }
+      ],
+      "exports": [
+        "Toggle",
+        "Row",
+        "Sub",
+        "Chip",
+        "Slider"
+      ],
+      "totalLines": 129,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/src/main.tsx": {
+      "filePath": "config-ui/src/main.tsx",
+      "contentHash": "294f62f7961cca8822a5474309fbc9f35bf45b61fc815fc7d8ecc17b64afe583",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React"
+          ]
+        },
+        {
+          "source": "react-dom/client",
+          "specifiers": [
+            "createRoot"
+          ]
+        },
+        {
+          "source": "./App",
+          "specifiers": [
+            "App"
+          ]
+        },
+        {
+          "source": "./styles.css",
+          "specifiers": []
+        }
+      ],
+      "exports": [],
+      "totalLines": 11,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/src/sections/BindingsSection.tsx": {
+      "filePath": "config-ui/src/sections/BindingsSection.tsx",
+      "contentHash": "c014fd90cfb9ea5c5e3dd2dcafaa2b528df0bb098c8a500f7ad327d2a245e8b7",
+      "functions": [
+        {
+          "name": "BindingsSection",
+          "params": [],
+          "exported": true,
+          "lineCount": 73
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React",
+            "useEffect",
+            "useState",
+            "useMemo"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api",
+            "Keybind"
+          ]
+        },
+        {
+          "source": "../components/UI",
+          "specifiers": [
+            "Sub"
+          ]
+        },
+        {
+          "source": "../components/Icon",
+          "specifiers": [
+            "Icon"
+          ]
+        }
+      ],
+      "exports": [
+        "BindingsSection"
+      ],
+      "totalLines": 79,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/src/sections/KeyboardSection.tsx": {
+      "filePath": "config-ui/src/sections/KeyboardSection.tsx",
+      "contentHash": "3a7f1d9999e104e38f8946cc31018b0b89fc1775a3d9c0a99959fe1c79be1666",
+      "functions": [
+        {
+          "name": "KeyboardSection",
+          "params": [
+            "{ s, set }"
+          ],
+          "exported": true,
+          "lineCount": 51
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "Settings"
+          ]
+        },
+        {
+          "source": "../components/UI",
+          "specifiers": [
+            "Sub",
+            "Row",
+            "Chip",
+            "Toggle"
+          ]
+        }
+      ],
+      "exports": [
+        "KeyboardSection"
+      ],
+      "totalLines": 66,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/src/sections/MinibubblesSection.tsx": {
+      "filePath": "config-ui/src/sections/MinibubblesSection.tsx",
+      "contentHash": "04cace4bed1e1a39a98a019c831a1877a8f29e1760c8b701026024b50f6aa293",
+      "functions": [
+        {
+          "name": "MinibubblesSection",
+          "params": [
+            "{\n  s,\n  set,\n  inv,\n}"
+          ],
+          "exported": true,
+          "lineCount": 88
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "Settings",
+            "Inventory",
+            "defaults"
+          ]
+        },
+        {
+          "source": "../components/UI",
+          "specifiers": [
+            "Sub",
+            "Row",
+            "Slider"
+          ]
+        },
+        {
+          "source": "../components/Icon",
+          "specifiers": [
+            "Icon",
+            "BUBBLE_META"
+          ]
+        }
+      ],
+      "exports": [
+        "MinibubblesSection"
+      ],
+      "totalLines": 96,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/src/sections/MonitorsSection.tsx": {
+      "filePath": "config-ui/src/sections/MonitorsSection.tsx",
+      "contentHash": "5db8fb0001258e5bfb0ffe6c0135a12dd124848ac1e6e5672788a88e2f62dcf1",
+      "functions": [
+        {
+          "name": "MonitorsSection",
+          "params": [
+            "{ s, set }"
+          ],
+          "exported": true,
+          "lineCount": 100
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React",
+            "useMemo"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "Monitor",
+            "Settings"
+          ]
+        },
+        {
+          "source": "../components/UI",
+          "specifiers": [
+            "Sub"
+          ]
+        },
+        {
+          "source": "../components/Icon",
+          "specifiers": [
+            "Icon"
+          ]
+        }
+      ],
+      "exports": [
+        "MonitorsSection"
+      ],
+      "totalLines": 117,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/src/sections/PagesSection.tsx": {
+      "filePath": "config-ui/src/sections/PagesSection.tsx",
+      "contentHash": "c4b5849c5e7f774c6a6dd4ceaacf49cc547ac03806f8ba2a15aa164f5c8cef61",
+      "functions": [
+        {
+          "name": "PagesSection",
+          "params": [
+            "{\n  s,\n  set,\n  inv,\n}"
+          ],
+          "exported": true,
+          "lineCount": 65
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "Settings",
+            "Inventory",
+            "defaults"
+          ]
+        },
+        {
+          "source": "../components/UI",
+          "specifiers": [
+            "Sub",
+            "Row",
+            "Chip",
+            "Slider"
+          ]
+        }
+      ],
+      "exports": [
+        "PagesSection"
+      ],
+      "totalLines": 72,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/src/sections/ParallaxSection.tsx": {
+      "filePath": "config-ui/src/sections/ParallaxSection.tsx",
+      "contentHash": "066c8476d23857386c09948f0514621ecbb8358c9fa0b2746781d198094bbfa5",
+      "functions": [
+        {
+          "name": "ParallaxSection",
+          "params": [
+            "{\n  s,\n  set,\n}"
+          ],
+          "exported": true,
+          "lineCount": 111
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "Settings",
+            "ParallaxCfg",
+            "PARALLAX_EASINGS",
+            "defaults"
+          ]
+        },
+        {
+          "source": "../components/UI",
+          "specifiers": [
+            "Sub",
+            "Row",
+            "Slider",
+            "Chip"
+          ]
+        },
+        {
+          "source": "../components/Icon",
+          "specifiers": [
+            "Icon"
+          ]
+        }
+      ],
+      "exports": [
+        "ParallaxSection"
+      ],
+      "totalLines": 125,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/src/sections/PinnedAppsSection.tsx": {
+      "filePath": "config-ui/src/sections/PinnedAppsSection.tsx",
+      "contentHash": "19e6d7f15a5c9976a4f0ce095575c92ad6ed29f5e02a832e3cfee2e3b1a67427",
+      "functions": [
+        {
+          "name": "PinnedAppsSection",
+          "params": [
+            "{ s, set }"
+          ],
+          "exported": true,
+          "lineCount": 67
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React",
+            "useState"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "Settings"
+          ]
+        },
+        {
+          "source": "../components/UI",
+          "specifiers": [
+            "Sub"
+          ]
+        },
+        {
+          "source": "../components/Icon",
+          "specifiers": [
+            "Icon"
+          ]
+        }
+      ],
+      "exports": [
+        "PinnedAppsSection"
+      ],
+      "totalLines": 73,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/src/sections/RawSection.tsx": {
+      "filePath": "config-ui/src/sections/RawSection.tsx",
+      "contentHash": "f233ef940da3308b2a3ea418bc9b8f6d9ed923351ab0f73fc1e88f1fac2ca575",
+      "functions": [
+        {
+          "name": "RawSection",
+          "params": [
+            "{ s, set }"
+          ],
+          "exported": true,
+          "lineCount": 60
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React",
+            "useEffect",
+            "useState"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "Settings"
+          ]
+        },
+        {
+          "source": "../components/UI",
+          "specifiers": [
+            "Sub"
+          ]
+        },
+        {
+          "source": "../components/Icon",
+          "specifiers": [
+            "Icon"
+          ]
+        }
+      ],
+      "exports": [
+        "RawSection"
+      ],
+      "totalLines": 66,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/src/sections/ThemeSection.tsx": {
+      "filePath": "config-ui/src/sections/ThemeSection.tsx",
+      "contentHash": "4d58a7d296b8d9f19c386def8f99bdfc105d7a761ef5a3bc7c2a9a61b8ade679",
+      "functions": [
+        {
+          "name": "ThemeSection",
+          "params": [
+            "{\n  s,\n  set,\n  palette,\n}"
+          ],
+          "exported": true,
+          "lineCount": 121
+        },
+        {
+          "name": "normalizeHex",
+          "params": [
+            "s"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 6
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "Settings"
+          ]
+        },
+        {
+          "source": "../components/UI",
+          "specifiers": [
+            "Sub",
+            "Row",
+            "Toggle",
+            "Slider"
+          ]
+        },
+        {
+          "source": "../components/Icon",
+          "specifiers": [
+            "Icon"
+          ]
+        }
+      ],
+      "exports": [
+        "ThemeSection"
+      ],
+      "totalLines": 141,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/src/styles.css": {
+      "filePath": "config-ui/src/styles.css",
+      "contentHash": "a934a4d7501ef0725cef14a3f48fa16efe420a93f96d88b5d18e1a1c66f01443",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1257,
+      "hasStructuralAnalysis": false
+    },
+    "config-ui/src/styles.css.bak": {
+      "filePath": "config-ui/src/styles.css.bak",
+      "contentHash": "8f5f0381f49747f6effb2b3eb4c70d8e78bd63279f36305d3d968fcc0b046760",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 969,
+      "hasStructuralAnalysis": false
+    },
+    "config-ui/tsconfig.json": {
+      "filePath": "config-ui/tsconfig.json",
+      "contentHash": "5be6de5d401a8a5ef48ba86c561d0f6acc385c67821eba4ee3c65fefc1408b0f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 19,
+      "hasStructuralAnalysis": true
+    },
+    "config-ui/vite.config.ts": {
+      "filePath": "config-ui/vite.config.ts",
+      "contentHash": "91823fb1dad62e42cbf517cfc028e65c37e253b3fa6e14600d288adc8e7eefad",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "vite",
+          "specifiers": [
+            "defineConfig"
+          ]
+        },
+        {
+          "source": "@vitejs/plugin-react",
+          "specifiers": [
+            "react"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 18,
+      "hasStructuralAnalysis": true
+    },
+    "hypridle.conf": {
+      "filePath": "hypridle.conf",
+      "contentHash": "a5e4f6b6de1d422895ab064832f4b8cf8ee86e5c1529619dcfe7ef9d91bb945b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": false
+    },
+    "hyprland.conf": {
+      "filePath": "hyprland.conf",
+      "contentHash": "ebd5f4ba5d3c684a7173f8cafef91b866c9820cbf836b7d62e771cef07d70542",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 323,
+      "hasStructuralAnalysis": false
+    },
+    "install.sh": {
+      "filePath": "install.sh",
+      "contentHash": "1c808d5a9171d71b4f19beffc71d01fec5a8dfeb2020bc845e345e1a0cfa40d4",
+      "functions": [
+        {
+          "name": "info",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "success",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "warn",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "die",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "header",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 190,
+      "hasStructuralAnalysis": true
+    },
+    "README.md": {
+      "filePath": "README.md",
+      "contentHash": "800aa7c8096b7bc49951434de7b3f478ee8dcc63a7ac949de0d2d4eb86600e2a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 71,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/config_ui_launch.sh": {
+      "filePath": "scripts/config_ui_launch.sh",
+      "contentHash": "ea3f84261a87436a4e3cad2ea231ea904b7272ef5f6cedbc97289152a74776fb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 62,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/game_detector.sh": {
+      "filePath": "scripts/game_detector.sh",
+      "contentHash": "0fae892f2f2d71eddf4260519c416f71a651c4e0196cfe59ba1877baade93c91",
+      "functions": [
+        {
+          "name": "get_library_paths",
+          "params": [],
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "find_manifest",
+          "params": [],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "get_cover",
+          "params": [],
+          "exported": false,
+          "lineCount": 21
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 103,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/game_stats.sh": {
+      "filePath": "scripts/game_stats.sh",
+      "contentHash": "0509d7fdcac18fcb15f3cc775d1dab74e6112c84442d6396241595d2043e6f6a",
+      "functions": [
+        {
+          "name": "get_fps",
+          "params": [],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "_cpu_sample",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "get_cpu",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "get_ram",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "get_gpu",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "get_gpu_temp",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "get_vram",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "get_ping",
+          "params": [],
+          "exported": false,
+          "lineCount": 6
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 84,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/get_apps.sh": {
+      "filePath": "scripts/get_apps.sh",
+      "contentHash": "996987a0292a5ca04c01b85006d42d23f8a173872b1913851cbcfde89381db0c",
+      "functions": [
+        {
+          "name": "resolve_icon",
+          "params": [],
+          "exported": false,
+          "lineCount": 27
+        },
+        {
+          "name": "parse_desktop",
+          "params": [],
+          "exported": false,
+          "lineCount": 35
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 83,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/hyprlax_apply.sh": {
+      "filePath": "scripts/hyprlax_apply.sh",
+      "contentHash": "d8c898180a5e186d4d54b301cc2ba3a2441bad848f2ca50a03ecbeb0b11edc4d",
+      "functions": [
+        {
+          "name": "read_jq",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "apply_if_set",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 35,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/hyprlax_start.sh": {
+      "filePath": "scripts/hyprlax_start.sh",
+      "contentHash": "f1261455b352b4900c2d90a6813915029816eeeb01ec9887894a0b7772854e76",
+      "functions": [
+        {
+          "name": "read_jq",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 62,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/init.sh": {
+      "filePath": "scripts/init.sh",
+      "contentHash": "26797c391a2c5cd735b2106e93b3c4c4f5e2946e2780d9ed61aef0a1b3f2c29a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 45,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/lock.sh": {
+      "filePath": "scripts/lock.sh",
+      "contentHash": "6d4360e39f8e3a2c79af6acd791f33dbd444f96c546ab8bcb0284ccc7945233f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 5,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/osd_brightness.sh": {
+      "filePath": "scripts/osd_brightness.sh",
+      "contentHash": "cc7b48b021d734699194208ead062572e50541ad608a85c633b24439213bc7c9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 12,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/osd_volume.sh": {
+      "filePath": "scripts/osd_volume.sh",
+      "contentHash": "caf7ab2a91cc489b7c75c0061d63b699fac642ecaaee0cde757d82ab35ee3df2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 18,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/pulse-backend/server.mjs": {
+      "filePath": "scripts/pulse-backend/server.mjs",
+      "contentHash": "54c268098c94fe68eb424a74068d3c0cc874712959441258fd2a8159e0efbc25",
+      "functions": [
+        {
+          "name": "send",
+          "params": [
+            "res",
+            "status",
+            "body"
+          ],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "readBody",
+          "params": [
+            "req"
+          ],
+          "exported": false,
+          "lineCount": 5
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:http",
+          "specifiers": [
+            "createServer"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 106,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/qs_manager.sh": {
+      "filePath": "scripts/qs_manager.sh",
+      "contentHash": "ef5130293052e0bb627b170c2de8e019b2215a09028b59f9820ef6d91407797a",
+      "functions": [
+        {
+          "name": "handle_wallpaper_prep",
+          "params": [],
+          "exported": false,
+          "lineCount": 67
+        },
+        {
+          "name": "handle_network_prep",
+          "params": [],
+          "exported": false,
+          "lineCount": 6
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 224,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/qs_reload.sh": {
+      "filePath": "scripts/qs_reload.sh",
+      "contentHash": "6801d39d6d747c05096aed77add8f7b736aa29a7b2140fe6b7064df223b56bc3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 29,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/AppLauncher.qml": {
+      "filePath": "scripts/quickshell/AppLauncher.qml",
+      "contentHash": "f1f0c297f2bfb331967ff7b43da001048d0703086fe5a2288a8d21bc52794da1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 431,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/battery/BatteryPopup.qml": {
+      "filePath": "scripts/quickshell/battery/BatteryPopup.qml",
+      "contentHash": "634c74562e812e2ae8f8b603cdf6a25dbe5f5cfaa2cd7af3722e8b88a17878c6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 780,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/battery/BatteryPopupAlt.qml": {
+      "filePath": "scripts/quickshell/battery/BatteryPopupAlt.qml",
+      "contentHash": "634d5110b1a37b4b9fef2db119000d923260fc9617fb565bdcd67778825f9360",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1474,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/calendar/.env:": {
+      "filePath": "scripts/quickshell/calendar/.env:",
+      "contentHash": "79a8069e4ae6e5596c18eb369c5cd85256dbe372d5438827cc07f4ce60f84001",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/calendar/.env.example": {
+      "filePath": "scripts/quickshell/calendar/.env.example",
+      "contentHash": "1814c66d7aec63ac728d6ff395f19926a753f3f7883c95421b203195c73bb1af",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 7,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/calendar/raw_weather.json": {
+      "filePath": "scripts/quickshell/calendar/raw_weather.json",
+      "contentHash": "89688540e9a25d6149df56248149253fdcecf3ecceab827127b09304167e36dd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/calendar/weather.sh": {
+      "filePath": "scripts/quickshell/calendar/weather.sh",
+      "contentHash": "4284a7327f17916dc60f8656bfd4fd60f5264184cf17e9897adfca14289e00ee",
+      "functions": [
+        {
+          "name": "resolve_location",
+          "params": [],
+          "exported": false,
+          "lineCount": 46
+        },
+        {
+          "name": "get_icon",
+          "params": [],
+          "exported": false,
+          "lineCount": 17
+        },
+        {
+          "name": "get_hex",
+          "params": [],
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "write_dummy_data",
+          "params": [],
+          "exported": false,
+          "lineCount": 29
+        },
+        {
+          "name": "get_data",
+          "params": [],
+          "exported": false,
+          "lineCount": 190
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 433,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/ClipboardViewer.qml": {
+      "filePath": "scripts/quickshell/ClipboardViewer.qml",
+      "contentHash": "746de497ddfc334b79ddc82ad598e6d5906f41ef9b815d4e98f90ada22ed25a0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 288,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/collapsed/ClockCollapsed.qml": {
+      "filePath": "scripts/quickshell/collapsed/ClockCollapsed.qml",
+      "contentHash": "0ba75e6db959831847d84ca3be1c42d7426e2b3b7afbbf068ed63fe4df430474",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 43,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/collapsed/DiscordCollapsed.qml": {
+      "filePath": "scripts/quickshell/collapsed/DiscordCollapsed.qml",
+      "contentHash": "21fd2b0e100418668d72304a966cb2b179578708735271f7233dad3f0871791e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 64,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/collapsed/EditModeCollapsed.qml": {
+      "filePath": "scripts/quickshell/collapsed/EditModeCollapsed.qml",
+      "contentHash": "c91ebce384a571467d81b8401b0f26b017e04e2c2abd289934a6f18bc879bb55",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/collapsed/GameCollapsed.qml": {
+      "filePath": "scripts/quickshell/collapsed/GameCollapsed.qml",
+      "contentHash": "40f28fbab8223605d866d7fc7d6d34b71709751c4187fb27adcd002ace5032e9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 110,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/collapsed/MusicCollapsed.qml": {
+      "filePath": "scripts/quickshell/collapsed/MusicCollapsed.qml",
+      "contentHash": "ad7b59cba729f4bea8590857bda916528a8d7cc0815666899231522db5983c0e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 123,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/collapsed/NotifsCollapsed.qml": {
+      "filePath": "scripts/quickshell/collapsed/NotifsCollapsed.qml",
+      "contentHash": "48e4fe825b7623018119e610869b551cadbedb48f94aa1f856d85f5b0e984050",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 90,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/collapsed/OSDCollapsed.qml": {
+      "filePath": "scripts/quickshell/collapsed/OSDCollapsed.qml",
+      "contentHash": "df999674c685e0687a4e4f1af2aab161e613ce970c7f0afbf1a801f26483419f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 90,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/collapsed/qmldir": {
+      "filePath": "scripts/quickshell/collapsed/qmldir",
+      "contentHash": "159ae5fb9bea7a85749590da910df534a3503e1862e65a41190eb43b98db6ee1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 12,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/collapsed/RecordingCollapsed.qml": {
+      "filePath": "scripts/quickshell/collapsed/RecordingCollapsed.qml",
+      "contentHash": "94471b5787219ff5d9d205078e3a643a14ec4c154d3ff8a038e178962423bea2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 99,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/collapsed/StashCollapsed.qml": {
+      "filePath": "scripts/quickshell/collapsed/StashCollapsed.qml",
+      "contentHash": "1feff2bf7bb60140067187c03c26510f294f108a89985fe422deb4c9992254db",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 29,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/collapsed/TimerCollapsed.qml": {
+      "filePath": "scripts/quickshell/collapsed/TimerCollapsed.qml",
+      "contentHash": "5eec37f5f4c5e0068ad5d96fa23fae4f8d527fd6fc14f69cfbb2da96554f2c17",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 73,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/colors.json.template": {
+      "filePath": "scripts/quickshell/colors.json.template",
+      "contentHash": "f29c586ce6f0ce4e10f5c484abce8d982c22d874e18faa4c55b84d4a5a661dd1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/DynamicIsland.qml": {
+      "filePath": "scripts/quickshell/DynamicIsland.qml",
+      "contentHash": "756cd6e5d5ae81f28ff96bbb53eaf05d6a8171dd4124db9e3d3f79b9fa51e5dc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2267,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/focustime/focus_daemon.py": {
+      "filePath": "scripts/quickshell/focustime/focus_daemon.py",
+      "contentHash": "d64019a14e9fbba893cb34e16de81c6a92f40537f6c73593760eb051fb47fe44",
+      "functions": [
+        {
+          "name": "get_xdg_search_dirs",
+          "params": [],
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "build_desktop_cache",
+          "params": [],
+          "exported": true,
+          "lineCount": 34
+        },
+        {
+          "name": "resolve_app_name",
+          "params": [
+            "app_class",
+            "raw_title"
+          ],
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "get_app_icon",
+          "params": [
+            "app_class"
+          ],
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "init_db",
+          "params": [],
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "get_active_window_hyprctl",
+          "params": [],
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "is_locked",
+          "params": [],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "listen_hyprland_ipc",
+          "params": [],
+          "exported": true,
+          "lineCount": 28
+        },
+        {
+          "name": "exit_handler",
+          "params": [
+            "sig",
+            "frame"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "main",
+          "params": [],
+          "exported": true,
+          "lineCount": 17
+        }
+      ],
+      "classes": [
+        {
+          "name": "DaemonTracker",
+          "methods": [
+            "__init__",
+            "full_sync",
+            "fast_tick",
+            "flush"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 226
+        }
+      ],
+      "imports": [
+        {
+          "source": "subprocess",
+          "specifiers": [
+            "subprocess"
+          ]
+        },
+        {
+          "source": "sqlite3",
+          "specifiers": [
+            "sqlite3"
+          ]
+        },
+        {
+          "source": "time",
+          "specifiers": [
+            "time"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "socket",
+          "specifiers": [
+            "socket"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "threading",
+          "specifiers": [
+            "threading"
+          ]
+        },
+        {
+          "source": "calendar",
+          "specifiers": [
+            "calendar"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "signal",
+          "specifiers": [
+            "signal"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "date",
+            "datetime",
+            "timedelta"
+          ]
+        },
+        {
+          "source": "collections",
+          "specifiers": [
+            "defaultdict"
+          ]
+        }
+      ],
+      "exports": [
+        "get_xdg_search_dirs",
+        "build_desktop_cache",
+        "resolve_app_name",
+        "get_app_icon",
+        "init_db",
+        "get_active_window_hyprctl",
+        "is_locked",
+        "listen_hyprland_ipc",
+        "DaemonTracker",
+        "exit_handler",
+        "main"
+      ],
+      "totalLines": 450,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/focustime/FocusTimePopup.qml": {
+      "filePath": "scripts/quickshell/focustime/FocusTimePopup.qml",
+      "contentHash": "9b538443157a1e86747936bbdaa3869dca9656a849daffc011b96fc92cacb2c1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1532,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/focustime/get_stats.py": {
+      "filePath": "scripts/quickshell/focustime/get_stats.py",
+      "contentHash": "68404bf4247968c813ccba3dad706640e7c4e004753e6ba766f4a667c02a219c",
+      "functions": [
+        {
+          "name": "get_xdg_search_dirs",
+          "params": [],
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "build_desktop_cache",
+          "params": [],
+          "exported": true,
+          "lineCount": 34
+        },
+        {
+          "name": "get_app_icon",
+          "params": [
+            "app_class"
+          ],
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "build_query",
+          "params": [
+            "base_query",
+            "date_params",
+            "app_filter"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "main",
+          "params": [],
+          "exported": true,
+          "lineCount": 158
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "sqlite3",
+          "specifiers": [
+            "sqlite3"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "argparse",
+          "specifiers": [
+            "argparse"
+          ]
+        },
+        {
+          "source": "calendar",
+          "specifiers": [
+            "calendar"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "date",
+            "timedelta"
+          ]
+        },
+        {
+          "source": "collections",
+          "specifiers": [
+            "defaultdict"
+          ]
+        }
+      ],
+      "exports": [
+        "get_xdg_search_dirs",
+        "build_desktop_cache",
+        "get_app_icon",
+        "build_query",
+        "main"
+      ],
+      "totalLines": 251,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/hello/HelloPopup.qml": {
+      "filePath": "scripts/quickshell/hello/HelloPopup.qml",
+      "contentHash": "4b1dd3126046907dcdcb44160d9e14e69fc772ce14ad6415c06c83a342da68e3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1060,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/Lock.qml": {
+      "filePath": "scripts/quickshell/Lock.qml",
+      "contentHash": "ec95dce829ffbd5588dafff501f0f698bf9f03b49edc9df36ed0a0b8974cd837",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1067,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/Main.qml": {
+      "filePath": "scripts/quickshell/Main.qml",
+      "contentHash": "2833bfd59e431c76dcd84dcc485ee54f0ea209a2b2d641995f9c25c8780e85d4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 396,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/MatugenColors.qml": {
+      "filePath": "scripts/quickshell/MatugenColors.qml",
+      "contentHash": "45a49f98f6d9be88cb13c39bf869d2097b81045b1aee44bf939a057f89c42ae5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 32,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/minibubbles/BaseBubble.qml": {
+      "filePath": "scripts/quickshell/minibubbles/BaseBubble.qml",
+      "contentHash": "1c6b26599d317d20151b391757932c0171919802b8fee89c40e84791594158fb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 162,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/minibubbles/ClockMiniBubble.qml": {
+      "filePath": "scripts/quickshell/minibubbles/ClockMiniBubble.qml",
+      "contentHash": "4a7971f7761a2d19c080ea0095533df7012ddf58808092eac3b084424e1dbe87",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 48,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/minibubbles/DiscordMiniBubble.qml": {
+      "filePath": "scripts/quickshell/minibubbles/DiscordMiniBubble.qml",
+      "contentHash": "a949c6cbe1447841a8bba49bb701809bf25f75150261a609970131f1404ca9f6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 67,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/minibubbles/GameMiniBubble.qml": {
+      "filePath": "scripts/quickshell/minibubbles/GameMiniBubble.qml",
+      "contentHash": "e519de18dded60b11fb29f3c5c2540f0f8a91d5516a2d54bf3787bbd5373a878",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 117,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/minibubbles/MusicMiniBubble.qml": {
+      "filePath": "scripts/quickshell/minibubbles/MusicMiniBubble.qml",
+      "contentHash": "64b0ba6f30f1aca57a8786077cdbc5794cedeba0358fd03d635c1a07f8863b24",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 137,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/minibubbles/NotifMiniBubble.qml": {
+      "filePath": "scripts/quickshell/minibubbles/NotifMiniBubble.qml",
+      "contentHash": "4a42e01c6b10e85c57309e41dc21033234a6c6b95bd870ee066729bc76cfcfca",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 50,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/minibubbles/qmldir": {
+      "filePath": "scripts/quickshell/minibubbles/qmldir",
+      "contentHash": "073a8c4a9d930eef8454e0bb79eb0cf1d78af165e154a3680fdb8a1b85b9ad84",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 12,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/minibubbles/RecordingMiniBubble.qml": {
+      "filePath": "scripts/quickshell/minibubbles/RecordingMiniBubble.qml",
+      "contentHash": "8a33d2112fbc24c3667309f317956774d5f288cd43ec567a2f61784146796779",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 76,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/minibubbles/StashMiniBubble.qml": {
+      "filePath": "scripts/quickshell/minibubbles/StashMiniBubble.qml",
+      "contentHash": "7326579d72abb7db69193fb5ebdf5997d1584d601f4ca5215a5cc45236174889",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 62,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/minibubbles/StopwatchMiniBubble.qml": {
+      "filePath": "scripts/quickshell/minibubbles/StopwatchMiniBubble.qml",
+      "contentHash": "9be3bea29de585b999b4a67a73a81fbb65c528b7454b6ad9afb79849357993c1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 73,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/minibubbles/TimerMiniBubble.qml": {
+      "filePath": "scripts/quickshell/minibubbles/TimerMiniBubble.qml",
+      "contentHash": "42a7332cb2d836c935112e3d6a119eef3a8c1849fffb958cc5875ef52df8154e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 75,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/minibubbles/VpnMiniBubble.qml": {
+      "filePath": "scripts/quickshell/minibubbles/VpnMiniBubble.qml",
+      "contentHash": "9d4b8a91bce90331d663b4432b8b163ec1b3da01cca87a219eed435351cbfde9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 62,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/monitors/MonitorPopup.qml": {
+      "filePath": "scripts/quickshell/monitors/MonitorPopup.qml",
+      "contentHash": "54c60be29145f3626a265ec0f7389601f23e12781e95b0c3cf9d686be44cb2c8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1469,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/music/cava_island.cfg": {
+      "filePath": "scripts/quickshell/music/cava_island.cfg",
+      "contentHash": "a588759a089064d2e902d242dc8db713ec31db23242b94871b559e6c810b8529",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 24,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/music/equalizer.sh": {
+      "filePath": "scripts/quickshell/music/equalizer.sh",
+      "contentHash": "cab345bd0caa3b3c35309bee8890aa7bed59d8283ddd8380d490f2f75726321d",
+      "functions": [
+        {
+          "name": "apply_eq",
+          "params": [],
+          "exported": false,
+          "lineCount": 26
+        },
+        {
+          "name": "save_preset",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 84,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/music/music_info.sh": {
+      "filePath": "scripts/quickshell/music/music_info.sh",
+      "contentHash": "ccc6a009e07edc9c30b92b7ec8db63ff560981bfb09d49f1339bd0282549ceb0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 162,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/music/MusicPopup.qml": {
+      "filePath": "scripts/quickshell/music/MusicPopup.qml",
+      "contentHash": "38b7c6fa98012f480a134719ab5cfe8e945765b6cf9030f62ff02f9941cdf59d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 508,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/music/player_control.sh": {
+      "filePath": "scripts/quickshell/music/player_control.sh",
+      "contentHash": "6c7316d906887e96ff4008a2beac230e761b41a4831a42719e041d21b4eb22a3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 70,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/network/bluetooth_panel_logic.sh": {
+      "filePath": "scripts/quickshell/network/bluetooth_panel_logic.sh",
+      "contentHash": "88698e9192d19205938abb81ac589f10b46c2426d90038b828a5850f4469ad40",
+      "functions": [
+        {
+          "name": "get_icon",
+          "params": [],
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "get_audio_profile",
+          "params": [],
+          "exported": false,
+          "lineCount": 19
+        },
+        {
+          "name": "get_status",
+          "params": [],
+          "exported": false,
+          "lineCount": 91
+        },
+        {
+          "name": "toggle_power",
+          "params": [],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "connect_dev",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "disconnect_dev",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 169,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/network/eth_panel_logic.sh": {
+      "filePath": "scripts/quickshell/network/eth_panel_logic.sh",
+      "contentHash": "d6cebbdba995b138d785fb0a677bdbb3a11ddb832bf9a143a596e48b4047c9ff",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 51,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/network/NetworkPopup.qml": {
+      "filePath": "scripts/quickshell/network/NetworkPopup.qml",
+      "contentHash": "64a0ae9441a0069878e79fe50c70d58ede216878941b09a2d57e8e7565eff75f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2103,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/network/NetworkPopupAlt.qml": {
+      "filePath": "scripts/quickshell/network/NetworkPopupAlt.qml",
+      "contentHash": "8e240b650fd7c540c364edad6a013705420cba868be08a36d0f3e833e580488a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 461,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/network/sounds/connect.wav": {
+      "filePath": "scripts/quickshell/network/sounds/connect.wav",
+      "contentHash": "9eeb4cd28446297a007936b0392f2cdac21c59874be7dc9be0e552732966c146",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1675,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/network/sounds/disconnect.wav": {
+      "filePath": "scripts/quickshell/network/sounds/disconnect.wav",
+      "contentHash": "9eeb4cd28446297a007936b0392f2cdac21c59874be7dc9be0e552732966c146",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1675,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/network/sounds/power_off.wav": {
+      "filePath": "scripts/quickshell/network/sounds/power_off.wav",
+      "contentHash": "29f1978a26a17f93455a35177745a2a7b006c76248c84ccb4c9f15ff93562227",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 798,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/network/sounds/power_on.wav": {
+      "filePath": "scripts/quickshell/network/sounds/power_on.wav",
+      "contentHash": "af6422e9461c30b6afbb5b11c180529455a381860fa4588b33e4e639493eab5d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 344,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/network/sounds/switch.wav": {
+      "filePath": "scripts/quickshell/network/sounds/switch.wav",
+      "contentHash": "5b64d4df4d4493d8b03cc9c53ea7e1926cbd30afda2bc4fb437f7a5e04fdb0df",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1437,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/network/wifi_panel_logic.sh": {
+      "filePath": "scripts/quickshell/network/wifi_panel_logic.sh",
+      "contentHash": "9c7ec98ad917a5fb828917fdb7de001952d75860118940923542e86011fd9b10",
+      "functions": [
+        {
+          "name": "get_icon",
+          "params": [],
+          "exported": false,
+          "lineCount": 8
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 83,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/notifications/IslandNotifications.qml": {
+      "filePath": "scripts/quickshell/notifications/IslandNotifications.qml",
+      "contentHash": "96dbee9e416249a8dc8076e723b48dd50ad29965bb9dfc99753187e297c468af",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 471,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/notifications/NotificationPopups.qml": {
+      "filePath": "scripts/quickshell/notifications/NotificationPopups.qml",
+      "contentHash": "99861faf71eb1f8b977d127c61d823712fe8b7ea125b93d7d70a4b7c2e087d21",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 280,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pages/AppletPickerPage.qml": {
+      "filePath": "scripts/quickshell/pages/AppletPickerPage.qml",
+      "contentHash": "cd48764755f4ea2a9574e28c45a05f6aaf814bd7ea9aaac7c69634e14e7aaf3f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 424,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pages/ClockPage.qml": {
+      "filePath": "scripts/quickshell/pages/ClockPage.qml",
+      "contentHash": "3aa7f6a02209577f68784bf8f1eed3e65b37adc23fb4ac2bd7fcfaa1a26f1359",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 344,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pages/DiscordPage.qml": {
+      "filePath": "scripts/quickshell/pages/DiscordPage.qml",
+      "contentHash": "b72b3efce186f88d1165f58a68eb82acc0b8ada37403353bbd81c9dc4126f23c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 85,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pages/FlipDigit.qml": {
+      "filePath": "scripts/quickshell/pages/FlipDigit.qml",
+      "contentHash": "5ee3017881370819380b9bd8b99825b73fe6c0260e13a7bba6982e57b275a6bb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 76,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pages/GamePage.qml": {
+      "filePath": "scripts/quickshell/pages/GamePage.qml",
+      "contentHash": "224f1bd41db4d45bf25bda533a72617dad7a44b98dde0d67cd8ad252ac79bf7f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 812,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pages/HelloPage.qml": {
+      "filePath": "scripts/quickshell/pages/HelloPage.qml",
+      "contentHash": "b85d762765c07f52408f4c34c07d483d0b2d1307d9db084cff218e4440750254",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 285,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pages/MusicPage.qml": {
+      "filePath": "scripts/quickshell/pages/MusicPage.qml",
+      "contentHash": "13fbf25758761f60173eed4bba2b4868a63615a517a7f71bfbe3e4d68e98a678",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 358,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pages/NotifExpandedPage.qml": {
+      "filePath": "scripts/quickshell/pages/NotifExpandedPage.qml",
+      "contentHash": "d84c23d01999250eb228fceb902bf916b4a28220f940a1d03834ca107aa2b40b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 118,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pages/NotifsPage.qml": {
+      "filePath": "scripts/quickshell/pages/NotifsPage.qml",
+      "contentHash": "a65ea86382604ec4f4e17ef45eab76091179cb1113726c9d70060254dc9ed35c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 340,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pages/qmldir": {
+      "filePath": "scripts/quickshell/pages/qmldir",
+      "contentHash": "bdaa94d4fd0f097fb04fa4efb3949b19d10afd233ee7482439e23e58cbf011a8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 15,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pages/RecordingPage.qml": {
+      "filePath": "scripts/quickshell/pages/RecordingPage.qml",
+      "contentHash": "4b82af7724a792852fa432271baea53424e8f4df7f9330cf1500fef0118f5f4d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 155,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pages/StashPage.qml": {
+      "filePath": "scripts/quickshell/pages/StashPage.qml",
+      "contentHash": "b7298bd34ecad54ad37e2f8ee3c937c3f68d77fafb21fcfa85ba2471c5695ded",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 663,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pages/TimerPage.qml": {
+      "filePath": "scripts/quickshell/pages/TimerPage.qml",
+      "contentHash": "d36ebfab076bc0016b09992abdf464f64d73a4871156985dd92e7967ada942d0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 201,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pages/WeatherScene.qml": {
+      "filePath": "scripts/quickshell/pages/WeatherScene.qml",
+      "contentHash": "cfda5eadc9fe96bb795c4a61b788defc2b832023b72b93b22a105f764d276e27",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 529,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pet/CatPill.qml": {
+      "filePath": "scripts/quickshell/pet/CatPill.qml",
+      "contentHash": "6968671ee7d56da589e690c726e2819baf7c6dea32831a0dba249cd47bcdbd27",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 267,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pet/Pet.qml": {
+      "filePath": "scripts/quickshell/pet/Pet.qml",
+      "contentHash": "e7e5d3a47fdc7209714b1114f173d1de14af1d75f7f351e9aead5be973c947e4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 255,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pet/qmldir": {
+      "filePath": "scripts/quickshell/pet/qmldir",
+      "contentHash": "b3c559add34207f79983f85d1364dcff50aa39dc2537c7c26fedfb5e5af240d7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 4,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/plugins/PluginApiShim.qml": {
+      "filePath": "scripts/quickshell/plugins/PluginApiShim.qml",
+      "contentHash": "c90d651fb2eb107b92c033bf0866b382097493797f5ef11cddf95a65ba047a61",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 138,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/plugins/PluginLoader.qml": {
+      "filePath": "scripts/quickshell/plugins/PluginLoader.qml",
+      "contentHash": "3319572889871586596f33f14269ca28fb60e13c21e097fb3b7d48c799dfaf86",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 61,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/plugins/qmldir": {
+      "filePath": "scripts/quickshell/plugins/qmldir",
+      "contentHash": "125ee28b6f66692059bb5b83fd6def5a42eb09442815eee172cbf5a212dc385b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 4,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/power/AppleSlider.qml": {
+      "filePath": "scripts/quickshell/power/AppleSlider.qml",
+      "contentHash": "fec68d0974bf09e82ea082eeed0bd9d50aff46ca3379f848a7cc893dec0e0a61",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 125,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/power/PowerButton.qml": {
+      "filePath": "scripts/quickshell/power/PowerButton.qml",
+      "contentHash": "ce2aa216822c19d40a897670688678df9b35cbab9bbeb05d0dd3a78114453d6e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 92,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/power/PowerMenuOverlay.qml": {
+      "filePath": "scripts/quickshell/power/PowerMenuOverlay.qml",
+      "contentHash": "2ce3bd06ef8650103890960eb56bfc93c98a9421bcd695584dff9018b80ffd45",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 133,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/power/qmldir": {
+      "filePath": "scripts/quickshell/power/qmldir",
+      "contentHash": "fd98936dcf0dad81b573a25615016d44797ed2497dda665c81b64ee4283b4033",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/pulse/PulsePopup.qml": {
+      "filePath": "scripts/quickshell/pulse/PulsePopup.qml",
+      "contentHash": "8c4cdb37520b4818f2ac31a08c01cb297cf1e38bdc7c984d6a2bbd3cfdb374fa",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 238,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Commons/Color.qml": {
+      "filePath": "scripts/quickshell/qs/Commons/Color.qml",
+      "contentHash": "961e88c1ab1a9b30c5d681d1ee9bf18738f506f1be50691982888318d69ce143",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 86,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Commons/IconsTabler.qml": {
+      "filePath": "scripts/quickshell/qs/Commons/IconsTabler.qml",
+      "contentHash": "c0b77632c9ffea80baab656e14bba13291567d968e485883a912207b2af9405e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6205,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Commons/IpcHandler.qml": {
+      "filePath": "scripts/quickshell/qs/Commons/IpcHandler.qml",
+      "contentHash": "365a3cbeec538ba27fd3adf211c4aede613d8e5303463bb28300c0076a700d3b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 8,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Commons/Logger.qml": {
+      "filePath": "scripts/quickshell/qs/Commons/Logger.qml",
+      "contentHash": "decbeb08b37fccfa74a3e0a5eef5ed0dfcf1007784c31381bc5806dc120269dc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 11,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Commons/qmldir": {
+      "filePath": "scripts/quickshell/qs/Commons/qmldir",
+      "contentHash": "7cda7fed089a4933fc2a1209e5757e8f5d3bc619c993089bbe84334783d30870",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 7,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Commons/Style.qml": {
+      "filePath": "scripts/quickshell/qs/Commons/Style.qml",
+      "contentHash": "ce945176fb821931dff35ffb63731079970c05e069f078282fa584330604be83",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 111,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Modules/Bar/Extras/qmldir": {
+      "filePath": "scripts/quickshell/qs/Modules/Bar/Extras/qmldir",
+      "contentHash": "d6282ec25dabf26b904e779d20fbd272e8dd85bed21dfc856f5731472f1b1393",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 3,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Modules/Bar/Extras/Settings.qml": {
+      "filePath": "scripts/quickshell/qs/Modules/Bar/Extras/Settings.qml",
+      "contentHash": "aa0a34cc4ff4add8a45412950dff696db3ee6b4a610df1198d3b537bedff9277",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 15,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Services/Location/LocationService.qml": {
+      "filePath": "scripts/quickshell/qs/Services/Location/LocationService.qml",
+      "contentHash": "0928baf5e52d39bb7b9d30e2d599fa989a0cd0f5399886e72b44bc929bd864c6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 12,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Services/Location/qmldir": {
+      "filePath": "scripts/quickshell/qs/Services/Location/qmldir",
+      "contentHash": "f3938dd14edfdcd84abe100cd00bcd9fdc873047cefb56d7f559bca502ed1058",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 3,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Services/System/HostService.qml": {
+      "filePath": "scripts/quickshell/qs/Services/System/HostService.qml",
+      "contentHash": "a2a0d3c56af4aee439efa558558510939f67f52f06b217b047bfa40e33c5004a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Services/System/qmldir": {
+      "filePath": "scripts/quickshell/qs/Services/System/qmldir",
+      "contentHash": "61b10567b7ce23fdc59933d51ad51c4c8e6828716308b392e2fb8b9d7f07ba1c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 5,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Services/System/SystemService.qml": {
+      "filePath": "scripts/quickshell/qs/Services/System/SystemService.qml",
+      "contentHash": "af2b2a681ee667644bf3fc8896a20f1d40fa095ae200653ae2a8b8a6c4bbca4a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 15,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Services/System/SystemStatService.qml": {
+      "filePath": "scripts/quickshell/qs/Services/System/SystemStatService.qml",
+      "contentHash": "4fe6bd4e8088d818f7c7cd104eadeac04dfbe5def955c59604d3d28d54b4b7cd",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 41,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Services/UI/BarService.qml": {
+      "filePath": "scripts/quickshell/qs/Services/UI/BarService.qml",
+      "contentHash": "abd5ae6f4d63bb32dba4e57cf720ff2fda6a92d45c23c39e2bf3d68ac3748d2d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 14,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Services/UI/FullscreenService.qml": {
+      "filePath": "scripts/quickshell/qs/Services/UI/FullscreenService.qml",
+      "contentHash": "5c5e3158b109c6e5326b5b4d753cf2f4fbb9f0e2846400d6e9886d7d6d500cc5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Services/UI/PanelService.qml": {
+      "filePath": "scripts/quickshell/qs/Services/UI/PanelService.qml",
+      "contentHash": "11ba8ab528b200675c1f432ab08af1401decdb38c9283dc3ef7a129719dd0337",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 107,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Services/UI/qmldir": {
+      "filePath": "scripts/quickshell/qs/Services/UI/qmldir",
+      "contentHash": "864142456dd7154a4cdd9433d187f65275678cb018caf5d7c668e9358afe135e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 7,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Services/UI/ToastService.qml": {
+      "filePath": "scripts/quickshell/qs/Services/UI/ToastService.qml",
+      "contentHash": "54a8eaab12c95008cd622c58e00808884f39147a0b8adcd2f47adf621205d18a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 28,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Services/UI/TooltipService.qml": {
+      "filePath": "scripts/quickshell/qs/Services/UI/TooltipService.qml",
+      "contentHash": "77f616be9c9526400b0489437db0615c1d42fbb2283eed4543b27292d064d84c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 11,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Widgets/NIcon.qml": {
+      "filePath": "scripts/quickshell/qs/Widgets/NIcon.qml",
+      "contentHash": "b2a53bdaa661331e4561893a21e53ff880e6864ab28814f4a6eff84c68f3e295",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 32,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Widgets/NIconButton.qml": {
+      "filePath": "scripts/quickshell/qs/Widgets/NIconButton.qml",
+      "contentHash": "313e2a4f678a5a57351c374b0d229b420fc9ab90a338a86c7d46976244cc6b3c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 104,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Widgets/NPopupContextMenu.qml": {
+      "filePath": "scripts/quickshell/qs/Widgets/NPopupContextMenu.qml",
+      "contentHash": "679c1cff43f60d277f28a2374ef6546fb7f60597444d08e983a5e383e549d6e2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 56,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Widgets/NText.qml": {
+      "filePath": "scripts/quickshell/qs/Widgets/NText.qml",
+      "contentHash": "a260b088dab773597daef2137bb10ea164e840bfe01c300d47496ffc4fd8be02",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 13,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/qs/Widgets/qmldir": {
+      "filePath": "scripts/quickshell/qs/Widgets/qmldir",
+      "contentHash": "9375dccc9096a8e83c6aa17f12f068b7c118560885bbcd77d6baa352abc7645e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/Scaler.qml": {
+      "filePath": "scripts/quickshell/Scaler.qml",
+      "contentHash": "2e58cc002b9b2711e83e344bf689a8134f49b36966e86d1a51499d8105255ea6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 55,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/ScreenshotOverlay.qml": {
+      "filePath": "scripts/quickshell/ScreenshotOverlay.qml",
+      "contentHash": "cd3dba3a426941513062ca17aa7108ae1d93587d3149cbb2483e64daee38a25b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 428,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/stash/localsend_discover.sh": {
+      "filePath": "scripts/quickshell/stash/localsend_discover.sh",
+      "contentHash": "2d38f30222bbbbb21cb96345b7809ebc51069fa8ddebc0ededa0bdf703288bf5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 103,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/stash/localsend_send.sh": {
+      "filePath": "scripts/quickshell/stash/localsend_send.sh",
+      "contentHash": "9f03ddea4e0d803ff0133df8192fa193d232e97fb863a46789e7511ab65e68cc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 71,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/sysinfo/SysInfoCard.qml": {
+      "filePath": "scripts/quickshell/sysinfo/SysInfoCard.qml",
+      "contentHash": "d6e3c943d46d56efa76e13701a3b998a6646e6ff4796d19f11bc76fe5c0ad980",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 744,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/tests/bubble_positioning.test.js": {
+      "filePath": "scripts/quickshell/tests/bubble_positioning.test.js",
+      "contentHash": "fa691030049b2f9c31009dcc03dd7929c3a6cbf02f48fa16ed8771426c017039",
+      "functions": [
+        {
+          "name": "makeScaler",
+          "params": [
+            "screenW"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "homeXFor",
+          "params": [
+            "id",
+            "leftSlots",
+            "rightSlots",
+            "collapsedW",
+            "bubbles",
+            "screenW",
+            "s"
+          ],
+          "exported": false,
+          "lineCount": 27
+        },
+        {
+          "name": "snapBubble",
+          "params": [
+            "id",
+            "dropCenterX",
+            "leftSlots",
+            "rightSlots",
+            "collapsedW",
+            "bubbles",
+            "screenW",
+            "s"
+          ],
+          "exported": false,
+          "lineCount": 36
+        },
+        {
+          "name": "checkNoIslandOverlap",
+          "params": [
+            "leftSlots",
+            "rightSlots",
+            "collapsedW",
+            "bubbles",
+            "screenW",
+            "s"
+          ],
+          "exported": false,
+          "lineCount": 21
+        },
+        {
+          "name": "checkNoBubbleOverlap",
+          "params": [
+            "leftSlots",
+            "rightSlots",
+            "collapsedW",
+            "bubbles",
+            "screenW",
+            "s"
+          ],
+          "exported": false,
+          "lineCount": 20
+        },
+        {
+          "name": "checkUniqueSlots",
+          "params": [
+            "leftSlots",
+            "rightSlots"
+          ],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "checkSnapSide",
+          "params": [
+            "id",
+            "dropCenterX",
+            "leftSlots",
+            "rightSlots",
+            "screenW"
+          ],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "check",
+          "params": [
+            "label",
+            "result"
+          ],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "runInvariants",
+          "params": [
+            "label",
+            "leftSlots",
+            "rightSlots",
+            "collapsedW",
+            "bubbles",
+            "screenW",
+            "s"
+          ],
+          "exported": false,
+          "lineCount": 5
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 295,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/themes/FakeGlassSurface.qml": {
+      "filePath": "scripts/quickshell/themes/FakeGlassSurface.qml",
+      "contentHash": "21a9254b21fd3a73273331e903d3581cdae971bd7d1dd63836ea768df7094444",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 107,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/themes/GlassSurface.qml": {
+      "filePath": "scripts/quickshell/themes/GlassSurface.qml",
+      "contentHash": "14f36b5b0335907b98b51cfdee1ac5d9542e766f9ef1055252243ec5a2351eb3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 38,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/themes/qmldir": {
+      "filePath": "scripts/quickshell/themes/qmldir",
+      "contentHash": "189bbbf3b742ca6e1b0175542b8f871be0df42beb0c914feab1f89ed5ad4448f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/themes/shaders/aberration.frag": {
+      "filePath": "scripts/quickshell/themes/shaders/aberration.frag",
+      "contentHash": "4c5fa3c403718e73b0c19f1c842fe8949f44156f5dd861aff990d9508a4e46f3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 52,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/themes/shaders/aberration.frag.qsb": {
+      "filePath": "scripts/quickshell/themes/shaders/aberration.frag.qsb",
+      "contentHash": "0d7a1d3a4a140be82f0d83b4c6531650b9bff4fb7e76c9f106df1fcdf5d5ab33",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/themes/shaders/aberration.vert": {
+      "filePath": "scripts/quickshell/themes/shaders/aberration.vert",
+      "contentHash": "07f23180af3f4f6cd382f35f6a94046063f4a35f54d083eacc96d75eb1119d31",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 18,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/themes/shaders/aberration.vert.qsb": {
+      "filePath": "scripts/quickshell/themes/shaders/aberration.vert.qsb",
+      "contentHash": "13b1ab942f2306ef06d8444cbd1d766dedcbf4674e911816d93cb4ab1168afb9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 9,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/themes/Theme.qml": {
+      "filePath": "scripts/quickshell/themes/Theme.qml",
+      "contentHash": "3eb1fb42cefef5d6d244ed6a19e5c506397bf841f010f5dcf4ea8b00bee3f058",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 411,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/themes/ThemeRegistry.qml": {
+      "filePath": "scripts/quickshell/themes/ThemeRegistry.qml",
+      "contentHash": "168b7e3a723b54ba4674dfd63345f85f019c81e617ca7ed32d1205e63657489d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 20,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/TopBar.qml": {
+      "filePath": "scripts/quickshell/TopBar.qml",
+      "contentHash": "4118252c2cabdb20e1eb24ce2094d67be197a27bd6337901c637e59df2379d88",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1097,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/topbar/applets/AvatarApplet.qml": {
+      "filePath": "scripts/quickshell/topbar/applets/AvatarApplet.qml",
+      "contentHash": "2c16c40824b4d953378915381b0b043ee75da331f571af62ec9904e2e21d52f4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 48,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/topbar/applets/BatteryApplet.qml": {
+      "filePath": "scripts/quickshell/topbar/applets/BatteryApplet.qml",
+      "contentHash": "117c5a22c9a68db6f70a40641cc62425048894b6ff6d2b437f4e8c4648f74df2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 69,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/topbar/applets/BluetoothApplet.qml": {
+      "filePath": "scripts/quickshell/topbar/applets/BluetoothApplet.qml",
+      "contentHash": "275c179fd0dd228e6b14cbf40e510d51701a236d7f3407c2b9d3ed61a531d1f3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 83,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/topbar/applets/KeyboardApplet.qml": {
+      "filePath": "scripts/quickshell/topbar/applets/KeyboardApplet.qml",
+      "contentHash": "0cb540f273b7a82c77774772b625dcc82651ed417cb126c0679c360447a2c0fb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 67,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/topbar/applets/PluginApplet.qml": {
+      "filePath": "scripts/quickshell/topbar/applets/PluginApplet.qml",
+      "contentHash": "4e40c2c39c5726c3356d298022e6f1fc82f1f17ad6cd6d9d675143cacf96481b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 126,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/topbar/applets/PowerApplet.qml": {
+      "filePath": "scripts/quickshell/topbar/applets/PowerApplet.qml",
+      "contentHash": "0cd45852ded2baf5f1496c63c0708b798aef90f9a4745d758456f98466f44545",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 48,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/topbar/applets/PulseApplet.qml": {
+      "filePath": "scripts/quickshell/topbar/applets/PulseApplet.qml",
+      "contentHash": "2da10a9ed76cc16e9f6b91d3ebe791b47d15d464f537e13aaae8feca7a7ff181",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 66,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/topbar/applets/qmldir": {
+      "filePath": "scripts/quickshell/topbar/applets/qmldir",
+      "contentHash": "1b9eab3f2514ea3786f94575aff64ebefbaa08c7d4ca9f3e9db94ab8b074897b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 13,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/topbar/applets/SeparatorApplet.qml": {
+      "filePath": "scripts/quickshell/topbar/applets/SeparatorApplet.qml",
+      "contentHash": "4880c98863d3c232b6bb23efe120fb960dcd6ba87c18a840c72a0f5fe87e286a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/topbar/applets/SpacerApplet.qml": {
+      "filePath": "scripts/quickshell/topbar/applets/SpacerApplet.qml",
+      "contentHash": "3c96abc310ceaa34dcb4c598d8a5091087e54cc1412e07aeecdc42097480f964",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 30,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/topbar/applets/SystemTrayApplet.qml": {
+      "filePath": "scripts/quickshell/topbar/applets/SystemTrayApplet.qml",
+      "contentHash": "c68a313809962857cb07d59c20b98f1117bbf955bf226621cabb5548b6c6fe11",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 89,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/topbar/applets/WifiApplet.qml": {
+      "filePath": "scripts/quickshell/topbar/applets/WifiApplet.qml",
+      "contentHash": "14b67d71b884b9498235c51496ecb2afaa80d71a7d786a0cec136e48836ce275",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 72,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/topbar/applets/WorkspacesApplet.qml": {
+      "filePath": "scripts/quickshell/topbar/applets/WorkspacesApplet.qml",
+      "contentHash": "79c6918f7c1d79d0ff490de1ab32a2c03fbbcbea49081ee896dc935cf84126a8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 81,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/topbar/BarZone.qml": {
+      "filePath": "scripts/quickshell/topbar/BarZone.qml",
+      "contentHash": "2bc9e2ba381c06a5604479ff187fc0b6cc3447f2692021499c5920606040bc04",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 423,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/topbar/qmldir": {
+      "filePath": "scripts/quickshell/topbar/qmldir",
+      "contentHash": "d565b182d96a3d43b6973d1a3f7b7d80f8858ba6e863a3fafc642a5ee2eb9ceb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/volume/audio_control.sh": {
+      "filePath": "scripts/quickshell/volume/audio_control.sh",
+      "contentHash": "65adcd56b9ddf0a47cdc49798f15076d7805bfd62f1d6df5d62a982e02bf0a52",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 21,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/volume/get_audio_state.py": {
+      "filePath": "scripts/quickshell/volume/get_audio_state.py",
+      "contentHash": "0c56f03c296a13a1dd05d9221141a628bddf2dffa65b533db6369600ef0e99e0",
+      "functions": [
+        {
+          "name": "run_cmd",
+          "params": [
+            "cmd"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "parse_pactl",
+          "params": [
+            "output"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "get_valid_string",
+          "params": [
+            "*args"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "get_data",
+          "params": [],
+          "exported": true,
+          "lineCount": 58
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "subprocess",
+          "specifiers": [
+            "subprocess"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        }
+      ],
+      "exports": [
+        "run_cmd",
+        "parse_pactl",
+        "get_valid_string",
+        "get_data"
+      ],
+      "totalLines": 86,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/volume/VolumePopup.qml": {
+      "filePath": "scripts/quickshell/volume/VolumePopup.qml",
+      "contentHash": "c79b7942e72d82b882d74b595aa2dec5fdc8b4acfa65d0a4819de70b1fadd098",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 903,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/wallpaper/ddg_search.sh": {
+      "filePath": "scripts/quickshell/wallpaper/ddg_search.sh",
+      "contentHash": "f50706a697e1abb0571fa9c6df9cefed3316b91a82ba16ab48b11813d13b35b6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 99,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/wallpaper/get_ddg_links.py": {
+      "filePath": "scripts/quickshell/wallpaper/get_ddg_links.py",
+      "contentHash": "5622fc599dba22b854c097f14292f810562cb0c84ab636330c4c318213dca243",
+      "functions": [
+        {
+          "name": "log",
+          "params": [
+            "msg"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "get_state",
+          "params": [],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "main",
+          "params": [],
+          "exported": true,
+          "lineCount": 114
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "time",
+          "specifiers": [
+            "time"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "urllib.request",
+          "specifiers": [
+            "urllib.request"
+          ]
+        },
+        {
+          "source": "urllib.parse",
+          "specifiers": [
+            "urllib.parse"
+          ]
+        },
+        {
+          "source": "http.cookiejar",
+          "specifiers": [
+            "http.cookiejar"
+          ]
+        }
+      ],
+      "exports": [
+        "log",
+        "get_state",
+        "main"
+      ],
+      "totalLines": 151,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/wallpaper/matugen_reload.sh": {
+      "filePath": "scripts/quickshell/wallpaper/matugen_reload.sh",
+      "contentHash": "f60c7eefcc7c98097b13caabb38759d6256f4b669247d47d13a53fd1c9314b00",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 86,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/wallpaper/WallpaperPicker.qml": {
+      "filePath": "scripts/quickshell/wallpaper/WallpaperPicker.qml",
+      "contentHash": "4e59a66a7e6f5c29a7c90997b73c718cdb149625456505c7dfeeeea1e1623201",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1668,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/quickshell/watchers/audio_fetch.sh": {
+      "filePath": "scripts/quickshell/watchers/audio_fetch.sh",
+      "contentHash": "26d888275f701f7d1fd518fdfa3f521ca2c3b27b8f8f0671bea1ecc1afb962f9",
+      "functions": [
+        {
+          "name": "get_volume",
+          "params": [],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "is_muted",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "get_volume_icon",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "toggle_mute",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 47,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/watchers/audio_wait.sh": {
+      "filePath": "scripts/quickshell/watchers/audio_wait.sh",
+      "contentHash": "26f5474818dd095ac7665eadff756bccb7ed04e690beff63577135a8e6b6776d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 7,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/watchers/battery_fetch.sh": {
+      "filePath": "scripts/quickshell/watchers/battery_fetch.sh",
+      "contentHash": "09695b7e3d03cd21b91d8c7963c02ead987bfbe57a049f4c8c2b8b064bdf3dfa",
+      "functions": [
+        {
+          "name": "get_battery_percent",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "get_battery_status",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "get_battery_icon",
+          "params": [],
+          "exported": false,
+          "lineCount": 23
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 28,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/watchers/battery_wait.sh": {
+      "filePath": "scripts/quickshell/watchers/battery_wait.sh",
+      "contentHash": "f99ece45b4fd9f5fa168b36393a6f13c1eb6496db527297f6e0715cf63944998",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 15,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/watchers/bg_luminance.sh": {
+      "filePath": "scripts/quickshell/watchers/bg_luminance.sh",
+      "contentHash": "d531bb56f290e3b79f8c8a78395cda1be4eb755e3aba66d0733cb1370c669fb3",
+      "functions": [
+        {
+          "name": "fallback",
+          "params": [],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "srgb_lin",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "lin_srgb",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "sample_strip",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 134,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/watchers/bt_fetch.sh": {
+      "filePath": "scripts/quickshell/watchers/bt_fetch.sh",
+      "contentHash": "61850097962af452df6a7c48e26a0fbed0a442c4e38b79a3eefc8b9c3b216a07",
+      "functions": [
+        {
+          "name": "get_bt_status",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "get_bt_connected_device",
+          "params": [],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "get_bt_icon",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "toggle_bt",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 29,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/watchers/bt_wait.sh": {
+      "filePath": "scripts/quickshell/watchers/bt_wait.sh",
+      "contentHash": "b99ad4cca96b181209bef872609c8e16d613f9e265941b03ca015edb0dffb1a0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 8,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/watchers/kb_fetch.sh": {
+      "filePath": "scripts/quickshell/watchers/kb_fetch.sh",
+      "contentHash": "1e9074a1584baf09d82d8ab9c8e1161adbff62d0c288e74576a448f086a448e7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 5,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/watchers/kb_wait.sh": {
+      "filePath": "scripts/quickshell/watchers/kb_wait.sh",
+      "contentHash": "824113f6de4c2df5a96516e26d186f84421ce564d9e4a55bcec412f3397e7733",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 14,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/watchers/network_fetch.sh": {
+      "filePath": "scripts/quickshell/watchers/network_fetch.sh",
+      "contentHash": "2c8ceb1400bfb55ececb19357193f5b461bbfd88a71e75f57c468c901317d029",
+      "functions": [
+        {
+          "name": "get_wifi_status",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "get_wifi_ssid",
+          "params": [],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "get_wifi_strength",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "get_wifi_icon",
+          "params": [],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "get_eth_status",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "toggle_wifi",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 57,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/watchers/network_wait.sh": {
+      "filePath": "scripts/quickshell/watchers/network_wait.sh",
+      "contentHash": "71bc530e288451435722fbbc8ff93e060ef8d1c6dfe9e737b5915d8a5a14a334",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 7,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/watchers/pulse_fetch.sh": {
+      "filePath": "scripts/quickshell/watchers/pulse_fetch.sh",
+      "contentHash": "4ee845600364e7120db50f09b38e9840ef98f09e112bca13f28f0c67392e04b4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 14,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/watchers/pulse_wait.sh": {
+      "filePath": "scripts/quickshell/watchers/pulse_wait.sh",
+      "contentHash": "889a4e33b5bccc783c40a665bb546dd9014ef69e0fbc39efcecb217ecc02f34a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 15,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/WindowRegistry.js": {
+      "filePath": "scripts/quickshell/WindowRegistry.js",
+      "contentHash": "53e21e36bea585e84b2895c38ab0eebf9569a18302b3992e22b65a98109fce62",
+      "functions": [
+        {
+          "name": "getScale",
+          "params": [
+            "mw",
+            "userScale"
+          ],
+          "exported": false,
+          "lineCount": 15
+        },
+        {
+          "name": "s",
+          "params": [
+            "val",
+            "scale"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "getLayout",
+          "params": [
+            "name",
+            "mx",
+            "my",
+            "mw",
+            "mh",
+            "userScale"
+          ],
+          "exported": false,
+          "lineCount": 39
+        },
+        {
+          "name": "getPopupLayout",
+          "params": [
+            "mw",
+            "userScale"
+          ],
+          "exported": false,
+          "lineCount": 14
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 82,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/quickshell/workspaces.sh": {
+      "filePath": "scripts/quickshell/workspaces.sh",
+      "contentHash": "e79cb0235c87fc9ab005bc32effa696420db4a4e2305c7cb1040abcf65e07821",
+      "functions": [
+        {
+          "name": "cleanup",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "print_workspaces",
+          "params": [],
+          "exported": false,
+          "lineCount": 34
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 97,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/rofi_clipboard.sh": {
+      "filePath": "scripts/rofi_clipboard.sh",
+      "contentHash": "f8e031a21bbe365b91c645814356564ac331befc1b71ac4cda0e7f2dc3c7213b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 15,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/scan_plugins.sh": {
+      "filePath": "scripts/scan_plugins.sh",
+      "contentHash": "4b9eb6dc1fc03ea0ababb59a3b8f07eaecaf165e4ec352e3bb46f3b5d4250f3e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 43,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/screenshot.sh": {
+      "filePath": "scripts/screenshot.sh",
+      "contentHash": "0e6d74f0da5b725531f4ca65e400f90c2f30a7e2745685b90795ac63d5f91e13",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 193,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/settings_watcher.sh": {
+      "filePath": "scripts/settings_watcher.sh",
+      "contentHash": "a87cff82eb5bcb39e7d34e4f9e9fc3f9d767cc6e91a4e92cb34191bc2bca6206",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 70,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/update_notifier.sh": {
+      "filePath": "scripts/update_notifier.sh",
+      "contentHash": "964fe56999b49c69d09890a004b2b6f4aa67b9c8df93eac665bb03aa4d553378",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 38,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/volume_listener.sh": {
+      "filePath": "scripts/volume_listener.sh",
+      "contentHash": "1166fd6ea129abb9755f4f8057b705bd6f2dd233465780d09a83cbebd0b237d0",
+      "functions": [
+        {
+          "name": "get_sink",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "get_vol",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "get_mute",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 37,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/watch_plugins.sh": {
+      "filePath": "scripts/watch_plugins.sh",
+      "contentHash": "e74f760d4e97d923cf16244edfb8fea263c1c7eabc37a8673265962cc1b79e46",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 20,
+      "hasStructuralAnalysis": true
+    },
+    "settings.json": {
+      "filePath": "settings.json",
+      "contentHash": "1fb6f7705472e4533c16870eda31e97d6c42c369c82a0fa0b3fa9c004f9ce6cf",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 73,
+      "hasStructuralAnalysis": true
+    }
+  }
+}

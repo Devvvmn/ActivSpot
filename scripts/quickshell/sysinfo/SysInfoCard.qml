@@ -645,8 +645,8 @@ Item {
                     }
 
                     Column {
-                        width: (parent.width - root.s(12) - root.s(1)) / 2
-                        spacing: root.s(2)
+                        width: (parent.width - root.s(32) - root.s(1)) / 2
+                        spacing: root.s(6)
                         Text {
                             text: "GPU"
                             font.family: skin.fontFamily
@@ -655,7 +655,7 @@ Item {
                             font.weight: Font.DemiBold
                             color: skin.muted
                             horizontalAlignment: Text.AlignRight
-                            width: parent.width
+                            width: parent.width - root.s(2)
                         }
                         Text {
                             text: root.sysGpu
@@ -681,10 +681,10 @@ Item {
                 Item { width: 1; height: root.s(8) }
 
                 // ── Edition footer ────────────────────────────────────────────
-                Row {
+                RowLayout {
                     width: parent.width
                     spacing: root.s(6)
-                    height: root.s(14)
+                    height: root.s(70)
 
                     Text {
                         text: skin.edition
@@ -693,14 +693,13 @@ Item {
                         font.letterSpacing: root.s(1.6)
                         font.weight: Font.DemiBold
                         color: skin.subtle
-                        anchors.verticalCenter: parent.verticalCenter
+                        
                     }
 
                     Item { Layout.fillWidth: true; height: 1 }
 
                     Row {
                         spacing: root.s(2)
-                        anchors.verticalCenter: parent.verticalCenter
                         Repeater {
                             model: 3
                             Rectangle {

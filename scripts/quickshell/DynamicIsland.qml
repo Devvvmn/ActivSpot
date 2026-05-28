@@ -1150,9 +1150,9 @@ PanelWindow {
     // =========================================================
     // In editBarMode: mask to island pill column only — bar applets on the
     // sides are outside this region and receive drag events normally.
-    mask: _hideForFullscreen ? emptyRegion
-        : editBarMode        ? editBarMaskedRegion
-        : expanded           ? null
+    mask: (_hideForFullscreen || launcherActive) ? emptyRegion
+        : editBarMode ? editBarMaskedRegion
+        : expanded    ? null
         : maskedRegion
 
     Item {
@@ -1241,8 +1241,8 @@ PanelWindow {
     Item {
         id: islandShape
         z: 10
-        opacity: islandWindow._hideForFullscreen ? 0 : 1
-        Behavior on opacity { NumberAnimation { duration: 150 } }
+        opacity: (islandWindow._hideForFullscreen || islandWindow.launcherActive) ? 0.0 : 1.0
+        Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
 
         property int collapsedW: {
             if (islandWindow.osdActive)                                                return osdCollapsed.preferredWidth;
@@ -1277,9 +1277,6 @@ PanelWindow {
         height: islandWindow.expanded ? expandedH  : collapsedH
         x: Math.floor((Screen.width - width) / 2)
         y: s(4)
-
-        opacity: islandWindow.launcherActive ? 0.0 : 1.0
-        Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
 
         Behavior on width  { NumberAnimation { duration: 540; easing.type: Easing.OutExpo } }
         Behavior on height {
@@ -1706,14 +1703,10 @@ PanelWindow {
                 readonly property bool isCurrent: islandWindow.expanded && !islandWindow.notifActive && islandWindow.currentPage === modelData.name
                 readonly property bool userEnabled: Theme.pageEnabled(modelData.name)
 
+                enabled: isCurrent && userEnabled
                 opacity: (isCurrent && userEnabled) ? 1 : 0
                 visible: opacity > 0.001
                 Behavior on opacity { NumberAnimation { duration: Theme.pageAnimDuration; easing.type: Easing.InOutCubic } }
-
-                transform: Translate {
-                    y: !islandWindow.notifActive && islandWindow.currentPage === modelData.name ? 0 : islandWindow.s(-8)
-                    Behavior on y { NumberAnimation { duration: 500; easing.type: Easing.OutExpo } }
-                }
             }
         }
 
@@ -1721,10 +1714,11 @@ PanelWindow {
         Loader {
             anchors.fill: parent
             sourceComponent: notifExpandedComp
+            active: islandWindow.expanded && islandWindow.notifActive
             z: 6
-            opacity: islandWindow.expanded && islandWindow.notifActive ? 1 : 0
+            opacity: active ? 1 : 0
             visible: opacity > 0.001
-            Behavior on opacity { NumberAnimation { duration: 260; easing.type: Easing.InOutCubic } }
+            Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
         }
 
         // ============================================================
@@ -1815,7 +1809,7 @@ PanelWindow {
     Item {
         id: bubblesGate
         anchors.fill: parent
-        visible: !FullscreenService.active
+        visible: !FullscreenService.active && !islandWindow.launcherActive
     }
 
     NotifMiniBubble {

@@ -6,6 +6,8 @@ Item {
     id: root
     property var island
 
+    readonly property bool _open: island.expanded && island.currentPage === "notifs"
+
     function relativeTime(ts) {
         if (!ts || ts === 0) return ""
         const diff = Math.floor((Date.now() - ts) / 1000)
@@ -19,7 +21,6 @@ Item {
         anchors.fill: parent
         anchors.margins: island.s(20)
         anchors.bottomMargin: island.s(68)
-
         ColumnLayout {
             anchors.fill: parent
             spacing: island.s(9)
@@ -181,6 +182,30 @@ Item {
 
                     property color accentColor: island.appAccentColor(model.appName)
                     property bool  hovered:     cardMouse.containsMouse
+
+                    property real _entryX: island.s(36)
+                    transform: Translate { x: notifDelegate._entryX }
+
+                    Connections {
+                        target: root
+                        function on_OpenChanged() {
+                            if (root._open) {
+                                notifDelegate._entryX = island.s(36)
+                                staggerTimer.interval = index * 80
+                                staggerTimer.restart()
+                            }
+                        }
+                    }
+                    Timer {
+                        id: staggerTimer
+                        onTriggered: entryXAnim.restart()
+                    }
+                    NumberAnimation {
+                        id: entryXAnim
+                        target: notifDelegate; property: "_entryX"
+                        from: island.s(36); to: 0
+                        duration: 720; easing.type: Easing.OutExpo
+                    }
 
                     scale: cardMouse.pressed ? 0.982 : 1.0
                     Behavior on scale { NumberAnimation { duration: 110; easing.type: Easing.OutQuad } }

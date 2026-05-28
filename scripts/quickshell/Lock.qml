@@ -32,6 +32,10 @@ ShellRoot {
     Process { id: poweroffProcess; command: ["systemctl", "poweroff"] }
     Process { id: reloadProcess;   command: ["systemctl", "reboot"] }
 
+    Process { id: musicPrevProcess;  command: ["playerctl", "previous"]   }
+    Process { id: musicPlayProcess;  command: ["playerctl", "play-pause"] }
+    Process { id: musicNextProcess;  command: ["playerctl", "next"]       }
+
     QtObject {
         id: lockUI
         property bool failed: false
@@ -69,6 +73,13 @@ ShellRoot {
                 property bool isDesktop: false
                 property bool powerMenuOpen: false
                 property bool inputActive: false
+                property string musicTitle: ""
+                property string musicArtist: ""
+                property string musicStatus: "Stopped"
+                property string musicArtUrl: ""
+                property int musicPosSec: 0
+                property int musicLenSec: 1
+                readonly property bool musicVisible: (musicStatus === "Playing" || musicStatus === "Paused") && musicTitle !== "" && musicTitle !== "Not Playing"
                 property real introOpacity: 0.0
 
                 Component.onCompleted: introAnim.start()
@@ -161,6 +172,27 @@ ShellRoot {
                 }
                 Timer { interval: 900000; running: true; repeat: true; triggeredOnStart: true; onTriggered: weatherPoller.running = true }
 
+                Process {
+                    id: musicPoller
+                    property string scriptPath: Qt.resolvedUrl("music/music_info.sh").toString().replace(/^file:\/\//, "")
+                    command: ["bash", scriptPath]
+                    stdout: StdioCollector {
+                        onStreamFinished: {
+                            try {
+                                let d = JSON.parse(this.text.trim());
+                                screenRoot.musicTitle  = d.title    || "";
+                                screenRoot.musicArtist = d.artist   || "";
+                                screenRoot.musicStatus = d.status   || "Stopped";
+                                screenRoot.musicArtUrl = d.artUrl   || "";
+                                screenRoot.musicPosSec = d.position || 0;
+                                screenRoot.musicLenSec = Math.max(1, d.length || 1);
+                            } catch(e) {}
+                        }
+                    }
+                }
+                Timer { interval: 2000; running: true; repeat: true; triggeredOnStart: true; onTriggered: musicPoller.running = true }
+                Timer { interval: 1000; running: screenRoot.musicStatus === "Playing"; repeat: true; onTriggered: { if (screenRoot.musicPosSec < screenRoot.musicLenSec) screenRoot.musicPosSec++ } }
+
                 // ── Background ────────────────────────────────────────────────
 
                 Rectangle {
@@ -195,6 +227,7 @@ ShellRoot {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
+                        if (musicCard.expanded) return;
                         if (screenRoot.powerMenuOpen) { screenRoot.powerMenuOpen = false; return; }
                         if (!screenRoot.inputActive) screenRoot.inputActive = true;
                         inputField.forceActiveFocus();
@@ -425,18 +458,15 @@ ShellRoot {
                                     Behavior on color        { ColorAnimation { duration: 220 } }
                                     Behavior on border.color { ColorAnimation { duration: 220 } }
 
-                                    transform: Translate { id: shakeT; x: 0 }
+                                    transformOrigin: Item.Center
                                     SequentialAnimation {
-                                        id: shakeAnim
-                                        NumberAnimation { target: shakeT; property: "x"; from: 0;   to: -8;  duration: 55 }
-                                        NumberAnimation { target: shakeT; property: "x"; from: -8;  to: 8;   duration: 75 }
-                                        NumberAnimation { target: shakeT; property: "x"; from: 8;   to: -5;  duration: 55 }
-                                        NumberAnimation { target: shakeT; property: "x"; from: -5;  to: 5;   duration: 55 }
-                                        NumberAnimation { target: shakeT; property: "x"; from: 5;   to: 0;   duration: 55 }
+                                        id: errorPulseAnim
+                                        NumberAnimation { target: pillBg; property: "scale"; to: 0.93; duration: 80;  easing.type: Easing.OutQuad }
+                                        NumberAnimation { target: pillBg; property: "scale"; to: 1.0;  duration: 300; easing.type: Easing.OutBack; easing.overshoot: 2.8 }
                                     }
                                     Connections {
                                         target: lockUI
-                                        function onFailedChanged() { if (lockUI.failed) shakeAnim.restart(); }
+                                        function onFailedChanged() { if (lockUI.failed) errorPulseAnim.restart(); }
                                     }
 
                                     // Placeholder
@@ -467,19 +497,26 @@ ShellRoot {
                                         Component.onCompleted: forceActiveFocus()
 
                                         onActiveFocusChanged: {
-                                            if (!activeFocus && !screenRoot.powerMenuOpen)
+                                            if (!activeFocus && !screenRoot.powerMenuOpen && !musicCard.expanded)
                                                 forceActiveFocus();
                                         }
 
                                         Keys.onPressed: (event) => {
-                                            if (!screenRoot.inputActive) screenRoot.inputActive = true;
                                             if (event.key === Qt.Key_Escape) {
+                                                if (musicCard.expanded) {
+                                                    musicCard.expanded = false;
+                                                    event.accepted = true;
+                                                    return;
+                                                }
                                                 screenRoot.inputActive = false;
                                                 text = "";
                                                 lockUI.failed = false;
                                                 lockUI.statusText = "";
                                                 event.accepted = true;
+                                                return;
                                             }
+                                            if (!musicCard.expanded && !screenRoot.inputActive)
+                                                screenRoot.inputActive = true;
                                         }
 
                                         onAccepted: {
@@ -563,6 +600,246 @@ ShellRoot {
                                         cursorShape: Qt.PointingHandCursor
                                         onClicked: inputField.accepted()
                                     }
+                                }
+                            }
+                        }
+                    }
+
+                    // ── Music player (pill → centered expanded, auth-card style) ─
+
+                    Item {
+                        id: musicCard
+                        property bool expanded: false
+                        anchors.fill: parent
+                        z: expanded ? 20 : 1
+                        enabled: screenRoot.musicVisible
+                        onEnabledChanged: { if (!enabled) expanded = false }
+
+                        // ── Collapsed pill (bottom-left, fixed position) ──────
+                        Item {
+                            id: musicPill
+                            property real _press: 1.0
+
+                            width:  screenRoot.sc * 330
+                            height: screenRoot.sc * 88
+                            x: screenRoot.sc * 36
+                            y: parent.height - height - screenRoot.sc * 36
+
+                            opacity: (screenRoot.musicVisible && !musicCard.expanded) ? 1.0 : 0.0
+                            scale:   screenRoot.musicVisible ? _press : 0.94
+                            transformOrigin: Item.BottomLeft
+                            Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                            Behavior on scale   { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
+                            Behavior on _press  { SpringAnimation { spring: 4.5; damping: 0.72; epsilon: 0.001 } }
+
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: screenRoot.sc * 20
+                                color: Qt.rgba(0.07, 0.07, 0.09, 0.90)
+                                border.color: Qt.rgba(1,1,1,0.10)
+                                border.width: 1
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onPressed:  { musicPill._press = 0.95 }
+                                onReleased: { musicPill._press = 1.0 }
+                                onClicked: { musicCard.expanded = true; screenRoot.inputActive = false; }
+                            }
+
+                            Item {
+                                id: artAreaC
+                                anchors.left: parent.left; anchors.leftMargin: screenRoot.sc * 14
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.verticalCenterOffset: -screenRoot.sc * 6
+                                width: screenRoot.sc * 54; height: screenRoot.sc * 54
+
+                                Rectangle { anchors.fill: parent; radius: screenRoot.sc * 10; color: Qt.rgba(1,1,1,0.10) }
+                                Text { anchors.centerIn: parent; text: "󰝚"; font.family: "Iosevka Nerd Font"; font.pixelSize: screenRoot.sc * 22; color: Qt.rgba(1,1,1,0.35) }
+                                Rectangle { id: artClipC; anchors.fill: parent; radius: screenRoot.sc * 10; visible: false; layer.enabled: true }
+                                Image { id: artImgC; anchors.fill: parent; source: screenRoot.musicArtUrl; fillMode: Image.PreserveAspectCrop; visible: false; asynchronous: true; cache: false }
+                                MultiEffect { source: artImgC; anchors.fill: artImgC; maskEnabled: true; maskSource: artClipC; visible: artImgC.status === Image.Ready }
+                            }
+
+                            Text {
+                                id: cTitle
+                                anchors.left: artAreaC.right; anchors.leftMargin: screenRoot.sc * 12
+                                anchors.right: cCtrl.left;   anchors.rightMargin: screenRoot.sc * 8
+                                anchors.bottom: artAreaC.verticalCenter; anchors.bottomMargin: screenRoot.sc * 2
+                                text: screenRoot.musicTitle
+                                font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: screenRoot.sc * 13
+                                color: "white"; elide: Text.ElideRight
+                            }
+                            Text {
+                                anchors.left: artAreaC.right; anchors.leftMargin: screenRoot.sc * 12
+                                anchors.right: cCtrl.left;   anchors.rightMargin: screenRoot.sc * 8
+                                anchors.top: cTitle.bottom;  anchors.topMargin: screenRoot.sc * 3
+                                text: screenRoot.musicArtist
+                                font.family: "Inter"; font.weight: Font.Light; font.pixelSize: screenRoot.sc * 11
+                                color: Qt.rgba(1,1,1,0.55); elide: Text.ElideRight
+                            }
+
+                            Row {
+                                id: cCtrl
+                                anchors.right: parent.right; anchors.rightMargin: screenRoot.sc * 12
+                                anchors.verticalCenter: artAreaC.verticalCenter
+                                spacing: screenRoot.sc * 2; z: 2
+                                Rectangle {
+                                    width: screenRoot.sc * 30; height: screenRoot.sc * 30; radius: screenRoot.sc * 8
+                                    color: cPrevMa.containsMouse ? Qt.rgba(1,1,1,0.13) : "transparent"; Behavior on color { ColorAnimation { duration: 120 } }
+                                    scale: cPrevMa.pressed ? 0.86 : 1.0; Behavior on scale { NumberAnimation { duration: 110; easing.type: Easing.OutBack } }
+                                    Text { anchors.centerIn: parent; text: "󰒮"; font.family: "Iosevka Nerd Font"; font.pixelSize: screenRoot.sc * 16; color: "white" }
+                                    MouseArea { id: cPrevMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: musicPrevProcess.running = true }
+                                }
+                                Rectangle {
+                                    width: screenRoot.sc * 30; height: screenRoot.sc * 30; radius: screenRoot.sc * 8
+                                    color: cPlayMa.containsMouse ? Qt.rgba(1,1,1,0.13) : "transparent"; Behavior on color { ColorAnimation { duration: 120 } }
+                                    scale: cPlayMa.pressed ? 0.86 : 1.0; Behavior on scale { NumberAnimation { duration: 110; easing.type: Easing.OutBack } }
+                                    Text { anchors.centerIn: parent; text: screenRoot.musicStatus === "Playing" ? "󰏤" : "󰐊"; font.family: "Iosevka Nerd Font"; font.pixelSize: screenRoot.sc * 16; color: "white" }
+                                    MouseArea { id: cPlayMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: musicPlayProcess.running = true }
+                                }
+                                Rectangle {
+                                    width: screenRoot.sc * 30; height: screenRoot.sc * 30; radius: screenRoot.sc * 8
+                                    color: cNextMa.containsMouse ? Qt.rgba(1,1,1,0.13) : "transparent"; Behavior on color { ColorAnimation { duration: 120 } }
+                                    scale: cNextMa.pressed ? 0.86 : 1.0; Behavior on scale { NumberAnimation { duration: 110; easing.type: Easing.OutBack } }
+                                    Text { anchors.centerIn: parent; text: "󰒭"; font.family: "Iosevka Nerd Font"; font.pixelSize: screenRoot.sc * 16; color: "white" }
+                                    MouseArea { id: cNextMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: musicNextProcess.running = true }
+                                }
+                            }
+
+                            Rectangle {
+                                anchors { left: parent.left; right: parent.right; bottom: parent.bottom; leftMargin: screenRoot.sc * 14; rightMargin: screenRoot.sc * 14; bottomMargin: screenRoot.sc * 10 }
+                                height: screenRoot.sc * 3; radius: height / 2; color: Qt.rgba(1,1,1,0.15)
+                                Rectangle {
+                                    width: parent.width * Math.min(1.0, screenRoot.musicPosSec / screenRoot.musicLenSec)
+                                    height: parent.height; radius: height / 2; color: "white"
+                                    Behavior on width { NumberAnimation { duration: 980; easing.type: Easing.Linear } }
+                                }
+                            }
+                        }
+
+                        // ── Expanded card (center, fixed position) ────────────
+                        Item {
+                            id: musicExpandedCard
+                            width:  screenRoot.sc * 300
+                            height: screenRoot.sc * 340
+                            x: (parent.width  - width)  / 2
+                            y: (parent.height - height) / 1.8
+
+                            opacity: musicCard.expanded ? 1.0 : 0.0
+                            scale:   musicCard.expanded ? 1.0 : 0.90
+                            transformOrigin: Item.Center
+                            Behavior on opacity { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+                            Behavior on scale   { NumberAnimation { duration: 320; easing.type: Easing.OutBack; easing.overshoot: 1.4 } }
+
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: screenRoot.sc * 24
+                                color: Qt.rgba(1,1,1,0.07)
+                                border.color: Qt.rgba(1,1,1,0.11)
+                                border.width: 1
+                            }
+
+                            Rectangle {
+                                anchors.top: parent.top;     anchors.topMargin:   screenRoot.sc * 14
+                                anchors.right: parent.right; anchors.rightMargin: screenRoot.sc * 14
+                                width: screenRoot.sc * 32; height: screenRoot.sc * 32; radius: height / 2
+                                color: closeBtnMa.pressed ? Qt.rgba(1,1,1,0.30) : (closeBtnMa.containsMouse ? Qt.rgba(1,1,1,0.18) : Qt.rgba(1,1,1,0.10))
+                                border.color: Qt.rgba(1,1,1,0.20); border.width: 1
+                                Behavior on color { ColorAnimation { duration: 140 } }
+                                scale: closeBtnMa.pressed ? 0.91 : 1.0; Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
+                                z: 2
+                                Text { anchors.centerIn: parent; text: "↓"; font.family: "Inter"; font.weight: Font.Light; font.pixelSize: screenRoot.sc * 16; color: "white" }
+                                MouseArea { id: closeBtnMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: musicCard.expanded = false }
+                            }
+
+                            Item {
+                                id: artAreaE
+                                anchors.top: parent.top; anchors.topMargin: screenRoot.sc * 32
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                width: screenRoot.sc * 110; height: screenRoot.sc * 110
+
+                                Rectangle { anchors.fill: parent; radius: screenRoot.sc * 16; color: Qt.rgba(1,1,1,0.14); border.color: Qt.rgba(1,1,1,0.25); border.width: 1 }
+                                Text { anchors.centerIn: parent; text: "󰝚"; font.family: "Iosevka Nerd Font"; font.pixelSize: screenRoot.sc * 38; color: Qt.rgba(1,1,1,0.35) }
+                                Rectangle { id: artClipE; anchors.fill: parent; radius: screenRoot.sc * 16; visible: false; layer.enabled: true }
+                                Image { id: artImgE; anchors.fill: parent; source: screenRoot.musicArtUrl; fillMode: Image.PreserveAspectCrop; visible: false; asynchronous: true; cache: false }
+                                MultiEffect { source: artImgE; anchors.fill: artImgE; maskEnabled: true; maskSource: artClipE; visible: artImgE.status === Image.Ready }
+                            }
+
+                            Text {
+                                id: eTitle
+                                anchors.top: artAreaE.bottom; anchors.topMargin: screenRoot.sc * 16
+                                anchors.left: parent.left; anchors.right: parent.right
+                                anchors.leftMargin: screenRoot.sc * 26; anchors.rightMargin: screenRoot.sc * 26
+                                text: screenRoot.musicTitle
+                                font.family: "Inter"; font.weight: Font.Medium; font.pixelSize: screenRoot.sc * 16
+                                color: "white"; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight
+                            }
+
+                            Text {
+                                id: eArtist
+                                anchors.top: eTitle.bottom; anchors.topMargin: screenRoot.sc * 5
+                                anchors.left: parent.left; anchors.right: parent.right
+                                anchors.leftMargin: screenRoot.sc * 26; anchors.rightMargin: screenRoot.sc * 26
+                                text: screenRoot.musicArtist
+                                font.family: "Inter"; font.weight: Font.Light; font.pixelSize: screenRoot.sc * 13
+                                color: Qt.rgba(1,1,1,0.45); horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight
+                            }
+
+                            Row {
+                                anchors.top: eArtist.bottom; anchors.topMargin: screenRoot.sc * 22
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                spacing: screenRoot.sc * 10; z: 2
+                                Rectangle {
+                                    width: screenRoot.sc * 44; height: screenRoot.sc * 44; radius: height / 2
+                                    color: ePrevMa.pressed ? Qt.rgba(1,1,1,0.30) : (ePrevMa.containsMouse ? Qt.rgba(1,1,1,0.18) : Qt.rgba(1,1,1,0.10))
+                                    border.color: Qt.rgba(1,1,1,0.20); border.width: 1; Behavior on color { ColorAnimation { duration: 130 } }
+                                    scale: ePrevMa.pressed ? 0.91 : 1.0; Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
+                                    Text { anchors.centerIn: parent; text: "󰒮"; font.family: "Iosevka Nerd Font"; font.pixelSize: screenRoot.sc * 18; color: "white" }
+                                    MouseArea { id: ePrevMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: musicPrevProcess.running = true }
+                                }
+                                Rectangle {
+                                    width: screenRoot.sc * 44; height: screenRoot.sc * 44; radius: height / 2
+                                    color: ePlayMa.pressed ? Qt.rgba(1,1,1,0.38) : (ePlayMa.containsMouse ? Qt.rgba(1,1,1,0.24) : Qt.rgba(1,1,1,0.14))
+                                    border.color: Qt.rgba(1,1,1,0.24); border.width: 1; Behavior on color { ColorAnimation { duration: 130 } }
+                                    scale: ePlayMa.pressed ? 0.91 : 1.0; Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
+                                    Text { anchors.centerIn: parent; text: screenRoot.musicStatus === "Playing" ? "󰏤" : "󰐊"; font.family: "Iosevka Nerd Font"; font.pixelSize: screenRoot.sc * 22; color: "white" }
+                                    MouseArea { id: ePlayMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: musicPlayProcess.running = true }
+                                }
+                                Rectangle {
+                                    width: screenRoot.sc * 44; height: screenRoot.sc * 44; radius: height / 2
+                                    color: eNextMa.pressed ? Qt.rgba(1,1,1,0.30) : (eNextMa.containsMouse ? Qt.rgba(1,1,1,0.18) : Qt.rgba(1,1,1,0.10))
+                                    border.color: Qt.rgba(1,1,1,0.20); border.width: 1; Behavior on color { ColorAnimation { duration: 130 } }
+                                    scale: eNextMa.pressed ? 0.91 : 1.0; Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
+                                    Text { anchors.centerIn: parent; text: "󰒭"; font.family: "Iosevka Nerd Font"; font.pixelSize: screenRoot.sc * 18; color: "white" }
+                                    MouseArea { id: eNextMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: musicNextProcess.running = true }
+                                }
+                            }
+
+                            // Progress bar then timestamps below — no overlap
+                            Item {
+                                anchors { left: parent.left; right: parent.right; bottom: parent.bottom; leftMargin: screenRoot.sc * 26; rightMargin: screenRoot.sc * 26; bottomMargin: screenRoot.sc * 20 }
+                                height: screenRoot.sc * 10; z: 2
+
+                                Rectangle {
+                                    id: progressTrackE
+                                    anchors { left: parent.left; right: parent.right; top: parent.top }
+                                    height: screenRoot.sc * 3; radius: height / 2; color: Qt.rgba(1,1,1,0.16)
+                                    Rectangle {
+                                        width: parent.width * Math.min(1.0, screenRoot.musicPosSec / screenRoot.musicLenSec)
+                                        height: parent.height; radius: height / 2; color: "white"
+                                        Behavior on width { NumberAnimation { duration: 980; easing.type: Easing.Linear } }
+                                    }
+                                }
+                                Text {
+                                    anchors.left: parent.left; anchors.top: progressTrackE.bottom; anchors.topMargin: screenRoot.sc * 6
+                                    text: { let s = screenRoot.musicPosSec; let m = Math.floor(s/60); return m + ":" + (s%60 < 10 ? "0" : "") + (s%60) }
+                                    font.family: "Inter"; font.weight: Font.Light; font.pixelSize: screenRoot.sc * 10; color: Qt.rgba(1,1,1,0.38)
+                                }
+                                Text {
+                                    anchors.right: parent.right; anchors.top: progressTrackE.bottom; anchors.topMargin: screenRoot.sc * 6
+                                    text: { let s = screenRoot.musicLenSec; let m = Math.floor(s/60); return m + ":" + (s%60 < 10 ? "0" : "") + (s%60) }
+                                    font.family: "Inter"; font.weight: Font.Light; font.pixelSize: screenRoot.sc * 10; color: Qt.rgba(1,1,1,0.38)
                                 }
                             }
                         }

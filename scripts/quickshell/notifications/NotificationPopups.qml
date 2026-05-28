@@ -88,22 +88,22 @@ PanelWindow {
 
             add: Transition {
                 ParallelAnimation {
-                    NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 400; easing.type: Easing.OutQuint }
-                    NumberAnimation { property: "x"; from: popupWindow.width * 0.4; to: 0; duration: 500; easing.type: Easing.OutQuint }
-                    NumberAnimation { property: "scale"; from: 0.9; to: 1.0; duration: 500; easing.type: Easing.OutQuint }
+                    NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 620; easing.type: Easing.OutExpo }
+                    NumberAnimation { property: "x"; from: 56 * popupWindow.uiScale; to: 0; duration: 720; easing.type: Easing.OutExpo }
+                    NumberAnimation { property: "scale"; from: 0.94; to: 1.0; duration: 720; easing.type: Easing.OutExpo }
                 }
             }
-            
+
             remove: Transition {
                 ParallelAnimation {
-                    NumberAnimation { property: "opacity"; to: 0.0; duration: 350; easing.type: Easing.OutQuint }
-                    NumberAnimation { property: "x"; to: popupWindow.width * 0.4; duration: 400; easing.type: Easing.OutQuint }
-                    NumberAnimation { property: "scale"; to: 0.9; duration: 400; easing.type: Easing.OutQuint }
+                    NumberAnimation { property: "opacity"; to: 0.0; duration: 340; easing.type: Easing.InExpo }
+                    NumberAnimation { property: "x"; to: 56 * popupWindow.uiScale; duration: 380; easing.type: Easing.InExpo }
+                    NumberAnimation { property: "scale"; to: 0.94; duration: 380; easing.type: Easing.InExpo }
                 }
             }
 
             displaced: Transition {
-                NumberAnimation { properties: "x,y"; duration: 450; easing.type: Easing.OutQuint }
+                NumberAnimation { properties: "x,y"; duration: 500; easing.type: Easing.OutExpo }
             }
 
             delegate: Item {

@@ -6,14 +6,19 @@ Item {
     id: root
     property var island
 
+    property real _entryY: island.s(22)
+
+    NumberAnimation {
+        running: true
+        target: root; property: "_entryY"
+        from: island.s(22); to: 0
+        duration: 620; easing.type: Easing.OutExpo
+    }
+
     Item {
         anchors.fill: parent
         anchors.margins: island.s(14)
-
-        transform: Translate {
-            y: island.notifActive ? 0 : island.s(-8)
-            Behavior on y { NumberAnimation { duration: 500; easing.type: Easing.OutExpo } }
-        }
+        transform: Translate { y: root._entryY }
 
         RowLayout {
             anchors.fill: parent

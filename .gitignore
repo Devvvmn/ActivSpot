@@ -13,6 +13,7 @@ PLUGIN_COMPAT_PLAN.md
 .claude/
 .codex
 PROJECT_ANALYSIS.md
+/home/dxvmxn/.config/hypr/.understand-anything
 
 # Reference / external dotfiles
 ref_dots/
@@ -23,4 +24,3 @@ noctalia-shell/
 
 # Quickshell runtime dirs (generated at runtime)
 scripts/quickshell/rmqs/
-
