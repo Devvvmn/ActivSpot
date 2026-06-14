@@ -176,8 +176,7 @@ Item {
                 delegate: Item {
                     id: notifDelegate
                     width: ListView.view.width
-                    readonly property bool hasBody: (model.body || "") !== ""
-                    height: island.s(hasBody ? 72 : 56)
+                    height: textCol.implicitHeight + island.s(22)
                     Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.OutQuad } }
 
                     property color accentColor: island.appAccentColor(model.appName)
@@ -278,9 +277,10 @@ Item {
 
                         // Text block
                         Column {
+                            id: textCol
                             anchors.left:  iconBg.right;      anchors.leftMargin:  island.s(9)
                             anchors.right: dismissArea.left;  anchors.rightMargin: island.s(4)
-                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.top: parent.top;          anchors.topMargin:   island.s(11)
                             spacing: island.s(3)
 
                             // App name + timestamp

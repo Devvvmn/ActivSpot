@@ -1,0 +1,175 @@
+#!/usr/bin/env bash
+# Manage Float-dock pinned apps.
+#
+#   dock_pins.sh list          -> "cls|exec|name" per line
+#                                 (merged: hyprland defaults + user pins − removed)
+#   dock_pins.sh pin   <cls>   -> pin a window class
+#   dock_pins.sh unpin <cls>   -> unpin (records it so a default won't reappear)
+#
+# State : ~/.cache/quickshell/dock_pinned.json  -> {"pins":[...],"removed":[...]}
+#   pins    = classes the user explicitly pinned (insertion order kept)
+#   removed = classes the user explicitly unpinned; suppresses defaults so an
+#             unpinned default app does NOT come back after a restart.
+#
+# Defaults are derived live from hyprland.conf: every `bind … , exec , CMD`
+# whose CMD is a SINGLE token (after resolving $vars) — i.e. a plain app launch
+# like `$terminal`, `chromium`, `nautilus`. Multi-token execs (scripts, bash -c,
+# qs_manager toggles, playerctl …) are ignored.
+
+set -uo pipefail
+
+CONF="$HOME/.config/hypr/hyprland.conf"
+STATE_DIR="$HOME/.cache/quickshell"
+STATE="$STATE_DIR/dock_pinned.json"
+APPDIRS=(
+    /usr/share/applications
+    "$HOME/.local/share/applications"
+    /var/lib/flatpak/exports/share/applications
+    "$HOME/.local/share/flatpak/exports/share/applications"
+)
+
+mkdir -p "$STATE_DIR"
+[ -f "$STATE" ] || echo '{"pins":[],"removed":[]}' > "$STATE"
+
+# ── desktop-file helpers ────────────────────────────────────────────────────
+# print "EXEC\037WMCLASS\037NAME" from the first [Desktop Entry] group.
+# \037 (unit separator) is used instead of TAB: TAB is IFS-whitespace, so `read`
+# would collapse an empty middle field and shift Name into the WMClass slot.
+SEP=$'\037'
+desktop_fields() {
+    awk '
+        /^\[Desktop Entry\]/ { ina=1; next }
+        /^\[/                { ina=0 }
+        ina && /^Exec=/            && e=="" { sub(/^Exec=/,"");            e=$0 }
+        ina && /^StartupWMClass=/  && w=="" { sub(/^StartupWMClass=/,"");  w=$0 }
+        ina && /^Name=/            && n=="" { sub(/^Name=/,"");            n=$0 }
+        END { printf "%s\037%s\037%s", e, w, n }
+    ' "$1"
+}
+strip_exec() { sed 's/ *%[uUfFdDnNickvm]//g; s/ *@@[^ ]*//g; s/ *--file-forwarding//; s/ *-- *$//; s/^ *//; s/ *$//' <<<"$1"; }
+base_cmd()   { basename "$(awk '{print $1}' <<<"$1")"; }
+
+# class -> "exec\tname"  (best effort; falls back to the class itself)
+class_info() {
+    local cls="$1" f="" e w n
+    for d in "${APPDIRS[@]}"; do
+        [ -d "$d" ] || continue
+        if [ -f "$d/${cls}.desktop" ]; then f="$d/${cls}.desktop"; fi
+        [ -z "$f" ] && f=$(grep -rilZ "^StartupWMClass=${cls}\$" "$d" 2>/dev/null | tr '\0' '\n' | head -1)
+        if [ -n "$f" ]; then
+            IFS=$SEP read -r e w n < <(desktop_fields "$f")
+            e=$(strip_exec "$e")
+            printf '%s\t%s' "${e:-$cls}" "${n:-$cls}"
+            return
+        fi
+    done
+    printf '%s\t%s' "$cls" "$cls"
+}
+
+# default command (e.g. "nautilus") -> window class.
+# Class = StartupWMClass if set, otherwise the desktop-id (which IS the class for
+# apps like org.gnome.Nautilus / chromium). An exact id match wins; web-app /
+# profile-specific chromium shortcuts (--app, --class, --profile-directory) are
+# skipped so `chromium` doesn't resolve to "apple-music" etc.
+cmd_to_class() {
+    local cmd="$1" base f e se w n id best_id="" best_wm=""
+    base=$(base_cmd "$cmd")
+    for d in "${APPDIRS[@]}"; do
+        [ -d "$d" ] || continue
+        for f in "$d"/*.desktop; do
+            [ -f "$f" ] || continue
+            IFS=$SEP read -r e w n < <(desktop_fields "$f")
+            se=$(strip_exec "$e")
+            [ "$(base_cmd "$se")" = "$base" ] || continue
+            case "$se" in *--app=*|*--app-id=*|*--class=*|*--profile-directory=*) continue ;; esac
+            id=$(basename "$f" .desktop)
+            if [ "$id" = "$cmd" ] || [ "$id" = "$base" ]; then echo "${w:-$id}"; return; fi
+            [ -z "$best_id" ] && { best_id="$id"; best_wm="$w"; }
+        done
+    done
+    [ -n "$best_id" ] && { echo "${best_wm:-$best_id}"; return; }
+    echo "$base"
+}
+
+# default app commands from hyprland.conf (single-token exec targets)
+default_cmds() {
+    [ -f "$CONF" ] || return
+    declare -A V
+    while IFS= read -r line; do
+        local k="${line%%=*}" v="${line#*=}"
+        k=$(tr -d ' ' <<<"$k"); v=$(sed 's/^ *//; s/ *$//' <<<"$v")
+        [ -n "$k" ] && V["$k"]="$v"
+    done < <(grep -E '^\s*\$\w+\s*=' "$CONF")
+
+    while IFS= read -r line; do
+        local cmd="${line#*exec,}"
+        cmd=$(sed 's/^ *//; s/ *$//' <<<"$cmd")
+        local tok="${cmd%% *}"
+        if [[ "$tok" == \$* ]]; then cmd="${V[$tok]:-}"; fi
+        cmd=$(sed 's/^ *//; s/ *$//' <<<"$cmd")
+        [ -z "$cmd" ] && continue
+        [[ "$cmd" == *" "* ]] && continue   # single token only = a plain app launch
+        case "$cmd" in */*|'~'*|*.sh) continue ;; esac  # skip scripts / paths
+        echo "$cmd"
+    done < <(grep -E '^\s*bind\w*\s*=.*,[[:space:]]*exec[[:space:]]*,' "$CONF")
+}
+
+emit_list() {
+    local removed
+    removed=$(jq -r '.removed[]?' "$STATE" 2>/dev/null)
+    local EMITTED=""
+    # emit <cls> [stored_exec]
+    # Desktop-resolved exec wins; the stored exec (captured from a window PID at
+    # pin time) is only used when no desktop matches the class (e.g. google-chrome).
+    emit() {
+        local cls="$1" stored="${2:-}"
+        grep -qxF "$cls" <<<"$EMITTED" && return
+        EMITTED+="$cls"$'\n'
+        local e n; IFS=$'\t' read -r e n < <(class_info "$cls")
+        [ "$e" = "$cls" ] && [ -n "$stored" ] && e="$stored"
+        printf '%s|%s|%s\n' "$cls" "$e" "$n"
+    }
+    # 1. hyprland defaults first, minus anything the user removed
+    while IFS= read -r cmd; do
+        [ -z "$cmd" ] && continue
+        local cls; cls=$(cmd_to_class "$cmd")
+        grep -qxF "$cls" <<<"$removed" && continue
+        emit "$cls"
+    done < <(default_cmds)
+    # 2. user pins (objects {cls,exec}; legacy bare strings tolerated)
+    while IFS=$'\t' read -r cls ex; do
+        [ -z "$cls" ] && continue
+        emit "$cls" "$ex"
+    done < <(jq -r '(.pins // [])[] |
+                    if type=="string" then "\(.)\t" else "\(.cls)\t\(.exec // "")" end' \
+                "$STATE" 2>/dev/null)
+}
+
+case "${1:-}" in
+    list)  emit_list ;;
+    pin)
+        cls="${2:?usage: dock_pins.sh pin <class> [pid]}"
+        pid="${3:-}"
+        # capture the real launch binary from the window's PID (handles apps
+        # with no matching .desktop, e.g. google-chrome). Desktop exec still
+        # takes precedence at list time when one exists.
+        ex=""
+        if [ -n "$pid" ] && [ -r "/proc/$pid/exe" ]; then
+            ex=$(readlink -f "/proc/$pid/exe" 2>/dev/null) || ex=""
+        fi
+        out=$(jq --arg c "$cls" --arg e "$ex" '
+            .pins    = ((.pins // []) | map(if type=="string" then {cls:., exec:""} else . end))
+          | .pins    = (if ([.pins[].cls] | index($c)) then .pins else (.pins + [{cls:$c, exec:$e}]) end)
+          | .removed = ((.removed // []) - [$c])
+        ' "$STATE") && echo "$out" > "$STATE"
+        ;;
+    unpin)
+        cls="${2:?usage: dock_pins.sh unpin <class>}"
+        out=$(jq --arg c "$cls" '
+            .pins    = ((.pins // []) | map(if type=="string" then {cls:., exec:""} else . end)
+                                       | map(select(.cls != $c)))
+          | .removed = (if (.removed|index($c)) then .removed else ((.removed // []) + [$c]) end)
+        ' "$STATE") && echo "$out" > "$STATE"
+        ;;
+    *) echo "usage: dock_pins.sh {list|pin <cls> [pid]|unpin <cls>}" >&2; exit 1 ;;
+esac

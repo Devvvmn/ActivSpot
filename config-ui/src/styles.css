@@ -17,6 +17,7 @@ html, body, #root { height: 100%; margin: 0; background: #000; }
 
   --hair:       #2a2a2e;        /* divider when subtle is needed */
   --hair-soft:  #1a1a1c;
+  --surface0:   #1a1a1c;       /* kb-combo and minor elevated surfaces */
 
   /* full Catppuccin palette — used loud */
   --mauve:      #cba6f7;
@@ -173,19 +174,18 @@ body {
   grid-template-columns: 22px auto 1fr auto;
   align-items: center;
   gap: 14px;
-  padding: 12px 22px;
+  padding: 12px 22px 12px 26px;
   cursor: pointer;
   color: var(--ink-muted);
   background: transparent;
   border: none;
-  border-left: 4px solid transparent;
   user-select: none;
   font-family: inherit;
   font-size: 12.5px;
   font-weight: 700;
   text-align: left;
   position: relative;
-  transition: background 80ms linear, color 80ms linear, border-color 80ms linear;
+  transition: background 80ms linear, color 80ms linear;
 }
 .nav-item:focus-visible {
   outline: 3px solid var(--accent);
@@ -201,14 +201,12 @@ body {
 .nav-item:hover {
   color: #fff;
   background: #0a0a0c;
-  border-left-color: var(--ink-faint);
 }
 .nav-item .ico { color: var(--ink-soft); font-size: 14px; }
 .nav-item:hover .ico { color: #fff; }
 .nav-item.active {
   color: #000;
   background: var(--accent);
-  border-left-color: #fff;
 }
 .nav-item.active::before { content: none; }
 .nav-item.active .ico { color: #000; }
@@ -451,8 +449,11 @@ body {
   margin: 8px 0 0;
   max-width: 64ch;
   line-height: 1.6;
-  border-left: 3px solid var(--accent);
-  padding-left: 12px;
+}
+.subsec-desc::before {
+  content: "// ";
+  color: var(--accent);
+  font-weight: 900;
 }
 
 .row {
@@ -546,6 +547,7 @@ textarea {
   border-radius: 0;
   font-size: 11px;
   font-weight: 800;
+  font-family: inherit;
   text-transform: uppercase;
   background: #000;
   border: 2px solid var(--ink-faint);
@@ -554,6 +556,7 @@ textarea {
   user-select: none;
   transition: background 80ms linear, color 80ms linear, border-color 80ms linear, transform 80ms linear, box-shadow 80ms linear;
   letter-spacing: 0.1em;
+  appearance: none;
 }
 .chip:hover { color: #000; background: #fff; border-color: #fff; transform: translate(-1px, -1px); box-shadow: 2px 2px 0 0 var(--accent); }
 .chip.active {
@@ -621,8 +624,13 @@ textarea {
   cursor: pointer;
   transition: background 80ms linear, transform 80ms linear;
   position: relative;
+  border-top: none;
+  border-left: none;
   border-right: 2px solid #fff;
   border-bottom: 2px solid #fff;
+  font-family: inherit;
+  text-align: left;
+  appearance: none;
 }
 .variant:focus-visible { outline: 3px solid var(--accent); outline-offset: -6px; }
 .variant:hover { background: #0a0a0c; }
@@ -728,8 +736,13 @@ textarea {
   padding: 14px 16px;
   cursor: pointer;
   transition: background 80ms linear;
+  border-top: none;
+  border-left: none;
   border-right: 2px solid #fff;
   border-bottom: 2px solid #fff;
+  font-family: inherit;
+  text-align: left;
+  appearance: none;
 }
 .bubble-item:focus-visible { outline: 3px solid var(--accent); outline-offset: -5px; }
 .bubble-item:hover { background: #0a0a0c; }
@@ -920,7 +933,7 @@ textarea {
 
 .kb-row {
   display: grid;
-  grid-template-columns: 30px 70px minmax(140px, 1fr) 130px minmax(0, 2fr);
+  grid-template-columns: 30px 70px minmax(140px, 1fr) minmax(0, 2fr) 28px;
   gap: 18px;
   align-items: center;
   padding: 12px 0;
@@ -969,6 +982,57 @@ textarea {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .kb-row .action .args { color: var(--ink-soft); }
+.kb-row.modified { background: rgba(203,166,247,0.06); }
+
+.kb-combo {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface0); border: 1px solid var(--hair);
+  padding: 4px 10px; cursor: pointer;
+  font-family: inherit; font-size: 12px;
+  transition: border-color 160ms, background 160ms;
+  justify-self: start;
+}
+.kb-combo:hover { border-color: var(--accent); }
+.kb-combo.recording {
+  border-color: var(--accent);
+  background: var(--paper-1);
+  animation: kb-blink 800ms steps(2) infinite;
+}
+.kb-listening {
+  color: var(--accent); font-weight: 700; letter-spacing: 0.08em;
+  font-size: 11px;
+}
+.kb-mods {
+  color: var(--ink-muted); font-weight: 700; font-size: 11px;
+}
+@keyframes kb-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+.kb-new {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 0; border-bottom: 2px solid var(--accent);
+  margin-bottom: 4px; flex-wrap: wrap;
+}
+.kb-new select { height: 32px; min-width: 90px; }
+.kb-new input  { height: 32px; flex: 1; min-width: 120px; }
+.kb-mods-row { display: flex; gap: 4px; }
+.kb-mod-chip {
+  padding: 4px 8px; font-size: 10px; font-weight: 800;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  background: transparent; border: 1px solid var(--ink-faint);
+  color: var(--ink-soft);
+  cursor: pointer; font-family: inherit;
+  transition: background 80ms linear, border-color 80ms linear, color 80ms linear;
+}
+.kb-mod-chip:hover {
+  border-color: var(--ink-muted);
+  color: var(--ink-muted);
+  background: var(--paper-1);
+}
+.kb-mod-chip.active {
+  background: var(--accent); border-color: var(--accent); color: #000;
+}
 
 /* Empty / spinner */
 .empty {
@@ -1087,25 +1151,24 @@ textarea {
   pointer-events: none;
 }
 .stage-island {
-  background: #1e1e2e;
   color: var(--ink);
   border-radius: 999px;
-  padding: 7px 14px;
-  font-size: 11px;
+  height: 36px;
+  padding: 0 16px;
   display: flex; align-items: center; gap: 12px;
-  min-height: 28px;
   transition: background 540ms cubic-bezier(.16,1,.3,1);
   z-index: 1;
+  box-sizing: border-box;
 }
-.stage-island .clock { font-weight: 700; font-variant-numeric: tabular-nums; }
-.stage-island .sep { width: 1px; height: 12px; background: rgba(255,255,255,0.08); }
+.stage-island .clock { font-weight: 900; font-variant-numeric: tabular-nums; letter-spacing: -0.3px; }
+.stage-island .sep { width: 1px; flex-shrink: 0; }
 .preview-bubbles {
   display: flex; gap: 4px; flex-wrap: wrap;
   margin-top: 14px; justify-content: center;
   z-index: 1;
 }
 .preview-bubble {
-  background: #1e1e2e;
+  background: #1a1a1a;
   color: var(--ink-muted);
   border-radius: 999px;
   padding: 4px 9px 4px 7px;

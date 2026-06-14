@@ -40,11 +40,6 @@ Row {
         anchors.verticalCenter: parent.verticalCenter
         color: parent.healthColor
         Behavior on color { ColorAnimation { duration: 400 } }
-        SequentialAnimation on opacity {
-            running: true; loops: Animation.Infinite
-            NumberAnimation { to: 0.30; duration: 900; easing.type: Easing.InOutSine }
-            NumberAnimation { to: 1.0;  duration: 900; easing.type: Easing.InOutSine }
-        }
     }
 
     Item { width: island.s(8); height: 1 }

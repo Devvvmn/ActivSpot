@@ -504,6 +504,8 @@ Item {
                             let dir = parsed.wallpaperDir.trim();
                             if (dir.startsWith("~/")) {
                                 dir = Quickshell.env("HOME") + dir.substring(1);
+                            } else if (dir.startsWith("$HOME")) {
+                                dir = Quickshell.env("HOME") + dir.substring(5);
                             }
                             if (dir.endsWith("/")) {
                                 dir = dir.substring(0, dir.length - 1);

@@ -82,6 +82,10 @@ PanelWindow {
     readonly property string themeId: Theme.themeId
     readonly property bool glassTheme: Theme.isGlass
     readonly property string surfaceStyle: Theme.surfaceStyle
+    readonly property int bubbleShowMs: Theme.bubbleShowMs
+    readonly property int bubbleHideMs: Theme.bubbleHideMs
+    readonly property int bubbleEasingType: Theme.bubbleEasingType
+    readonly property int bubbleFocusRotateMs: Theme.bubbleFocusRotateMs
 
     // =========================================================
     // --- STATE ---
@@ -267,9 +271,14 @@ PanelWindow {
     property int _bgLuminance: 0
 
     function _updateDotOnDarks(lums) {
-        let bits = 0
-        for (let i = 0; i < lums.length; i++)
-            if (lums[i] < 128) bits |= (1 << i)
+        // Hysteresis per dot: flip to dark-dots (bit=0) only above 140,
+        // back to white-dots (bit=1) only below 110. Mirrors TopBar thresholds.
+        let bits = _dotOnDarkBits
+        for (let i = 0; i < lums.length; i++) {
+            let wasOnDark = (bits & (1 << i)) !== 0
+            if (wasOnDark  && lums[i] > 140) bits &= ~(1 << i)
+            else if (!wasOnDark && lums[i] < 110) bits |=  (1 << i)
+        }
         _dotOnDarkBits = bits
     }
 
@@ -389,7 +398,7 @@ PanelWindow {
     // (handled in BaseBubble); pin is released when that bubble disappears.
     property string primaryBubbleId: "clock"
     property string pinnedBubbleId: ""
-    property int    primaryRotateMs: 30000
+    property int    primaryRotateMs: Theme.bubbleFocusRotateMs
 
     // Iteration order — must match the bubbleFor() dispatch list. Stable
     // priority used by the round-robin scheduler.
@@ -650,6 +659,16 @@ PanelWindow {
     function handleImageDrop(urls) {
         islandWindow.exec("echo 'drop received: " + urls + "' >> $HOME/Downloads/qs_stash/drop_debug.txt");
         var hasImage = false;
+
+        // .qsplugin dropped → addon install flow, not the stash
+        for (var p = 0; p < urls.length; p++) {
+            var u = urls[p].toString().trim();
+            if (u.startsWith("file://") && u.toLowerCase().endsWith(".qsplugin")) {
+                var pluginPath = decodeURIComponent(u.replace('file://', ''));
+                islandWindow.exec("echo 'plugininstall:" + pluginPath + "' > /tmp/qs_widget_state");
+                return;
+            }
+        }
 
         var targetDir = "$HOME/Downloads/qs_stash/";
         if (urls.length > 1) {
@@ -2101,15 +2120,15 @@ PanelWindow {
     // Samples wallpaper every 2s. Script emits 3 lines:
     //   1: 8 per-dot luminances (under the dots row)
     //   2: 8 bar-zone luminances (4 left + 4 right of the island)
-    //   3: overall average (for legacy /tmp/qs_bg_luminance consumers)
+    //   3: overall average
+    // The script writes /tmp/qs_bg_luminance and /tmp/qs_bar_lum itself
+    // (only on change), and caches the wallpaper-derived lines — the
+    // steady-state cost per cycle is one small grim capture.
     Process {
         id: bgLumReader
         command: ["bash", "-c",
-            "OUT=$(bash /home/dxvmxn/.config/hypr/scripts/quickshell/watchers/bg_luminance.sh " +
-            Screen.width + " " + Screen.height + "); " +
-            "echo \"$OUT\"; " +
-            "printf '%s' \"$(echo \"$OUT\" | sed -n '3p')\" > /tmp/qs_bg_luminance; " +
-            "printf '%s' \"$(echo \"$OUT\" | sed -n '2p')\" > /tmp/qs_bar_lum"]
+            "exec bash \"$HOME/.config/hypr/scripts/quickshell/watchers/bg_luminance.sh\" " +
+            Screen.width + " " + Screen.height]
         stdout: StdioCollector {
             onStreamFinished: {
                 let lines = this.text.trim().split("\n")
@@ -2137,13 +2156,15 @@ PanelWindow {
         onTriggered: bgLumReader.running = true
     }
 
-    // ── Ambient workspace dots — centered below the collapsed pill ────────
+    // ── Workspace segments — thin dashes below the collapsed pill ────────────
+    // s(3)px gap below capsule + s(3)px tall segments = 6px total footprint.
+    // Active: wider + mauve. Occupied: medium + adaptive. Empty: short + faint.
     Item {
         id: wsDots
         x: 0
-        y: islandShape.y + islandShape.collapsedH + s(6)
+        y: islandShape.y + islandShape.collapsedH + s(3)
         width:  Screen.width
-        height: s(14)
+        height: s(6)
         z: 9
 
         opacity: (!islandWindow.expanded
@@ -2151,24 +2172,6 @@ PanelWindow {
                   && !islandWindow.editBarMode
                   && wsDotModel.count > 0) ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
-
-        // Subtle shadow behind the dots — tight blur so it doesn't bleed downward
-        Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter:   parent.verticalCenter
-            anchors.verticalCenterOffset: s(1)
-            width:  dotsRow.width + s(16)
-            height: s(8)
-            radius: height / 2
-            color:  Qt.rgba(0, 0, 0, 0.45)
-            Behavior on width { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                blurEnabled: true
-                blurMax:     12
-                blur:        0.8
-            }
-        }
 
         Row {
             id: dotsRow
@@ -2188,61 +2191,50 @@ PanelWindow {
                     property bool isHovered:       dotHit.containsMouse
                     property bool isTrailingEmpty: !isOccupied && index > islandWindow.wsDotLastOccupied
 
-                    readonly property real dotD: isActive ? s(10) : (isOccupied ? s(8) : s(6))
+                    // Segment width varies by state; slot width is uniform + gap
+                    readonly property real segW: isActive ? s(16) : (isOccupied ? s(9) : s(5))
 
-                    // Width bakes in the right-side gap so Row spacing can stay 0.
-                    // Trailing empties collapse to 0, pulling the Row inward smoothly.
-                    width: isTrailingEmpty ? 0 : s(16)
+                    width: isTrailingEmpty ? 0 : (isActive ? s(20) : s(13))
                     Behavior on width { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
-                    height: s(10)
-                    clip: true
+                    height: s(6)
+                    clip: false
 
                     Rectangle {
                         id: dot
-                        // Horizontally pinned to left of slot so it stays put while
-                        // the slot collapses rightward; vertically centered.
-                        x: 0
+                        anchors.left:           parent.left
                         anchors.verticalCenter: parent.verticalCenter
 
-                        width:  dotSlot.dotD
-                        height: dotSlot.dotD
-                        radius: width / 2
+                        width:  dotSlot.segW
+                        height: s(3)
+                        radius: height / 2
 
-                        Behavior on width  { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-                        Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                        Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
 
-                        // Per-dot adaptive tint — white on dark wallpaper patches,
-                        // near-black on bright ones, so dots never wash out.
                         readonly property bool _onDark:
                             (islandWindow._dotOnDarkBits & (1 << dotSlot.index)) !== 0
                         readonly property real _baseAlpha:
-                            dotSlot.isOccupied ? 0.78
-                          : dotSlot.isHovered  ? 0.65
-                          :                      0.45
+                            dotSlot.isActive   ? 1.0
+                          : dotSlot.isHovered  ? 0.70
+                          : dotSlot.isOccupied ? 0.42
+                          :                      0.15
+
                         color: dotSlot.isActive
-                            ? Qt.rgba(islandWindow.mauve.r, islandWindow.mauve.g, islandWindow.mauve.b, 1.0)
+                            ? (_onDark
+                                ? Qt.rgba(islandWindow.mauve.r, islandWindow.mauve.g, islandWindow.mauve.b, 1.0)
+                                : Qt.rgba(Theme.overlay0.r, Theme.overlay0.g, Theme.overlay0.b, 1.0))
                             : (_onDark
                                 ? Qt.rgba(1.0, 1.0, 1.0, _baseAlpha)
                                 : Qt.rgba(0.08, 0.08, 0.08, Math.min(1.0, _baseAlpha + 0.15)))
-                        Behavior on color { ColorAnimation { duration: 300; easing.type: Easing.OutCubic } }
+                        Behavior on color   { ColorAnimation  { duration: 300; easing.type: Easing.OutCubic } }
 
                         opacity: dotSlot.isTrailingEmpty ? 0.0 : 1.0
                         Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
 
-                        // Two independent scales composed via multiplication:
-                        //   _presenceScale — dot pops in (OutBack) / fades out (OutCubic)
-                        //   _hoverScale    — hover spring, unchanged
                         property real _presenceScale: dotSlot.isTrailingEmpty ? 0.0 : 1.0
                         Behavior on _presenceScale {
                             NumberAnimation { duration: 240; easing.type: Easing.OutBack }
                         }
-
-                        property real _hoverScale: dotSlot.isHovered && !dotSlot.isActive ? 1.3 : 1.0
-                        Behavior on _hoverScale {
-                            NumberAnimation { duration: 200; easing.type: Easing.OutBack }
-                        }
-
-                        scale: Math.max(0.0, _presenceScale * _hoverScale)
+                        scale: _presenceScale
                         transformOrigin: Item.Left
                     }
 

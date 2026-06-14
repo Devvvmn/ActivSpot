@@ -36,6 +36,22 @@ QtObject {
     property int bubbleShowMs: 220
     property int bubbleHideMs: 360
     property int pageAnimDuration: 300
+    property int bubbleFocusRotateMs: 30000
+    property string bubbleEasing: "easeOutCubic"
+
+    function _easingFromStr(name) {
+        switch (name) {
+            case "linear":        return Easing.Linear
+            case "easeInQuad":    return Easing.InQuad
+            case "easeOutQuad":   return Easing.OutQuad
+            case "easeInOutQuad": return Easing.InOutQuad
+            case "easeOutCubic":  return Easing.OutCubic
+            case "easeInOutCubic":return Easing.InOutCubic
+            case "easeOutBack":   return Easing.OutBack
+            default:              return Easing.OutCubic
+        }
+    }
+    readonly property int bubbleEasingType: _easingFromStr(bubbleEasing)
 
     // Lookup helpers used by minibubbles / page registry.
     function _hasCi(arr, id) {
@@ -345,7 +361,10 @@ QtObject {
                         const t = d.minibubbles.timing
                         if (typeof t.showMs === "number" && t.showMs >= 0) root.bubbleShowMs = t.showMs
                         if (typeof t.hideMs === "number" && t.hideMs >= 0) root.bubbleHideMs = t.hideMs
+                        if (typeof t.easing === "string" && t.easing.length) root.bubbleEasing = t.easing
                     }
+                    if (d.minibubbles && typeof d.minibubbles.focusRotateMs === "number" && d.minibubbles.focusRotateMs > 0)
+                        root.bubbleFocusRotateMs = d.minibubbles.focusRotateMs
                     if (d.pages && d.pages.animations) {
                         const a = d.pages.animations
                         if (typeof a.duration === "number" && a.duration >= 0) root.pageAnimDuration = a.duration

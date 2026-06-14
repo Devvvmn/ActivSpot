@@ -2,7 +2,7 @@
   "uiScale": 1,
   "openGuideAtStartup": false,
   "topbarHelpIcon": false,
-  "wallpaperDir": "/home/dxvmxn/Pictures/Wallpapers/",
+  "wallpaperDir": "~/Pictures/Wallpapers/",
   "language": "us,ru",
   "kbOptions": "grp:caps_toggle",
   "topbarTheme": "carbon",
@@ -23,7 +23,7 @@
     }
   ],
   "theme": {
-    "mode": "mocha",
+    "mode": "latte",
     "overrides": {}
   },
   "minibubbles": {
@@ -41,10 +41,11 @@
       "Clock"
     ],
     "timing": {
-      "showMs": 0,
-      "hideMs": 180,
-      "easing": "easeOutCubic"
-    }
+      "showMs": 290,
+      "hideMs": 460,
+      "easing": "easeInOutQuad"
+    },
+    "focusRotateMs": 15000
   },
   "pages": {
     "enabled": [
@@ -58,7 +59,7 @@
       "Clock"
     ],
     "animations": {
-      "duration": 300,
+      "duration": 320,
       "easing": "easeOutCubic"
     }
   },

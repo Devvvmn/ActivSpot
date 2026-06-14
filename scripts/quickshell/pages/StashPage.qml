@@ -22,9 +22,23 @@ Item {
     property bool   compressFinished:     false
 
     property int modelCount: island && island.stashModel ? island.stashModel.count : 0
-    onModelCountChanged:      updateHeight()
+    onModelCountChanged: {
+        updateHeight()
+        if (modelCount > _prevModelCount) {
+            _addedCount  = modelCount - _prevModelCount
+            _showFeedback = true
+            feedbackTimer.restart()
+        }
+        _prevModelCount = modelCount
+    }
     onIsCompressingModeChanged: updateHeight()
     onIslandChanged:          updateHeight()
+
+    property int  _prevModelCount: 0
+    property bool _showFeedback:   false
+    property int  _addedCount:     0
+
+    Timer { id: feedbackTimer; interval: 2000; onTriggered: root._showFeedback = false }
 
     function updateHeight() {
         if (!island) return
@@ -279,6 +293,40 @@ Item {
                             hoverEnabled: true
                             enabled: root.lsState === "ready"
                             onClicked: root.sendTo(model.ip)
+                        }
+                    }
+                }
+            }
+
+            // ── Drop feedback banner ──────────────────────────────────────────
+            Item {
+                anchors.top: parent.top
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width
+                height: island.s(32)
+                z: 10
+                opacity: root._showFeedback ? 1.0 : 0.0
+                Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                visible: opacity > 0.001
+
+                Rectangle {
+                    anchors.centerIn: parent
+                    height: island.s(24)
+                    width: _fbRow.implicitWidth + island.s(20)
+                    radius: island.s(12)
+                    color: Qt.rgba(island.teal.r, island.teal.g, island.teal.b, 0.16)
+                    border.width: 1
+                    border.color: Qt.rgba(island.teal.r, island.teal.g, island.teal.b, 0.32)
+                    Row {
+                        id: _fbRow
+                        anchors.centerIn: parent
+                        spacing: island.s(6)
+                        Text { text: "󰄬"; font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(12); color: island.teal; anchors.verticalCenter: parent.verticalCenter }
+                        Text {
+                            text: "Stashed " + root._addedCount + (root._addedCount === 1 ? " file" : " files")
+                            font.family: "JetBrains Mono"; font.pixelSize: island.s(11); font.weight: Font.Medium
+                            color: island.teal
+                            anchors.verticalCenter: parent.verticalCenter
                         }
                     }
                 }

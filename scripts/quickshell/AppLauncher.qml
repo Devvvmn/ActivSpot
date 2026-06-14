@@ -116,7 +116,24 @@ PanelWindow {
         launchProc.launchCmd = a.exec
         launchProc.running   = false
         launchProc.running   = true
+        // Tell the float dock a window is coming (pending bounce icon).
+        // desktop stem ≈ expected window class; the dock matches it fuzzily.
+        pendingNotifyProc.payload = JSON.stringify({
+            cls: a.desktop || a.name, icon: a.icon || "", ts: Date.now()
+        })
+        pendingNotifyProc.running = false
+        pendingNotifyProc.running = true
         open = false
+    }
+
+    // Writes pending-launch info for FloatDock. Guarded by the float mode flag —
+    // outside float mode there is no dock to consume (and rm) the file.
+    Process {
+        id: pendingNotifyProc
+        property string payload: ""
+        command: ["bash", "-c",
+            "[ -f /tmp/qs_float_mode ] || exit 0; printf '%s' \"$1\" > /tmp/qs_dock_pending",
+            "qs", payload]
     }
 
     Process {

@@ -116,7 +116,6 @@ handle_network_prep() {
 # -----------------------------------------------------------------------------
 MAIN_QML_PATH="$HOME/.config/hypr/scripts/quickshell/Main.qml"
 BAR_QML_PATH="$HOME/.config/hypr/scripts/quickshell/TopBar.qml"
-DOCK_QML_PATH="$HOME/.config/hypr/scripts/quickshell/dock/Dock.qml"
 ISLAND_QML_PATH="$HOME/.config/hypr/scripts/quickshell/DynamicIsland.qml"
 LAUNCHER_QML_PATH="$HOME/.config/hypr/scripts/quickshell/AppLauncher.qml"
 CLIPBOARD_QML_PATH="$HOME/.config/hypr/scripts/quickshell/ClipboardViewer.qml"

@@ -21,7 +21,6 @@ BaseBubble {
     scale:   shouldShow ? 1.0 : 0.05
     transformOrigin: Item.Right
 
-    Behavior on opacity { NumberAnimation { duration: island.expanded ? 0 : 360; easing.type: Easing.OutCubic } }
     Behavior on scale   { SpringAnimation { spring: 5.5; damping: 0.7 } }
 
     readonly property color fpsColor: {
@@ -73,11 +72,6 @@ BaseBubble {
             color: root.fpsColor
             anchors.verticalCenter: parent.verticalCenter
             Behavior on color { ColorAnimation { duration: 400 } }
-            SequentialAnimation on opacity {
-                running: root.shouldShow; loops: Animation.Infinite
-                NumberAnimation { to: 0.3; duration: 800; easing.type: Easing.InOutSine }
-                NumberAnimation { to: 1.0; duration: 800; easing.type: Easing.InOutSine }
-            }
         }
 
         // FPS

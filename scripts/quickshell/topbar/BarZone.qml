@@ -30,6 +30,8 @@ Item {
     // patch of wallpaper directly behind them.
     readonly property color adaptiveText:    side === "left" ? bar.leftAdaptiveText    : bar.rightAdaptiveText
     readonly property color adaptiveSubtext: side === "left" ? bar.leftAdaptiveSubtext : bar.rightAdaptiveSubtext
+    // Backdrop plate tint — dark under white text, light under graphite.
+    readonly property color adaptiveScrim:   side === "left" ? bar.leftScrim : bar.rightScrim
 
     // ── Applet component registry ──────────────────────────────────────
     Component { id: wsComp;      WorkspacesApplet { bar: bz.bar; barZone: bz; editMode: bz.editMode } }
@@ -229,7 +231,8 @@ Item {
             height: bz.bar ? bz.bar.barHeight : 36
             radius: height / 2
 
-            color: Qt.rgba(0, 0, 0, 0.06)
+            color: bz.adaptiveScrim
+            Behavior on color { ColorAnimation { duration: 520; easing.type: Easing.InOutCubic } }
 
             opacity: bz._showZone ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }

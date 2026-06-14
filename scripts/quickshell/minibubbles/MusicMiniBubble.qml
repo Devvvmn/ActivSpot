@@ -20,7 +20,6 @@ BaseBubble {
     scale:   shouldShow ? 1.0 : 0.05
     transformOrigin: Item.Right
 
-    Behavior on opacity { NumberAnimation { duration: island.expanded ? 0 : 360; easing.type: Easing.OutCubic } }
     Behavior on scale   { SpringAnimation { spring: 5.5; damping: 0.7 } }
 
     // Soft mauve halo behind the pill — gently breathes opacity instead of

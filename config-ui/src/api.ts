@@ -9,13 +9,33 @@ async function j<T>(url: string, opts?: RequestInit): Promise<T> {
   return (await r.json()) as T;
 }
 
+export interface WeatherCurrent {
+  icon: string;
+  hex: string;
+  desc: string;
+  temp: string;
+  feels_like: string;
+  humidity: string;
+  wind: string;
+}
+
+export interface WeatherData {
+  current: WeatherCurrent | null;
+  today: { max: string; min: string; icon: string; desc: string } | null;
+}
+
 export const api = {
   getSettings: () => j<Settings>("/settings"),
   putSettings: (s: Settings) => j<{ ok: true }>("/settings", { method: "PUT", body: JSON.stringify(s) }),
   inventory: () => j<Inventory>("/inventory"),
   keybinds: () => j<Keybind[]>("/keybinds"),
   colors: () => j<Record<string, string>>("/colors"),
+  weather: () => j<WeatherData>("/weather"),
+  getHyprconf: () => fetch("/api/hyprconf").then(r => r.text()),
+  putHyprconf: (text: string) => j<{ ok: true }>("/hyprconf", { method: "PUT", body: JSON.stringify({ text }) }),
   reload: () => j<{ ok: true }>("/reload", { method: "POST" }),
+  uninstallPlugin: (id: string) =>
+    j<{ ok: boolean; output: string }>(`/plugins/${encodeURIComponent(id)}`, { method: "DELETE" }),
 };
 
 export interface Monitor {
@@ -37,6 +57,7 @@ export interface ThemeCfg {
 export interface BubbleCfg {
   enabled: string[];
   timing: { showMs: number; hideMs: number; easing: string };
+  focusRotateMs: number;
 }
 
 export interface PagesCfg {
@@ -73,11 +94,22 @@ export interface Settings {
   [k: string]: unknown;
 }
 
+export interface Plugin {
+  id: string;
+  name: string;
+  version: string;
+  author: string;
+  description: string;
+  hasWindow: boolean;
+  hasBarWidget: boolean;
+  hasHooks: boolean;
+}
+
 export interface Inventory {
   bubbles: { id: string; label: string }[];
   pages: { id: string; label: string }[];
   applets: { id: string; label: string }[];
-  plugins: { id: string }[];
+  plugins: Plugin[];
 }
 
 export interface Keybind {
@@ -92,7 +124,7 @@ export interface Keybind {
 
 export const defaults: Required<Pick<Settings, "theme" | "minibubbles" | "pages" | "parallax">> = {
   theme: { mode: "mocha", overrides: {} },
-  minibubbles: { enabled: [], timing: { showMs: 220, hideMs: 180, easing: "easeOutCubic" } },
+  minibubbles: { enabled: [], timing: { showMs: 220, hideMs: 180, easing: "easeOutCubic" }, focusRotateMs: 30000 },
   pages: { enabled: [], animations: { duration: 250, easing: "easeOutCubic" } },
   parallax: { shift: 0.3, duration: 1.0, easing: "cubic", fps: 60, input: "cursor:0.0001,workspace" },
 };

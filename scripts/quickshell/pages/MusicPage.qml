@@ -187,6 +187,7 @@ Item {
 
                     // Cava waveform — 4 bars, inline, real audio data
                     Item {
+                        id: cavaWrap
                         Layout.preferredWidth: island.s(28)
                         Layout.preferredHeight: island.s(20)
                         Layout.alignment: Qt.AlignVCenter
@@ -201,7 +202,7 @@ Item {
                                 delegate: Item {
                                     width: (parent.width - 3 * island.s(3)) / 4
                                     height: parent.height
-                                    property real _v: parent.parent.parent.parent._vals[index]
+                                    property real _v: cavaWrap._vals[index]
                                     Rectangle {
                                         property real _h: Math.max(island.s(3), _v * parent.height)
                                         Behavior on _h { NumberAnimation { duration: 80; easing.type: Easing.OutCubic } }

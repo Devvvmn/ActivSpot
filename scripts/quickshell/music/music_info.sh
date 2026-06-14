@@ -10,6 +10,35 @@ if [ ! -f "$PLACEHOLDER" ]; then
     convert -size 500x500 xc:"#313244" "$PLACEHOLDER"
 fi
 
+# Resolve an mpris:artUrl file path to something actually openable from the host.
+# Sandboxed browsers (flatpak/snap Chrome, Chromium, Brave…) expose artwork as
+# e.g. file:///tmp/.com.google.Chrome.XXXX — a temp file in the app's PRIVATE
+# /tmp, invisible on the host. It is reachable via /proc/<pid>/root, but only
+# through a *dumpable* pid (sandbox renderers return EACCES), so we probe pids
+# with a real 1-byte read and return the first that opens. Echoes the usable
+# path on success, nothing on failure.
+resolve_art_path() {
+    local path="${1#file://}"
+    [ -z "$path" ] && return 1
+    # Host-visible already?
+    if dd if="$path" bs=1 count=1 >/dev/null 2>&1; then
+        printf '%s' "$path"; return 0
+    fi
+    # Only hidden /tmp temp files come from sandboxed browsers — scan their pids.
+    case "$path" in
+        /tmp/.*) ;;
+        *) return 1 ;;
+    esac
+    local pid src
+    for pid in $(pgrep -f 'chrom|brave|edge|vivaldi|opera|electron' 2>/dev/null); do
+        src="/proc/$pid/root$path"
+        if dd if="$src" bs=1 count=1 >/dev/null 2>&1; then
+            printf '%s' "$src"; return 0
+        fi
+    done
+    return 1
+}
+
 # --- 2. ONE playerctl CALL for everything ---
 PLAYER_FLAG=""
 [ -n "$1" ] && PLAYER_FLAG="--player $1"
@@ -45,24 +74,27 @@ if [ "$STATUS" = "Playing" ] || [ "$STATUS" = "Paused" ]; then
             touch "$lockFile"
             (
                 trap "rm -f '$lockFile'" EXIT
+                # Fetch into a temp first; only commit to the cache if it turns
+                # out to be a real raster image. A failed fetch leaves NO cache
+                # entry, so the next tick retries instead of locking in the
+                # placeholder forever (the old behaviour broke sandboxed Chrome).
+                tmpArt="$TMP_DIR/${trackHash}_art.tmp"
+                rm -f "$tmpArt"
+
                 if [[ "$rawUrl" == http* ]]; then
-                    curl -s -L --max-time 10 -o "$finalArt" "$rawUrl"
+                    curl -s -L --max-time 10 -o "$tmpArt" "$rawUrl"
                 else
-                    cleanPath=$(echo "$rawUrl" | sed 's/file:\/\///g')
-                    if [ -f "$cleanPath" ]; then
-                        cp "$cleanPath" "$finalArt"
-                    else
-                        cp "$PLACEHOLDER" "$finalArt"
-                    fi
+                    cleanPath=$(resolve_art_path "$rawUrl")
+                    [ -n "$cleanPath" ] && cp "$cleanPath" "$tmpArt" 2>/dev/null
                 fi
 
-                [ ! -s "$finalArt" ] && cp "$PLACEHOLDER" "$finalArt"
-
-                isPlaceholder=$(convert "$finalArt" -format "%[hex:u.p{0,0}]" info: 2>/dev/null | cut -c1-6)
-                if [[ "$isPlaceholder" == "313244" ]] || [[ -z "$isPlaceholder" ]]; then
-                    cp "$finalArt" "$blurPath"
+                # Valid image with real dimensions? then commit + blur.
+                if [ -s "$tmpArt" ] && identify -format '%wx%h' "$tmpArt" >/dev/null 2>&1; then
+                    mv -f "$tmpArt" "$finalArt"
+                    convert "$finalArt" -blur 0x20 -brightness-contrast -30x-10 "$blurPath" 2>/dev/null \
+                        || cp "$finalArt" "$blurPath"
                 else
-                    convert "$finalArt" -blur 0x20 -brightness-contrast -30x-10 "$blurPath" 2>/dev/null
+                    rm -f "$tmpArt"   # no real art this tick — leave cache empty, retry later
                 fi
 
                 rm -f "$lockFile"

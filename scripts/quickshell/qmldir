@@ -100,4 +100,3 @@ FullscreenService 1.0 qs/Services/UI/FullscreenService.qml
 PanelService 1.0 qs/Services/UI/PanelService.qml
 ToastService 1.0 qs/Services/UI/ToastService.qml
 TooltipService 1.0 qs/Services/UI/TooltipService.qml
-Settings 1.0 qs/Modules/Bar/Extras/Settings.qml

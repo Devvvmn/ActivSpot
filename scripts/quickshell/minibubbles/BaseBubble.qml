@@ -16,6 +16,15 @@ Item {
     // bubble pins it as primary instead of firing the bubble's own action.
     property bool primary: true
 
+    // opacity < 0.5 means the bubble is currently hidden and about to appear → showMs
+    // opacity ≥ 0.5 means it is currently visible and about to hide → hideMs
+    Behavior on opacity {
+        NumberAnimation {
+            duration: island && island.expanded ? 0 : (root.opacity < 0.5 ? (island ? island.bubbleShowMs : 220) : (island ? island.bubbleHideMs : 360))
+            easing.type: island ? island.bubbleEasingType : Easing.OutCubic
+        }
+    }
+
     signal tapped()
 
     Component.onCompleted: {

@@ -96,7 +96,7 @@ ShellRoot {
                 Process {
                     id: wallpaperPoller
                     running: true
-                    command: ["cat", "/home/dxvmxn/.cache/wallpaper_picker/current"]
+                    command: ["bash", "-c", "cat \"$HOME/.cache/wallpaper_picker/current\""]
                     stdout: StdioCollector {
                         onStreamFinished: {
                             let p = this.text.trim();

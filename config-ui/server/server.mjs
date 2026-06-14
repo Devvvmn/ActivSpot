@@ -60,6 +60,26 @@ async function listQml(dir) {
   }
 }
 
+async function pluginDetails(ids) {
+  const dirs = ids.filter((p) => !p.startsWith("."));
+  const out = await Promise.all(
+    dirs.map(async (id) => {
+      const m = await readJson(join(HYPR_DIR, "plugins", id, "manifest.json"), {});
+      return {
+        id,
+        name: m?.name || id,
+        version: m?.version || "",
+        author: m?.author || "",
+        description: m?.description || "",
+        hasWindow: !!m?.window,
+        hasBarWidget: !!m?.entryPoints?.barWidget,
+        hasHooks: !!m?.hooks,
+      };
+    }),
+  );
+  return out.sort((a, b) => a.name.localeCompare(b.name));
+}
+
 async function inventory() {
   const [bubbles, pages, applets, plugins] = await Promise.all([
     listQml(join(QS_DIR, "minibubbles")),
@@ -78,8 +98,25 @@ async function inventory() {
       .filter((p) => !excluded.has(p))
       .map((file) => ({ id: stripSuffix(file, "Page"), label: humanize(file, "Page") })),
     applets: applets.map((file) => ({ id: stripSuffix(file, "Applet"), label: humanize(file, "Applet") })),
-    plugins: plugins.filter((p) => !p.startsWith(".")).map((id) => ({ id })),
+    plugins: await pluginDetails(plugins),
   };
+}
+
+const PLUGIN_INSTALL = join(HYPR_DIR, "scripts/plugin_install.sh");
+const VALID_PLUGIN_ID = /^[a-z0-9][a-z0-9._-]*$/;
+
+function uninstallPlugin(id) {
+  return new Promise((resolve) => {
+    // id is validated against VALID_PLUGIN_ID before this is called, so it is
+    // safe to interpolate — no path traversal / shell metacharacters possible.
+    exec(
+      `bash ${JSON.stringify(PLUGIN_INSTALL)} uninstall ${JSON.stringify(id)}`,
+      { timeout: 30000 },
+      (err, stdout, stderr) => {
+        resolve({ ok: !err, output: ((stdout || "") + (stderr || "")).trim() });
+      },
+    );
+  });
 }
 
 function humanize(name, suffix) {
@@ -123,6 +160,7 @@ async function colorsPalette() {
   return j;
 }
 
+const WEATHER_JSON = join(os.homedir(), ".cache/quickshell/weather/weather.json");
 const RELOAD_SCRIPT = join(HYPR_DIR, "scripts/qs_reload.sh");
 
 function reloadShell() {
@@ -198,12 +236,43 @@ const server = createServer(async (req, res) => {
     if (pathname === "/api/inventory" && req.method === "GET") {
       return send(res, 200, await inventory());
     }
+    if (pathname.startsWith("/api/plugins/") && req.method === "DELETE") {
+      const id = decodeURIComponent(pathname.slice("/api/plugins/".length));
+      if (!VALID_PLUGIN_ID.test(id)) return send(res, 400, { error: "invalid plugin id" });
+      if (!existsSync(join(HYPR_DIR, "plugins", id)))
+        return send(res, 404, { error: "plugin not installed" });
+      const r = await uninstallPlugin(id);
+      return send(res, r.ok ? 200 : 500, r);
+    }
     if (pathname === "/api/keybinds" && req.method === "GET") {
       return send(res, 200, await parseKeybinds());
+    }
+    if (pathname === "/api/hyprconf" && req.method === "GET") {
+      try {
+        const text = await readFile(HYPR_CONF, "utf8");
+        res.writeHead(200, { "content-type": "text/plain; charset=utf-8" });
+        res.end(text);
+      } catch { send(res, 404, { error: "hyprland.conf not found" }); }
+      return;
+    }
+    if (pathname === "/api/hyprconf" && req.method === "PUT") {
+      const body = await readBody(req);
+      if (!body || typeof body.text !== "string")
+        return send(res, 400, { error: "expected { text: string }" });
+      await writeFile(HYPR_CONF, body.text, "utf8");
+      return send(res, 200, { ok: true });
     }
     if (pathname === "/api/colors" && req.method === "GET") {
       const c = await colorsPalette();
       return send(res, 200, c || {});
+    }
+    if (pathname === "/api/weather" && req.method === "GET") {
+      const w = await readJson(WEATHER_JSON, null);
+      if (!w) return send(res, 200, {});
+      return send(res, 200, {
+        current: w.current || null,
+        today: w.forecast?.[0] || null,
+      });
     }
     if (pathname === "/api/reload" && req.method === "POST") {
       const r = await reloadShell();

@@ -50,9 +50,24 @@ JetBrains Mono, Iosevka Nerd Font
 
 ## Installation
 
-Clone repo
+```bash
+git clone <your-repo> ~/.config/hypr
+cd ~/.config/hypr
+./install.sh
+```
 
-Run instalation script
+This launches a beautiful **TUI application** (written in Rust + Ratatui) that:
+
+- Performs system checks
+- Installs all dependencies
+- Builds the hypr-dock Rust component
+- Patches configuration for your user
+- Provides a polished, app-like installation experience
+
+After installation:
+- Add wallpapers to `~/Pictures/Wallpapers`
+- Restart Hyprland
+- Open settings: `./scripts/config_ui_launch.sh`
 
 ---
 

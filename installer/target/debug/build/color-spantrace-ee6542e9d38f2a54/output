@@ -1,0 +1,4 @@
+cargo:rustc-check-cfg=cfg(nightly)
+cargo:rustc-check-cfg=cfg(beta)
+cargo:rustc-check-cfg=cfg(stable)
+cargo:rustc-cfg=stable

@@ -1,0 +1,292 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-28T00:00:00Z",
+  "title": "Design System: ActivSpot Configurator",
+  "extensions": {
+    "colorMeta": {
+      "accent-violet": {
+        "role": "primary",
+        "displayName": "Signal Violet",
+        "canonical": "oklch(75% 0.18 305)",
+        "tonalRamp": [
+          "#0e0318",
+          "#1e0930",
+          "#330d52",
+          "#4e1a7a",
+          "#6e32a8",
+          "#9658d4",
+          "#cba6f7",
+          "#e5d3fb"
+        ]
+      },
+      "midnight": {
+        "role": "neutral",
+        "displayName": "Midnight",
+        "canonical": "oklch(0% 0 0)",
+        "tonalRamp": [
+          "#000000",
+          "#0a0a0c",
+          "#141418",
+          "#1a1a1c",
+          "#2a2a2e",
+          "#3a3a40",
+          "#707078",
+          "#b8b8c0"
+        ]
+      },
+      "signal-green": {
+        "role": "positive",
+        "displayName": "Signal Green",
+        "canonical": "oklch(87% 0.13 142)",
+        "tonalRamp": [
+          "#071a07",
+          "#0f320f",
+          "#195819",
+          "#287a28",
+          "#3d9e3d",
+          "#64c264",
+          "#a6e3a1",
+          "#d4f2d2"
+        ]
+      },
+      "signal-yellow": {
+        "role": "warning",
+        "displayName": "Signal Yellow",
+        "canonical": "oklch(91% 0.10 87)",
+        "tonalRamp": [
+          "#1a1200",
+          "#332500",
+          "#594000",
+          "#805c00",
+          "#a87c00",
+          "#d4a800",
+          "#f9e2af",
+          "#fdf2d9"
+        ]
+      },
+      "signal-red": {
+        "role": "danger",
+        "displayName": "Signal Red",
+        "canonical": "oklch(73% 0.19 4)",
+        "tonalRamp": [
+          "#1a0009",
+          "#360013",
+          "#5c0020",
+          "#840030",
+          "#ad0042",
+          "#d43e66",
+          "#f38ba8",
+          "#fac8d6"
+        ]
+      },
+      "signal-blue": {
+        "role": "informational",
+        "displayName": "Signal Blue",
+        "canonical": "oklch(75% 0.15 254)",
+        "tonalRamp": [
+          "#000f2a",
+          "#001e52",
+          "#002f7a",
+          "#0047a8",
+          "#1864cc",
+          "#4d8ef0",
+          "#89b4fa",
+          "#c4d9fd"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page titles. One per view. The largest typographic element — reads like a stamp at 56px tight tracking."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section and subsection headings."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "UI chrome: nav items, subsection titles, structural labels."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Descriptions and helper text. The only reading-weight in the system."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Meta captions, status badges, breadcrumbs. Stamped, not read."
+      }
+    },
+    "shadows": [
+      {
+        "name": "accent-lift",
+        "value": "6px 6px 0 0 #cba6f7",
+        "purpose": "Primary interactive hover. Buttons at hover, inputs on focus, raw editor container, preview stage."
+      },
+      {
+        "name": "ink-lift",
+        "value": "3px 3px 0 0 #ffffff",
+        "purpose": "Secondary interactive elements. Icon buttons, brand mark."
+      },
+      {
+        "name": "danger-lift",
+        "value": "6px 6px 0 0 #f38ba8",
+        "purpose": "Error toast shadow."
+      },
+      {
+        "name": "success-lift",
+        "value": "6px 6px 0 0 #a6e3a1",
+        "purpose": "Success toast shadow."
+      },
+      {
+        "name": "dock-shadow",
+        "value": "0 -6px 0 0 #ffffff",
+        "purpose": "Save dock upward shadow. Indicates the panel rising from the bottom edge."
+      }
+    ],
+    "motion": [
+      {
+        "name": "snap",
+        "value": "steps(2)",
+        "purpose": "Status blink, toggle knob, status dot. Discrete binary state."
+      },
+      {
+        "name": "snap-appear",
+        "value": "steps(3)",
+        "purpose": "Toast slide-in, dock appear. Chunky appear animation."
+      },
+      {
+        "name": "snap-dock",
+        "value": "steps(4)",
+        "purpose": "Save dock translateY animation."
+      },
+      {
+        "name": "state-fast",
+        "value": "60ms linear",
+        "purpose": "Button transform and shadow on hover/active."
+      },
+      {
+        "name": "state-std",
+        "value": "80ms linear",
+        "purpose": "Background and color transitions on all interactive elements."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Signal Violet fill. Save, confirm, primary CTA actions.",
+      "html": "<button class=\"ds-btn-primary\"><span>Save Changes</span></button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; padding: 8px 14px; border-radius: 0; background: #cba6f7; border: 2px solid #ffffff; color: #000000; cursor: pointer; box-shadow: 4px 4px 0 0 #ffffff; transition: transform 60ms linear, box-shadow 60ms linear, background 80ms linear, color 80ms linear; } .ds-btn-primary:hover { background: #ffffff; color: #000000; box-shadow: 6px 6px 0 0 #cba6f7; transform: translate(-2px, -2px); } .ds-btn-primary:active { transform: translate(4px, 4px); box-shadow: 0 0 0 0; } .ds-btn-primary:focus-visible { outline: 3px solid #cba6f7; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; transform: none; }"
+    },
+    {
+      "name": "Default Button",
+      "kind": "button",
+      "refersTo": "button-default",
+      "description": "Midnight fill, white text. Secondary actions: Reload, Discard, navigation.",
+      "html": "<button class=\"ds-btn-default\"><span>Reload Shell</span></button>",
+      "css": ".ds-btn-default { display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; padding: 8px 14px; border-radius: 0; background: #000000; border: 2px solid #ffffff; color: #ffffff; cursor: pointer; transition: transform 60ms linear, box-shadow 60ms linear, background 80ms linear, color 80ms linear; } .ds-btn-default:hover { background: #ffffff; color: #000000; box-shadow: 4px 4px 0 0 #cba6f7; transform: translate(-2px, -2px); } .ds-btn-default:active { transform: translate(2px, 2px); box-shadow: none; } .ds-btn-default:focus-visible { outline: 3px solid #cba6f7; outline-offset: 2px; } .ds-btn-default:disabled { opacity: 0.4; cursor: not-allowed; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Transparent, subdued. Tertiary actions or actions in high-contrast contexts like the save dock.",
+      "html": "<button class=\"ds-btn-ghost\"><span>Discard</span></button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; padding: 8px 14px; border-radius: 0; background: transparent; border: 2px solid #3a3a40; color: #b8b8c0; cursor: pointer; transition: transform 60ms linear, box-shadow 60ms linear, background 80ms linear, color 80ms linear; } .ds-btn-ghost:hover { background: #ffffff; color: #000000; border-color: #ffffff; box-shadow: 3px 3px 0 0 #3a3a40; transform: translate(-1px, -1px); } .ds-btn-ghost:focus-visible { outline: 3px solid #cba6f7; outline-offset: 2px; }"
+    },
+    {
+      "name": "Chip — Inactive",
+      "kind": "chip",
+      "refersTo": "chip-default",
+      "description": "Filter or selection chip at rest. Unselected state.",
+      "html": "<button class=\"ds-chip\">Clock</button>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 0; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; background: #000000; border: 2px solid #3a3a40; color: #b8b8c0; cursor: pointer; transition: background 80ms linear, color 80ms linear, border-color 80ms linear, transform 80ms linear, box-shadow 80ms linear; } .ds-chip:hover { color: #000000; background: #ffffff; border-color: #ffffff; transform: translate(-1px, -1px); box-shadow: 2px 2px 0 0 #cba6f7; } .ds-chip:focus-visible { outline: 3px solid #cba6f7; outline-offset: 2px; }"
+    },
+    {
+      "name": "Chip — Active",
+      "kind": "chip",
+      "refersTo": "chip-active",
+      "description": "Filter or selection chip in selected state.",
+      "html": "<button class=\"ds-chip ds-chip--active\">Music</button>",
+      "css": ".ds-chip--active { background: #cba6f7; color: #000000; border-color: #ffffff; box-shadow: 2px 2px 0 0 #ffffff; } .ds-chip--active:hover { background: #ffffff; color: #000000; box-shadow: 2px 2px 0 0 #cba6f7; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Text and number fields. Offset on focus — the field jumps to meet the cursor.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Enter value…\" />",
+      "css": ".ds-input { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; background: #000000; color: #ffffff; border: 2px solid #ffffff; border-radius: 0; padding: 8px 12px; min-width: 220px; transition: box-shadow 80ms linear, transform 80ms linear; } .ds-input::placeholder { color: #707078; font-weight: 600; } .ds-input:focus { outline: none; box-shadow: 4px 4px 0 0 #cba6f7; transform: translate(-2px, -2px); }"
+    },
+    {
+      "name": "Toggle",
+      "kind": "custom",
+      "refersTo": "chip-active",
+      "description": "Square block toggle. On = Signal Violet. Knob snaps in steps(3), never slides.",
+      "html": "<div class=\"ds-toggle ds-toggle--on\" role=\"switch\" aria-checked=\"true\" tabindex=\"0\"></div>",
+      "css": ".ds-toggle { position: relative; width: 52px; height: 26px; background: #000000; border-radius: 0; cursor: pointer; border: 2px solid #ffffff; transition: background 80ms linear; } .ds-toggle:focus-visible { outline: 3px solid #cba6f7; outline-offset: 2px; } .ds-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 0; background: #ffffff; transition: transform 120ms steps(3), background 80ms linear; } .ds-toggle--on { background: #cba6f7; border-color: #ffffff; } .ds-toggle--on::after { transform: translateX(26px); background: #000000; }"
+    },
+    {
+      "name": "Nav Item — Active",
+      "kind": "nav",
+      "refersTo": "chip-active",
+      "description": "Active sidebar navigation item. Full accent fill — no partial treatment.",
+      "html": "<button class=\"ds-nav-item ds-nav-item--active\"><span class=\"ds-nav-item__label\">Theme</span><span class=\"ds-nav-item__sub\">Catppuccin · palette</span></button>",
+      "css": ".ds-nav-item { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 14px; padding: 12px 22px; cursor: pointer; color: #b8b8c0; background: transparent; border: none; border-left: 4px solid transparent; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 900; text-align: left; transition: background 80ms linear, color 80ms linear, border-color 80ms linear; } .ds-nav-item:hover { color: #ffffff; background: #0a0a0c; border-left-color: #3a3a40; } .ds-nav-item--active { color: #000000; background: #cba6f7; border-left-color: #ffffff; } .ds-nav-item__label { display: block; font-size: 13px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; } .ds-nav-item__sub { display: block; font-size: 9.5px; font-weight: 700; color: #707078; letter-spacing: 0.16em; text-transform: uppercase; } .ds-nav-item--active .ds-nav-item__sub { color: #000000; opacity: 0.7; }"
+    },
+    {
+      "name": "Toast — Success",
+      "kind": "custom",
+      "refersTo": "button-primary",
+      "description": "Success feedback. Snaps in from bottom-right, auto-dismisses at 2400ms.",
+      "html": "<div class=\"ds-toast ds-toast--success\">settings.json written</div>",
+      "css": ".ds-toast { position: fixed; bottom: 80px; right: 24px; background: #000000; color: #ffffff; border: 3px solid #ffffff; padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; display: inline-flex; align-items: center; gap: 12px; box-shadow: 6px 6px 0 0 #cba6f7; animation: ds-toast-in 200ms steps(3) forwards; } .ds-toast--success { border-color: #a6e3a1; box-shadow: 6px 6px 0 0 #a6e3a1; } .ds-toast--error { border-color: #f38ba8; box-shadow: 6px 6px 0 0 #f38ba8; } @keyframes ds-toast-in { from { transform: translate(20px, 20px); opacity: 0; } to { transform: translate(0, 0); opacity: 1; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Zine Config",
+    "overview": "ActivSpot Configurator is a settings tool with a self-published personality. The aesthetic is DIY-sharp: cut-and-paste grids, uppercase labels set tight, hard structural borders as the layout skeleton, and the Catppuccin palette used loud rather than tastefully. Nothing is soft. Nothing is neutral.\n\nThe system runs on a single monospace typeface (JetBrains Mono) at high weights throughout. Hierarchy is achieved through scale, weight contrast, and spatial rhythm — not through color variety or card separation. Backgrounds are near-pure black; surfaces are differentiated by 3px white structural lines, not depth.\n\nCatppuccin accents appear as loud, functional signals: the active nav item fills with Signal Violet, not merely gets accented. Status colors are used at full saturation. Color is information, not decoration.",
+    "keyCharacteristics": [
+      "Pure black canvas, near-zero tonal layering between surfaces",
+      "3px solid white structural borders as the primary layout tool",
+      "JetBrains Mono exclusively, from 10px caption to 56px display",
+      "Hard offset box-shadows (blur 0) as the only elevation mechanism",
+      "Catppuccin Mocha accents at full saturation for active and status states",
+      "All UI chrome uppercase; body descriptions mixed-case",
+      "steps()-based animations: discrete snaps, no easing curves, no duration > 200ms"
+    ],
+    "rules": [
+      { "name": "The Loud Accent Rule", "body": "Signal Violet is never used at reduced opacity or as a tint. When it appears, it appears at full #cba6f7.", "section": "colors" },
+      { "name": "The Status Purity Rule", "body": "Signal Green, Yellow, Red, and Blue are reserved for semantic status exclusively. No decorative use of status colors.", "section": "colors" },
+      { "name": "The One-Font Rule", "body": "JetBrains Mono is the only typeface. No variable-font tricks, no secondary humanist sans for body text.", "section": "typography" },
+      { "name": "The Uppercase Chrome Rule", "body": "All UI chrome (nav labels, breadcrumbs, section titles, status badges, button labels) is uppercase. Body descriptions are mixed-case.", "section": "typography" },
+      { "name": "The Zero Blur Rule", "body": "Every shadow in this system has a blur radius of 0. No ambient glows, no soft shadows, no backdrop-filter.", "section": "elevation" },
+      { "name": "The Offset-Is-State Rule", "body": "Shadows appear in response to interaction, never at rest. A surface at rest is flat. The shadow is not decoration — it is the hover state.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use border-radius: 0 on every interactive and structural element.",
+      "Do use box-shadow: Xpx Xpx 0 0 {color} with blur = 0 and spread = 0.",
+      "Do use Signal Violet at full #cba6f7 — never dilute it with opacity.",
+      "Do use steps() for toggles, appear animations, and discrete state snaps.",
+      "Do uppercase all UI chrome labels, button text, nav items, and status badges.",
+      "Do use 3px solid white for primary structural divisions.",
+      "Do use weight 900 vs 600 for hierarchy. Weight 400 does not exist in this system.",
+      "Do use font-variant-numeric: tabular-nums for all numeric display values."
+    ],
+    "donts": [
+      "Don't add border-radius to any element. Zero tolerance.",
+      "Don't use blur in shadows or backdrop-filter.",
+      "Don't use opacity-reduced accent as a tint.",
+      "Don't build GNOME Settings, KDE panels, or any soft-edged system preferences UI.",
+      "Don't use linear or radial gradients as backgrounds.",
+      "Don't introduce a second typeface.",
+      "Don't smooth-animate toggle or discrete state changes.",
+      "Don't use status colors (green, yellow, red, blue) for decoration.",
+      "Don't use nested containers or card grids. Separation is done with 3px borders.",
+      "Don't add ambient shadow to any element at rest. Resting surfaces are flat."
+    ]
+  }
+}

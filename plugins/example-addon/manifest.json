@@ -1,0 +1,9 @@
+{
+  "id": "example-addon",
+  "name": "Example Addon",
+  "version": "1.0.0",
+  "author": "dxvmxn",
+  "description": "Reference addon: demonstrates the .qsplugin format — a hypr snippet and one script.",
+  "hypr": "hypr.conf",
+  "scripts": ["scripts/hello.sh"]
+}

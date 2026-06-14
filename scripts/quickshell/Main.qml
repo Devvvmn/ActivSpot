@@ -334,7 +334,8 @@ PanelWindow {
         masterWindow.targetW = t.w;
         masterWindow.targetH = t.h;
         
-        let props = newWidget === "wallpaper" ? { "widgetArg": arg } : {};
+        let props = (newWidget === "wallpaper" || newWidget === "plugininstall")
+                    ? { "widgetArg": arg } : {};
         if (newWidget === "battery") props["notifModel"] = masterWindow.notifModel;
 
         if (immediate) {
@@ -363,7 +364,8 @@ PanelWindow {
                 if (rawCmd !== "") {
                     let parts = rawCmd.split(":");
                     let cmd   = parts[0];
-                    let arg   = parts.length > 1 ? parts[1] : "";
+                    // join — args may contain ':' (e.g. plugininstall file paths)
+                    let arg   = parts.length > 1 ? parts.slice(1).join(":") : "";
 
                     if (cmd === "close") {
                         switchWidget("hidden", "");

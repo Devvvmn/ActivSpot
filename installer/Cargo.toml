@@ -1,0 +1,11 @@
+[package]
+name = "activspot-installer"
+version = "0.1.0"
+edition = "2021"
+authors = ["ActivSpot"]
+description = "Beautiful TUI installer for ActivSpot Hyprland shell"
+
+[dependencies]
+ratatui = { version = "0.29", features = ["crossterm"] }
+crossterm = "0.28"
+color-eyre = "0.6"

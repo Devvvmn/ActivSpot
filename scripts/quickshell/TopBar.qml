@@ -5,6 +5,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import "./topbar"
 import "./themes"
+import "./plugins"
 import qs.Services.UI
 import qs.Commons
 
@@ -230,7 +231,7 @@ Variants {
                 left: s(4)
                 right: s(4)
             }
-            exclusiveZone: barHeight + s(18)   // s(4) above + barHeight + extra room for ws dots
+            exclusiveZone: barHeight + s(4)
             color: "transparent"
 
             // ── Theme ─────────────────────────────────────────────────
@@ -244,8 +245,16 @@ Variants {
             property int  bgLum: 0
             // Per-zone luminance samples from /tmp/qs_bar_lum (4 left + 4 right)
             property var  barLums: [128, 128, 128, 128, 128, 128, 128, 128]
-            readonly property int leftBgLum:  (barLums[0] + barLums[1] + barLums[2] + barLums[3]) / 4
-            readonly property int rightBgLum: (barLums[4] + barLums[5] + barLums[6] + barLums[7]) / 4
+            // Use (min + mean) / 2 so mixed zones (e.g. dark mountain + bright sky in one
+            // sample strip) don't falsely trigger dark-text mode: a single bright pixel no
+            // longer drags the zone average past the 140 flip threshold.
+            function _zoneLum(a, b, c, d) {
+                var mn = Math.min(a, Math.min(b, Math.min(c, d)))
+                var mean = (a + b + c + d) / 4
+                return (mn + mean) / 2
+            }
+            readonly property int leftBgLum:  _zoneLum(barLums[0], barLums[1], barLums[2], barLums[3])
+            readonly property int rightBgLum: _zoneLum(barLums[4], barLums[5], barLums[6], barLums[7])
 
             // Hysteresis avoids flicker when a zone average teeters around 128.
             // Flip to "light" only above 140, back to "dark" only below 116.
@@ -269,12 +278,19 @@ Variants {
                     _rightOnDark = _applyHysteresis(bgLum, _rightOnDark)
                 }
             }
-            onLeftBgLumChanged:  _leftOnDark  = _applyHysteresis(leftBgLum,  _leftOnDark)
-            onRightBgLumChanged: _rightOnDark = _applyHysteresis(rightBgLum, _rightOnDark)
+            // Per-zone states use a direct threshold, not hysteresis: zone lums
+            // come from the static wallpaper file and only change on wallpaper /
+            // layout change, so there is no temporal jitter to damp. Hysteresis
+            // here was actively harmful — a value landing in the 116–140 dead
+            // zone held a stale (possibly wrong) state forever.
+            onLeftBgLumChanged:  _leftOnDark  = leftBgLum  < 132
+            onRightBgLumChanged: _rightOnDark = rightBgLum < 132
 
             function _adaptiveText(onDark, alpha) {
+                // On light wallpaper use a soft graphite (≈#4a4a4a) rather than
+                // near-black — pure black "shouts" against pale cloud/sky.
                 return onDark ? Qt.rgba(1.0, 1.0, 1.0, alpha)
-                              : Qt.rgba(0.08, 0.08, 0.08, alpha)
+                              : Qt.rgba(0.29, 0.29, 0.29, alpha)
             }
 
             // Adaptive foreground (overall avg — fallback / legacy)
@@ -286,6 +302,16 @@ Variants {
             readonly property color leftAdaptiveSubtext:  _adaptiveText(_leftOnDark,  0.45)
             readonly property color rightAdaptiveText:    _adaptiveText(_rightOnDark, 0.92)
             readonly property color rightAdaptiveSubtext: _adaptiveText(_rightOnDark, 0.45)
+
+            // Adaptive scrim behind applet groups — lifts contrast on busy
+            // wallpapers where a single text color is partly lost against mixed
+            // pixels. Dark plate under white text, light plate under graphite.
+            function _adaptiveScrim(onDark) {
+                return onDark ? Qt.rgba(0.0, 0.0, 0.0, 0.24)
+                              : Qt.rgba(1.0, 1.0, 1.0, 0.30)
+            }
+            readonly property color leftScrim:  _adaptiveScrim(_leftOnDark)
+            readonly property color rightScrim: _adaptiveScrim(_rightOnDark)
 
             // Pill surface adapts to wallpaper luminance for guaranteed readability
             readonly property color pillColor: _onDark
@@ -500,6 +526,48 @@ Variants {
             Component.onCompleted: {
                 bgLumBarReader.running = true
                 barLumReader.running   = true
+                barZonesDebounce.restart()
+            }
+
+            // ── Publish real applet-pill screen rects for luminance sampling ──
+            // bg_luminance.sh reads /tmp/qs_bar_zones ("LX LW RX RW", screen px)
+            // and samples wallpaper luminance under exactly these rects instead
+            // of the whole half-bar. Without it, bright sky in the empty part of
+            // a half-bar dragged the zone average up and flipped applet text to
+            // dark even though the wallpaper behind the pills was dark.
+            property string _lastBarZones: ""
+            function _publishBarZones() {
+                if (!leftZone || !rightZone) return
+                // mapToItem(null, …) → window-surface coords; the layershell
+                // surface sits margins.left in from the screen edge.
+                var mL = margins.left
+                var lx = Math.max(0, Math.round(leftZone.mapToItem(null, 0, 0).x + mL))
+                var lw = Math.max(1, Math.round(leftZone._totalW))
+                var rStart = rightZone.width - rightZone._totalW
+                var rx = Math.max(0, Math.round(rightZone.mapToItem(null, rStart, 0).x + mL))
+                var rw = Math.max(1, Math.round(rightZone._totalW))
+                var payload = lx + " " + lw + " " + rx + " " + rw
+                if (payload === _lastBarZones) return
+                _lastBarZones = payload
+                // payload is digits+spaces only — safe to inline.
+                barZonesWriter.command = ["bash", "-c",
+                    "printf '%s' '" + payload + "' > /tmp/qs_bar_zones"]
+                barZonesWriter.running = true
+            }
+            Timer {
+                id: barZonesDebounce
+                interval: 300
+                onTriggered: barWindow._publishBarZones()
+            }
+            Process { id: barZonesWriter }
+            onWidthChanged: barZonesDebounce.restart()
+            Connections {
+                target: leftZone
+                function on_TotalWChanged() { barZonesDebounce.restart() }
+            }
+            Connections {
+                target: rightZone
+                function on_TotalWChanged() { barZonesDebounce.restart() }
             }
 
             // IPC: island writes "1"/"0" to /tmp/qs_bar_edit
@@ -1092,5 +1160,8 @@ Variants {
         }
     }
 }
+
+// ── Plugin windows (manifest "window" entries, e.g. float-mode dock) ───────
+PluginWindowHost {}
 
 } // ShellRoot

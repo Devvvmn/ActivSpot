@@ -383,8 +383,8 @@ Item {
                 x: 0, y: 0, scale: m.sysScale, transform: m.transform
             }];
             let safeJson = JSON.stringify(jsonMonitorsArray).replace(/'/g, "'\\''");
-            let jsonCmd = "jq '.monitors = " + safeJson + "' ~/.config/hypr/settings.json > ~/.config/hypr/settings.json.tmp && mv ~/.config/hypr/settings.json.tmp ~/.config/hypr/settings.json";
-            let postReloadCmd = "pkill -x hyprlax ; sleep 0.2 ; W=$(cat ~/.cache/wallpaper_picker/current 2>/dev/null) ; [ -n \"$W\" ] && setsid -f ~/.local/bin/hyprlax --input cursor:0.0001,workspace \"$W\" >/dev/null 2>&1 &";
+            let jsonCmd = "jq '.monitors = " + safeJson + "' \"$HOME/.config/hypr/settings.json\" > \"$HOME/.config/hypr/settings.json.tmp\" && mv \"$HOME/.config/hypr/settings.json.tmp\" \"$HOME/.config/hypr/settings.json\"";
+            let postReloadCmd = "pkill -x hyprlax ; sleep 0.2 ; W=$(cat ~/.cache/wallpaper_picker/current 2>/dev/null) ; [ -n \"$W\" ] && setsid -f $HOME/.local/bin/hyprlax --input cursor:0.0001,workspace \"$W\" >/dev/null 2>&1 &";
 
             Quickshell.execDetached(["notify-send", "Display Update", "Applied & Saved: " + m.resW + "x" + m.resH + " @ " + m.rate + "Hz"]);
             Quickshell.execDetached(["sh", "-c", "hyprctl keyword monitor " + monitorStr + " ; " + jsonCmd + " ; " + postReloadCmd]);
@@ -481,8 +481,8 @@ Item {
             
             let fullHyprCmd = "hyprctl --batch '" + batchCmds.join(" ; ") + "'";
             let safeJson = JSON.stringify(jsonMonitorsArray).replace(/'/g, "'\\''");
-            let jsonCmd = "jq '.monitors = " + safeJson + "' ~/.config/hypr/settings.json > ~/.config/hypr/settings.json.tmp && mv ~/.config/hypr/settings.json.tmp ~/.config/hypr/settings.json";
-            let postReloadCmd = "pkill -x hyprlax ; sleep 0.2 ; W=$(cat ~/.cache/wallpaper_picker/current 2>/dev/null) ; [ -n \"$W\" ] && setsid -f ~/.local/bin/hyprlax --input cursor:0.0001,workspace \"$W\" >/dev/null 2>&1 &";
+            let jsonCmd = "jq '.monitors = " + safeJson + "' \"$HOME/.config/hypr/settings.json\" > \"$HOME/.config/hypr/settings.json.tmp\" && mv \"$HOME/.config/hypr/settings.json.tmp\" \"$HOME/.config/hypr/settings.json\"";
+            let postReloadCmd = "pkill -x hyprlax ; sleep 0.2 ; W=$(cat ~/.cache/wallpaper_picker/current 2>/dev/null) ; [ -n \"$W\" ] && setsid -f $HOME/.local/bin/hyprlax --input cursor:0.0001,workspace \"$W\" >/dev/null 2>&1 &";
 
             Quickshell.execDetached(["sh", "-c", fullHyprCmd + " ; " + jsonCmd + " ; " + postReloadCmd]);
             Quickshell.execDetached(["notify-send", "Display Update", "Applied & Saved layout for: " + summaryString]);

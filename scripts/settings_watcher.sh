@@ -49,10 +49,10 @@ while :; do
     # 2. Update Guide Autostart (Comment / Uncomment)
     if [ "$GUIDE_STARTUP" == "true" ]; then
         # Remove any leading hash/spaces to enable the autostart
-        sed -i 's|^#*[[:space:]]*exec-once = ~/.config/hypr/scripts/qs_manager.sh toggle guide.*|exec-once = ~/.config/hypr/scripts/qs_manager.sh toggle guide \&|' "$HYPR_CONF"
+        sed -i 's|^#*[[:space:]]*exec-once = .*qs_manager.sh toggle hello.*|exec-once = sleep 4 \&\& ~/.config/hypr/scripts/qs_manager.sh toggle hello \&|' "$HYPR_CONF"
     elif [ "$GUIDE_STARTUP" == "false" ]; then
         # Add a hash to comment it out if it isn't already
-        sed -i 's|^exec-once = ~/.config/hypr/scripts/qs_manager.sh toggle guide.*|# exec-once = ~/.config/hypr/scripts/qs_manager.sh toggle guide \&|' "$HYPR_CONF"
+        sed -i 's|^exec-once = .*qs_manager.sh toggle hello.*|# exec-once = sleep 4 \&\& ~/.config/hypr/scripts/qs_manager.sh toggle hello \&|' "$HYPR_CONF"
     fi
 
     # Parallax: push live to running hyprlax via ctl set (no restart)
