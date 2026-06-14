@@ -34,3 +34,15 @@ scripts/quickshell/rmqs/
 scripts/addons-src/float-mode/
 scripts/hypr-dock/
 plugins/float-mode/
+
+# Node
+node_modules/
+**/node_modules/
+
+# Rust
+target/
+**/target/
+
+# Прочий мусор
+*.bak
+.impeccable/
