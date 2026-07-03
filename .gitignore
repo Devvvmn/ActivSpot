@@ -57,3 +57,4 @@ target/
 # Прочий мусор
 *.bak
 .impeccable/
+.understand-anything/tmp/
