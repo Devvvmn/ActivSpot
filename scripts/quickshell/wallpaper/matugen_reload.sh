@@ -83,3 +83,8 @@ fi
 killall swayosd-server 2>/dev/null
 swayosd-server --top-margin 0.9 --style "$HOME/.config/swayosd/style.css" > /dev/null 2>&1 &
 disown
+
+# Re-render GTK/Qt app themes from the fresh matugen palette (no-op unless
+# the active ActivSpot theme is matugen)
+bash "$HOME/.config/hypr/scripts/apply_app_themes.sh" --if-matugen --force > /dev/null 2>&1 &
+disown

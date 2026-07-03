@@ -58,11 +58,13 @@ Rectangle {
         }
     }
 
+    // Battery popup was removed (Control Center covers it) — the applet is a
+    // passive indicator; click opens the island control page instead.
     MouseArea {
         id: batMouse
         anchors.fill: parent
         hoverEnabled: true
         enabled: !root.editMode
-        onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle battery"])
+        onClicked: Quickshell.execDetached(["bash", "-c", "echo page:control > /tmp/qs_island_toggle"])
     }
 }

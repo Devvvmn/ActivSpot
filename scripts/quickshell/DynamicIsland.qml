@@ -1013,7 +1013,7 @@ PanelWindow {
     Timer { interval: 3000; running: true; repeat: true; triggeredOnStart: true
         onTriggered: playersProc.running = true }
     // NOTE: the island's equalizer poller was removed — islandWindow.eqData had
-    // zero consumers in this process (MusicPopup in Main.qml runs its own).
+    // zero consumers in this process.
     // Adaptive music poll: 800 ms while media is active (position tracking),
     // relaxed 1500 ms player-discovery poll when nothing is playing.
     Timer {
@@ -1841,7 +1841,13 @@ PanelWindow {
             acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
             onClicked: (mouse) => {
                 if (mouse.button === Qt.MiddleButton) {
-                    Quickshell.execDetached(["bash", "-c", "echo 'music' > /tmp/qs_widget_state"]);
+                    // Music popup removed — middle click expands the island
+                    // music page instead (only meaningful while media plays)
+                    if (islandWindow.isMediaActive && !islandWindow.editBarMode) {
+                        islandWindow.skimCommit();
+                        islandWindow.currentPage = "music";
+                        islandWindow.expanded = true;
+                    }
                 } else if (mouse.button === Qt.RightButton) {
                     // Control Center gesture — lives outside the wheel rotation
                     if (!islandWindow.expanded && !islandWindow.editBarMode) {
@@ -2489,6 +2495,26 @@ PanelWindow {
         onTriggered: laProducers.running = true
     }
 
+    // GTK/Qt apps follow the island theme. Runs once at startup (no-op when
+    // the rendered palette is already current — hash check inside) and again
+    // on every theme switch / per-color override change from config-ui.
+    // Wallpaper-driven matugen updates are hooked in matugen_reload.sh.
+    Process {
+        id: appThemeApply; running: true
+        command: ["bash", "-c", "exec bash \"$HOME/.config/hypr/scripts/apply_app_themes.sh\""]
+    }
+    Connections {
+        target: Theme
+        function onThemeIdChanged() {
+            appThemeApply.running = false
+            appThemeApply.running = true
+        }
+        function onPaletteOverridesChanged() {
+            appThemeApply.running = false
+            appThemeApply.running = true
+        }
+    }
+
     // =========================================================
     // IPC: Incoming notification from Main.qml
     // =========================================================
@@ -2678,6 +2704,23 @@ PanelWindow {
         else if (cmd === "next")     wheelStep(1, false);
         else if (cmd === "prev")     wheelStep(-1, false);
         else if (cmd === "edit")     editBarMode ? exitEditBarMode() : enterEditBarMode();
+        // Command-center actions (AppLauncher runs as a separate process)
+        else if (cmd === "dnd") {
+            dndEnabled = !dndEnabled;
+            exec("echo '" + (dndEnabled ? "1" : "0") + "' > ~/.cache/qs_dnd");
+        }
+        else if (cmd === "aot") {
+            alwaysOnTop = !alwaysOnTop;
+            exec("echo '" + (alwaysOnTop ? "1" : "0") + "' > ~/.cache/qs_island_aot");
+        }
+        else if (cmd.indexOf("timer:") === 0) {
+            let sec = parseInt(cmd.slice(6));
+            if (!isNaN(sec) && sec > 0) {
+                startTimer(sec);
+                currentPage = "timer";
+                expanded = true;
+            }
+        }
         else if (cmd.indexOf("page:") === 0) {
             let sub = cmd.slice(5).split(":");
             let pg  = sub[0];

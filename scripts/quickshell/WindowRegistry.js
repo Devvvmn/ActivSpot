@@ -29,21 +29,11 @@ function getLayout(name, mx, my, mw, mh, userScale, anchorX) {
 
     let base = {
         // Right-aligned: pinned 20px from the right edge dynamically
-        "battery":   { w: s(801, scale), h: s(680, scale), rx: mw - s(821, scale), ry: s(70, scale), comp: "battery/BatteryPopup.qml" },
         "powermenu": { w: mw, h: mh, rx: 0, ry: 0, comp: "power/PowerMenuOverlay.qml" },
-        "pulse":     { w: s(400, scale), h: s(300, scale), rx: mw - s(420, scale), ry: s(70, scale), comp: "pulse/PulsePopup.qml" },
-        //"volume":    { w: s(480, scale), h: s(760, scale), rx: mw - s(500, scale), ry: s(70, scale), comp: "volume/VolumePopup.qml" },
-        
-        // Centered horizontally dynamically based on current screen width
-        "calendar":  { w: s(1450, scale), h: s(750, scale), rx: Math.floor((mw/2)-(s(1450, scale)/2)), ry: s(70, scale), comp: "calendar/CalendarPopup.qml" },
-        
-        // Centered horizontally under the dynamic island
-        "music":     { w: s(700, scale), h: s(620, scale), rx: Math.floor((mw/2)-(s(700, scale)/2)), ry: s(70, scale), comp: "music/MusicPopup.qml" },
         
         // Right-aligned: pinned 20px from the right edge dynamically (Width: 900 + 20 margin = 920)
         "network":   { w: s(440, scale), h: s(560, scale), rx: mw - s(460, scale), ry: s(70, scale), comp: "network/NetworkPopup.qml" },
         
-        "monitors":  { w: s(850, scale), h: s(580, scale), rx: Math.floor((mw/2)-(s(850, scale)/2)), ry: Math.floor((mh/2)-(s(580, scale)/2)), comp: "monitors/MonitorPopup.qml" },
         "plugininstall": { w: s(560, scale), h: s(620, scale), rx: Math.floor((mw/2)-(s(560, scale)/2)), ry: Math.floor((mh/2)-(s(620, scale)/2)), comp: "plugins/PluginInstallPopup.qml" },
         "sysinfo":   { w: s(500, scale), h: s(640, scale), rx: Math.floor((mw/2)-(s(500, scale)/2)), ry: Math.floor((mh/2)-(s(640, scale)/2)), comp: "sysinfo/SysInfoCard.qml" },
         "focustime": { w: s(900, scale), h: s(720, scale), rx: Math.floor((mw/2)-(s(900, scale)/2)), ry: Math.floor((mh/2)-(s(720, scale)/2)), comp: "focustime/FocusTimePopup.qml" },

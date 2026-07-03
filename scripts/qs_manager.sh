@@ -192,12 +192,6 @@ if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
         exit 0
     fi
 
-    # Music: open/toggle the standalone music popup window.
-    if [[ "$TARGET" == "music" ]]; then
-        echo "music" > "$IPC_FILE"
-        exit 0
-    fi
-
     # Launcher: toggle the Spotlight-style app launcher
     if [[ "$TARGET" == "launcher" ]]; then
         echo "toggle" > /tmp/qs_launcher

@@ -52,6 +52,8 @@ PanelWindow {
             filterApps("")
             appsProc.running = false
             appsProc.running = true
+            gateProc.running = false
+            gateProc.running = true
             Qt.callLater(function() { searchInput.forceActiveFocus() })
         } else {
             hideTimer.restart()
@@ -64,6 +66,100 @@ PanelWindow {
 
     ListModel { id: allAppsModel }
     ListModel { id: filteredModel }
+
+    // ─── Command center: actions ──────────────────────────────────────────────
+    // `>` filters to actions only; without it actions mix into app results.
+    // Every cmd goes through existing IPC channels — nothing island-internal
+    // is duplicated here (the launcher is a separate quickshell process).
+    //
+    // Gating mirrors the user's actual config: `page` entries hide when the
+    // island page is disabled in settings.json pages.enabled (empty list =
+    // all enabled, same semantics as Theme.pageEnabled); `plugin` entries
+    // hide when the addon directory is not installed.
+    readonly property var _actions: [
+        { name: "Do Not Disturb",     glyph: "󰂛", kw: "dnd mute silence",        cmd: "echo dnd > /tmp/qs_island_toggle" },
+        { name: "Always on Top",      glyph: "󰁍", kw: "aot pin island",          cmd: "echo aot > /tmp/qs_island_toggle" },
+        { name: "Timer",              glyph: "󰔛", kw: "countdown",               cmd: "echo page:timer > /tmp/qs_island_toggle",    page: "timer" },
+        { name: "Notifications",      glyph: "󰂚", kw: "history notifs",          cmd: "echo page:notifs > /tmp/qs_island_toggle",   page: "notifs" },
+        { name: "Stash",              glyph: "󰉖", kw: "files tray drop",         cmd: "echo page:stash > /tmp/qs_island_toggle",    page: "stash" },
+        { name: "Control Center",     glyph: "󰒓", kw: "settings toggles wifi bt", cmd: "echo page:control > /tmp/qs_island_toggle", page: "control" },
+        { name: "Audio Mixer",        glyph: "󰕾", kw: "volume sound pulse",      cmd: "echo page:control:mixer > /tmp/qs_island_toggle", page: "control" },
+        { name: "Edit Bar",           glyph: "󰏫", kw: "applets layout edit mode", cmd: "echo edit > /tmp/qs_island_toggle" },
+        { name: "Network",            glyph: "󰖩", kw: "wifi internet",           cmd: "echo network > /tmp/qs_widget_state" },
+        { name: "Focus Time",         glyph: "󱎫", kw: "pomodoro work",           cmd: "echo focustime > /tmp/qs_widget_state" },
+        { name: "Wallpaper",          glyph: "󰸉", kw: "background picker",       cmd: "echo wallpaper > /tmp/qs_widget_state" },
+        { name: "Power Menu",         glyph: "󰐥", kw: "shutdown reboot logout suspend", cmd: "echo powermenu > /tmp/qs_widget_state" },
+        { name: "Clipboard History",  glyph: "󰅍", kw: "copy paste clip",         cmd: "echo toggle > /tmp/qs_clipboard" },
+        { name: "Float Mode",         glyph: "󱂬", kw: "floating windows dock",   cmd: "bash ~/.config/hypr/plugins/float-mode/float_mode.sh toggle", plugin: "float-mode" },
+        { name: "Screenshot Region",  glyph: "󰹑", kw: "capture area grab",       cmd: "sleep 0.4 && bash ~/.config/hypr/scripts/screenshot.sh" },
+        { name: "Screenshot Screen",  glyph: "󰍺", kw: "capture full grab",       cmd: "sleep 0.4 && bash ~/.config/hypr/scripts/screenshot.sh --full" },
+        { name: "Reload Shell",       glyph: "󰜉", kw: "restart quickshell qs",   cmd: "pkill -SIGUSR2 quickshell" },
+    ]
+
+    // null → settings.json unread/empty list → everything enabled
+    property var _enabledPages: null
+    property var _plugins: []
+
+    function _actionVisible(a) {
+        if (a.page && _enabledPages !== null && _enabledPages.indexOf(a.page) < 0) return false
+        if (a.plugin && _plugins.indexOf(a.plugin) < 0) return false
+        return true
+    }
+
+    // Re-read config each open — page toggles from config-ui apply live
+    Process {
+        id: gateProc
+        command: ["bash", "-c",
+            "cat ~/.config/hypr/settings.json 2>/dev/null; echo '@@@'; ls ~/.config/hypr/plugins/ 2>/dev/null"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let parts = this.text.split("@@@")
+                try {
+                    let st = JSON.parse(parts[0])
+                    let en = st.pages && st.pages.enabled
+                    launcherRoot._enabledPages = (Array.isArray(en) && en.length > 0)
+                        ? en.map(p => String(p).toLowerCase()) : null
+                } catch(e) { launcherRoot._enabledPages = null }
+                launcherRoot._plugins = (parts[1] || "").trim().split("\n").filter(p => p !== "")
+                launcherRoot.filterApps(searchInput.text)
+            }
+        }
+    }
+
+    // ─── Command center: inline calculator ────────────────────────────────────
+    // "=..." forces math mode; otherwise any query that is only math chars and
+    // contains an operator is evaluated. Enter copies the result (wl-copy).
+    function tryCalc(query) {
+        let e = query.trim()
+        let forced = e.startsWith("=")
+        if (forced) e = e.slice(1).trim()
+        if (e === "" || !/^[0-9+\-*/().,%^ ]+$/.test(e)) return null
+        if (!/[0-9]/.test(e)) return null
+        if (!forced && !/[+\-*/%^]/.test(e)) return null
+        e = e.replace(/,/g, ".").replace(/\^/g, "**")
+        try {
+            let r = Function('"use strict"; return (' + e + ')')()
+            if (typeof r !== "number" || !isFinite(r)) return null
+            r = Math.round(r * 1e10) / 1e10
+            return String(r)
+        } catch(err) { return null }
+    }
+
+    function _timerEnabled() {
+        return _enabledPages === null || _enabledPages.indexOf("timer") >= 0
+    }
+
+    // ">timer 15" / "timer 15" → dynamic "start 15 min timer" action
+    function tryTimerAction(query) {
+        let m = query.match(/^(?:timer|таймер)\s+(\d+)\s*(?:m|min|м|мин)?\s*$/i)
+        if (!m) return null
+        let mins = parseInt(m[1])
+        if (isNaN(mins) || mins <= 0 || mins > 720) return null
+        return {
+            name: "Start " + mins + " min timer", glyph: "󰔛",
+            cmd: "echo timer:" + (mins * 60) + " > /tmp/qs_island_toggle"
+        }
+    }
 
     function fuzzyScore(name, query) {
         let n = name.toLowerCase(), q = query.toLowerCase()
@@ -85,26 +181,63 @@ PanelWindow {
         open = false
     }
 
+    // Full role set on every append — ListModel locks roles on first insert
+    function _appendRow(kind, name, exec, icon, desktop, glyph, sub) {
+        filteredModel.append({ kind: kind, name: name, exec: exec, icon: icon,
+                               desktop: desktop, glyph: glyph, sub: sub })
+    }
+    function _appendApp(a)    { _appendRow("app", a.name, a.exec, a.icon, a.desktop, "", "") }
+    function _appendAction(a) { _appendRow("action", a.name, a.cmd, "", "", a.glyph, "action") }
+
     function filterApps(query) {
         webSearchSelected = false
         filteredModel.clear()
         let q = query.trim()
-        if (!q) {
-            for (let i = 0; i < allAppsModel.count; i++) {
-                let a = allAppsModel.get(i)
-                filteredModel.append({ name: a.name, exec: a.exec, icon: a.icon, desktop: a.desktop })
+
+        // ── `>` prefix: actions only ─────────────────────────────────────
+        if (q.startsWith(">")) {
+            let aq = q.slice(1).trim()
+            let t = _timerEnabled() ? tryTimerAction(aq) : null
+            if (t) _appendAction(t)
+            for (let i = 0; i < _actions.length; i++) {
+                let a = _actions[i]
+                if (!_actionVisible(a)) continue
+                if (!aq || fuzzyScore(a.name + " " + a.kw, aq) > 0) _appendAction(a)
             }
+            appList.currentIndex = 0
+            return
+        }
+
+        // ── calculator row (always first when the query parses as math) ──
+        let calc = tryCalc(q)
+        if (calc !== null)
+            _appendRow("calc", calc, calc, "", "", "󰃬", "Enter — copy")
+
+        if (!q) {
+            for (let i = 0; i < allAppsModel.count; i++)
+                _appendApp(allAppsModel.get(i))
         } else {
+            // Apps and actions share one scored list; exact/prefix app
+            // matches outrank actions, actions outrank weak fuzzy app hits.
+            let t = _timerEnabled() ? tryTimerAction(q) : null
+            if (t) _appendAction(t)
             let scored = []
             for (let i = 0; i < allAppsModel.count; i++) {
                 let a = allAppsModel.get(i)
                 let sc = fuzzyScore(a.name, q)
-                if (sc > 0) scored.push({ sc, a })
+                if (sc > 0) scored.push({ sc: sc, app: a, act: null })
             }
-            scored.sort((x, y) => y.sc - x.sc || x.a.name.localeCompare(y.a.name))
+            for (let i = 0; i < _actions.length; i++) {
+                let a = _actions[i]
+                if (!_actionVisible(a)) continue
+                let sc = fuzzyScore(a.name + " " + a.kw, q)
+                if (sc > 1) scored.push({ sc: sc - 0.5, app: null, act: a })
+            }
+            scored.sort((x, y) => y.sc - x.sc
+                || (x.app ? x.app.name : x.act.name).localeCompare(y.app ? y.app.name : y.act.name))
             for (let i = 0; i < scored.length; i++) {
-                let a = scored[i].a
-                filteredModel.append({ name: a.name, exec: a.exec, icon: a.icon, desktop: a.desktop })
+                if (scored[i].app) _appendApp(scored[i].app)
+                else               _appendAction(scored[i].act)
             }
         }
         appList.currentIndex = 0
@@ -113,6 +246,20 @@ PanelWindow {
     function launchApp(idx) {
         if (idx < 0 || idx >= filteredModel.count) return
         let a = filteredModel.get(idx)
+
+        // Non-app rows: run the IPC/shell command (action) or copy the
+        // result (calc) and close — no dock-pending notification needed.
+        if (a.kind === "action") {
+            Quickshell.execDetached(["bash", "-c", a.exec])
+            open = false
+            return
+        }
+        if (a.kind === "calc") {
+            Quickshell.execDetached(["bash", "-c", 'printf "%s" "$1" | wl-copy', "qs_calc", a.exec])
+            open = false
+            return
+        }
+
         launchProc.launchCmd = a.exec
         launchProc.running   = false
         launchProc.running   = true
@@ -275,7 +422,7 @@ PanelWindow {
 
                         Text {
                             visible: searchInput.text.length === 0
-                            text: "Search apps or web..."
+                            text: "Apps, >actions, math, web…"
                             font.family: "Ubuntu"; font.pixelSize: s(15)
                             color: Qt.rgba(theme.subtext0.r, theme.subtext0.g, theme.subtext0.b, 0.7)
                             anchors.verticalCenter: parent.verticalCenter
@@ -354,17 +501,19 @@ PanelWindow {
                             anchors { left: parent.left; right: parent.right; margins: s(10); verticalCenter: parent.verticalCenter }
                             spacing: s(10)
 
-                            // Icon with letter fallback
+                            // Icon: app image with letter fallback, or an
+                            // action/calc nerd-font glyph badge
                             Item {
                                 width: s(32); height: s(32); anchors.verticalCenter: parent.verticalCenter
 
                                 Image {
                                     id: appIcon; anchors.fill: parent
-                                    source: model.icon ? "file://" + model.icon : ""
+                                    visible: model.kind === "app"
+                                    source: model.kind === "app" && model.icon ? "file://" + model.icon : ""
                                     fillMode: Image.PreserveAspectFit; asynchronous: true; smooth: true
                                 }
                                 Rectangle {
-                                    visible: appIcon.status !== Image.Ready
+                                    visible: model.kind === "app" && appIcon.status !== Image.Ready
                                     anchors.fill: parent; radius: s(8)
                                     color: Qt.rgba(theme.surface1.r, theme.surface1.g, theme.surface1.b, 0.7)
                                     Text {
@@ -374,16 +523,39 @@ PanelWindow {
                                         color: theme.subtext0
                                     }
                                 }
+                                Rectangle {
+                                    visible: model.kind !== "app"
+                                    anchors.fill: parent; radius: s(8)
+                                    color: Qt.rgba(theme.mauve.r, theme.mauve.g, theme.mauve.b,
+                                                   appList.currentIndex === index ? 0.20 : 0.10)
+                                    Behavior on color { ColorAnimation { duration: 100 } }
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: model.glyph
+                                        font.family: "Iosevka Nerd Font"; font.pixelSize: s(16)
+                                        color: theme.mauve
+                                    }
+                                }
                             }
 
                             Text {
-                                width: parent.width - s(32) - s(10)
+                                width: parent.width - s(32) - s(10) - (subLabel.visible ? subLabel.width + s(10) : 0)
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: model.name
-                                font.family: "Ubuntu"; font.pixelSize: s(14); font.weight: Font.DemiBold
+                                text: model.kind === "calc" ? "= " + model.name : model.name
+                                font.family: model.kind === "calc" ? "JetBrains Mono" : "Ubuntu"
+                                font.pixelSize: s(14); font.weight: Font.DemiBold
                                 color: appList.currentIndex === index ? theme.text : theme.subtext0
                                 elide: Text.ElideRight
                                 Behavior on color { ColorAnimation { duration: 100 } }
+                            }
+
+                            Text {
+                                id: subLabel
+                                visible: model.sub !== ""
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: model.sub
+                                font.family: "Ubuntu"; font.pixelSize: s(11)
+                                color: Qt.rgba(theme.subtext0.r, theme.subtext0.g, theme.subtext0.b, 0.7)
                             }
                         }
 
@@ -396,7 +568,7 @@ PanelWindow {
 
                 // ── Web search row ───────────────────────────────────────────
                 Rectangle {
-                    visible: searchInput.text.length > 0
+                    visible: searchInput.text.length > 0 && !searchInput.text.trim().startsWith(">")
                     width: parent.width; height: s(54)
                     radius: s(12)
                     color: webSearchSelected

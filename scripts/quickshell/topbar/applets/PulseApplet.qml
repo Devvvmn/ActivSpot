@@ -60,6 +60,7 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         enabled: !root.editMode
-        onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle pulse"])
+        // Pulse popup removed — open the Control Center mixer detail instead
+        onClicked: Quickshell.execDetached(["bash", "-c", "echo page:control:mixer > /tmp/qs_island_toggle"])
     }
 }

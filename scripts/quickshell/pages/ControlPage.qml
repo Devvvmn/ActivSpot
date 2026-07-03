@@ -2088,23 +2088,6 @@ Item {
                         width: parent.width * 0.44
                         elide: Text.ElideRight
                     }
-                    Text {
-                        visible: root.mons.length > 1
-                        anchors { bottom: parent.bottom; right: parent.right }
-                        text: "arrange layout 󰅂"
-                        font.family: "JetBrains Mono"
-                        font.pixelSize: island.s(9)
-                        color: arrMa.containsMouse ? Theme.accent : island.subtext0
-                        Behavior on color { ColorAnimation { duration: 140 } }
-                        MouseArea {
-                            id: arrMa
-                            anchors.fill: parent
-                            anchors.margins: -island.s(6)
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.openWidget("monitors")
-                        }
-                    }
                 }
             }
         }

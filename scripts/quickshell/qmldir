@@ -10,8 +10,6 @@ Scaler 1.0 Scaler.qml
 ScreenshotOverlay 1.0 ScreenshotOverlay.qml
 TopBar 1.0 TopBar.qml
 shell 1.0 shell.qml
-BatteryPopup 1.0 battery/BatteryPopup.qml
-BatteryPopupAlt 1.0 battery/BatteryPopupAlt.qml
 ClockCollapsed 1.0 collapsed/ClockCollapsed.qml
 DiscordCollapsed 1.0 collapsed/DiscordCollapsed.qml
 EditModeCollapsed 1.0 collapsed/EditModeCollapsed.qml
@@ -35,8 +33,6 @@ StashMiniBubble 1.0 minibubbles/StashMiniBubble.qml
 StopwatchMiniBubble 1.0 minibubbles/StopwatchMiniBubble.qml
 TimerMiniBubble 1.0 minibubbles/TimerMiniBubble.qml
 VpnMiniBubble 1.0 minibubbles/VpnMiniBubble.qml
-MonitorPopup 1.0 monitors/MonitorPopup.qml
-MusicPopup 1.0 music/MusicPopup.qml
 NetworkPopup 1.0 network/NetworkPopup.qml
 NetworkPopupAlt 1.0 network/NetworkPopupAlt.qml
 IslandNotifications 1.0 notifications/IslandNotifications.qml
@@ -61,14 +57,12 @@ PluginLoader 1.0 plugins/PluginLoader.qml
 AppleSlider 1.0 power/AppleSlider.qml
 PowerButton 1.0 power/PowerButton.qml
 PowerMenuOverlay 1.0 power/PowerMenuOverlay.qml
-PulsePopup 1.0 pulse/PulsePopup.qml
 SysInfoCard 1.0 sysinfo/SysInfoCard.qml
 FakeGlassSurface 1.0 themes/FakeGlassSurface.qml
 GlassSurface 1.0 themes/GlassSurface.qml
 Theme 1.0 themes/Theme.qml
 ThemeRegistry 1.0 themes/ThemeRegistry.qml
 BarZone 1.0 topbar/BarZone.qml
-VolumePopup 1.0 volume/VolumePopup.qml
 WallpaperPicker 1.0 wallpaper/WallpaperPicker.qml
 Color 1.0 qs/Commons/Color.qml
 IconsTabler 1.0 qs/Commons/IconsTabler.qml

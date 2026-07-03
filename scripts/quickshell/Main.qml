@@ -466,7 +466,6 @@ PanelWindow {
         
         let props = (newWidget === "wallpaper" || newWidget === "plugininstall")
                     ? { "widgetArg": arg } : {};
-        if (newWidget === "battery") props["notifModel"] = masterWindow.notifModel;
 
         if (immediate) {
             widgetStack.replace(t.comp, props, StackView.Immediate);
