@@ -1,0 +1,8 @@
+{
+  "id": "card-skin-vapor",
+  "name": "Card Skin — Vapor",
+  "version": "1.0.0",
+  "author": "ActivSpot",
+  "description": "Vaporwave pastel skin for the system-info collectible card. Installs a new option under Theme → System card skin.",
+  "cardSkin": "vapor.json"
+}

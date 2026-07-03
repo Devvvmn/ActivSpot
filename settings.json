@@ -38,7 +38,8 @@
       "Stash",
       "Discord",
       "Recording",
-      "Clock"
+      "Clock",
+      "Activity"
     ],
     "timing": {
       "showMs": 290,
@@ -56,7 +57,9 @@
       "Recording",
       "Game",
       "Discord",
-      "Clock"
+      "Clock",
+      "Control",
+      "Activity"
     ],
     "animations": {
       "duration": 320,
@@ -68,6 +71,7 @@
     "duration": 1,
     "easing": "cubic",
     "fps": 60,
-    "input": "cursor:0.00001,workspace"
-  }
+    "input": "cursor:0.000001,workspace"
+  },
+  "sysinfoSkin": "aurora"
 }

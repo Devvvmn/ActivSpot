@@ -84,22 +84,93 @@ PanelWindow {
         }
     }
 
+    // Live notifications kept for cross-process action invocation (the island
+    // runs as a separate quickshell process — it sends {id,type,key,text} JSON
+    // back through /tmp/qs_notif_action, we invoke on the retained object).
+    property var _liveNotifs: ({})
+
     NotificationServer {
         id: globalNotificationServer
         bodySupported: true
         actionsSupported: true
         imageSupported: true
+        inlineReplySupported: true
 
         onNotification: (n) => {
+            // ── Progress notifications → Live Activities ────────────────
+            // Apps sending the freedesktop `value` hint (0–100: KDE file
+            // ops, some browsers, `notify-send -h int:value:N`) become a
+            // live island card with a real progress bar instead of a toast.
+            // Replacements (same id, new value) update the card in place.
+            let laProgress = -1;
+            try {
+                let hv = n.hints ? n.hints["value"] : undefined;
+                if (hv !== undefined && hv !== null && hv !== "") {
+                    let pv = parseInt(hv);
+                    if (!isNaN(pv)) laProgress = pv;
+                }
+            } catch(e) {}
+            if (laProgress >= 0) {
+                n.tracked = true;   // keep alive so closed → end event fires
+                let laId = "notif-" + n.id;
+                Quickshell.execDetached([
+                    "bash", "-c",
+                    'printf "%s\n" "$1" >> /tmp/qs_live_activity',
+                    "qs_la_sender",
+                    JSON.stringify({
+                        id:       laId,
+                        icon:     "󰛴",
+                        title:    n.summary !== "" ? n.summary : n.appName,
+                        subtitle: n.body !== "" ? n.body : n.appName,
+                        progress: Math.min(1, laProgress / 100),
+                        ttlMs:    45000,
+                        kind:     "notif"
+                    })
+                ]);
+                n.closed.connect(() => {
+                    Quickshell.execDetached([
+                        "bash", "-c",
+                        'printf "%s\n" "$1" >> /tmp/qs_live_activity',
+                        "qs_la_sender",
+                        JSON.stringify({ id: laId, event: "end", status: "ok" })
+                    ]);
+                });
+                return;   // no toast, no history spam — the card is the UI
+            }
+
             console.log("Saving to history:", n.appName, "-", n.summary);
 
-            // Resolve best icon: prefer n.image (avatar/inline image), fall back to app icon name
+            // Retain so actions/inline-reply can be invoked later from the island
+            n.tracked = true;
+            masterWindow._liveNotifs[n.id] = n;
+            let closedId = n.id;
+            n.closed.connect(() => {
+                delete masterWindow._liveNotifs[closedId];
+                // Broadcast so the island can grey out dead action chips /
+                // retract the banner when the app closes the notification
+                // (e.g. message read on phone). Append — never clobber a
+                // pending unconsumed notification line.
+                Quickshell.execDetached([
+                    "bash", "-c",
+                    'printf "%s\n" "$1" >> /tmp/qs_island_notif',
+                    "qs_notif_sender",
+                    JSON.stringify({ type: "closed", id: closedId })
+                ]);
+            });
+
+            // Resolve best icon: prefer n.image (avatar/inline image), fall back to app icon name.
+            // n.image may be a plain string path or an object with .source depending on
+            // quickshell version — handle both, else avatars silently never show.
             let iconUrl = "";
-            if (n.image && n.image.source && n.image.source.toString() !== "") {
-                iconUrl = n.image.source.toString();
-            } else if (n.appIcon !== "") {
-                iconUrl = n.appIcon;
-            }
+            try {
+                let img = n.image;
+                if (img && typeof img === "object" && img.source !== undefined) img = img.source;
+                if (img && img.toString() !== "") iconUrl = img.toString();
+            } catch(e) {}
+            if (iconUrl === "" && n.appIcon !== "") iconUrl = n.appIcon;
+            // quickshell wraps filesystem paths in its icon provider
+            // ("image://icon//home/…") — unwrap so path detection works downstream
+            if (iconUrl.startsWith("image://icon/")) iconUrl = iconUrl.substring(13);
 
             let notifData = {
                 "appName": n.appName !== "" ? n.appName : "System",
@@ -117,20 +188,72 @@ PanelWindow {
             let popupData = Object.assign({ "uid": masterWindow._popupCounter }, notifData);
             activePopupsModel.append(popupData);
 
-            // C. Show in Dynamic Island via IPC
+            // C. Show in Dynamic Island via IPC — actions/reply metadata included
+            let actionList = [];
+            try {
+                for (let i = 0; i < n.actions.length; i++)
+                    actionList.push({ k: n.actions[i].identifier, t: n.actions[i].text });
+            } catch(e) {}
             Quickshell.execDetached([
                 "bash", "-c",
-                'printf "%s\n" "$1" > /tmp/qs_island_notif',
+                'printf "%s\n" "$1" >> /tmp/qs_island_notif',
                 "qs_notif_sender",
                 JSON.stringify({
-                    appName: notifData.appName,
-                    title:   notifData.summary,
-                    body:    notifData.body,
-                    icon:    notifData.iconPath
+                    appName:  notifData.appName,
+                    title:    notifData.summary,
+                    body:     notifData.body,
+                    icon:     notifData.iconPath,
+                    id:       n.id,
+                    actions:  actionList,
+                    hasReply: n.hasInlineReply === true,
+                    urgency:  n.urgency !== undefined ? n.urgency : 1
                 })
             ]);
         }
-    }    
+    }
+
+    // Back-channel: island → server. Single-shot inotifywait (no -m), anchored.
+    Process {
+        id: notifActionWatcher; running: true
+        command: ["bash", "-c",
+            "inotifywait -qq -e close_write,moved_to --include 'qs_notif_action$' /tmp/ 2>/dev/null; " +
+            "if [ -f /tmp/qs_notif_action ]; then cat /tmp/qs_notif_action; rm -f /tmp/qs_notif_action; fi"
+        ]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                // May contain several appended lines — parse each independently
+                let lines = this.text.trim().split("\n");
+                for (let li = 0; li < lines.length; li++) {
+                    let data = lines[li].trim();
+                    if (!data) continue;
+                    try {
+                        let req = JSON.parse(data);
+                        let n = masterWindow._liveNotifs[req.id];
+                        if (n) {
+                            // Each call guarded — the app may have destroyed the
+                            // notification between our lookup and the invoke.
+                            if (req.type === "reply" && req.text) {
+                                try { n.sendInlineReply(req.text); } catch(e) { console.warn("notifAction reply:", e); }
+                                try { n.dismiss(); } catch(e) {}
+                            } else if (req.type === "action" && req.key) {
+                                try {
+                                    for (let i = 0; i < n.actions.length; i++)
+                                        if (n.actions[i].identifier === req.key) { n.actions[i].invoke(); break; }
+                                } catch(e) { console.warn("notifAction invoke:", e); }
+                            } else if (req.type === "dismiss") {
+                                try { n.dismiss(); } catch(e) {}
+                            }
+                        } else {
+                            console.warn("notifAction: notification", req.id, "no longer live");
+                        }
+                    } catch(e) { console.warn("notifAction parse:", e) }
+                }
+                notifActionWatcher.running = false;
+                notifActionWatcher.running = true;
+            }
+        }
+    }
+
     property var notifModel: globalNotificationHistory
     
     // =========================================================
@@ -174,8 +297,15 @@ PanelWindow {
         }
     }
 
-    function getLayout(name) {
-        return Registry.getLayout(name, 0, 0, Screen.width, Screen.height, masterWindow.globalUiScale);
+    function getLayout(name, anchorX) {
+        return Registry.getLayout(name, 0, 0, Screen.width, Screen.height, masterWindow.globalUiScale, anchorX);
+    }
+
+    // Parse an IPC arg into a usable anchor x (or undefined when not numeric).
+    function _anchorOf(arg) {
+        if (arg === undefined || arg === null || arg === "") return undefined;
+        let n = Number(arg);
+        return isNaN(n) ? undefined : n;
     }
 
     Connections {
@@ -187,7 +317,7 @@ PanelWindow {
     function handleNativeScreenChange() {
         if (masterWindow.currentActive === "hidden") return;
         
-        let t = getLayout(masterWindow.currentActive);
+        let t = getLayout(masterWindow.currentActive, _anchorOf(masterWindow.activeArg));
         if (t) {
             masterWindow.animX = t.rx;
             masterWindow.animY = t.ry;
@@ -326,7 +456,7 @@ PanelWindow {
         masterWindow.currentActive = newWidget;
         masterWindow.activeArg = arg;
         
-        let t = getLayout(newWidget);
+        let t = getLayout(newWidget, _anchorOf(arg));
         masterWindow.animX = t.rx;
         masterWindow.animY = t.ry;
         masterWindow.animW = t.w;

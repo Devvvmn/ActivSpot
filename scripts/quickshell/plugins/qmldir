@@ -1,4 +1,6 @@
 module plugins
 singleton PluginLoader 1.0 PluginLoader.qml
+singleton DesktopWidgetStore 1.0 DesktopWidgetStore.qml
 PluginApiShim 1.0 PluginApiShim.qml
 PluginWindowHost 1.0 PluginWindowHost.qml
+PluginDesktopHost 1.0 PluginDesktopHost.qml

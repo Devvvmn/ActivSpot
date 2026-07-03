@@ -24,18 +24,44 @@ export interface WeatherData {
   today: { max: string; min: string; icon: string; desc: string } | null;
 }
 
+export interface CardSkin {
+  id: string;
+  name: string;
+  builtin: boolean;
+  edition?: string;
+  rarity?: string;
+  accent?: string;
+  bodyTop?: string;
+  bodyBottom?: string;
+  diskBarStart?: string;
+  [k: string]: unknown;
+}
+
 export const api = {
   getSettings: () => j<Settings>("/settings"),
   putSettings: (s: Settings) => j<{ ok: true }>("/settings", { method: "PUT", body: JSON.stringify(s) }),
   inventory: () => j<Inventory>("/inventory"),
   keybinds: () => j<Keybind[]>("/keybinds"),
   colors: () => j<Record<string, string>>("/colors"),
+  cardSkins: () => j<CardSkin[]>("/cardskins"),
   weather: () => j<WeatherData>("/weather"),
   getHyprconf: () => fetch("/api/hyprconf").then(r => r.text()),
   putHyprconf: (text: string) => j<{ ok: true }>("/hyprconf", { method: "PUT", body: JSON.stringify({ text }) }),
   reload: () => j<{ ok: true }>("/reload", { method: "POST" }),
   uninstallPlugin: (id: string) =>
     j<{ ok: boolean; output: string }>(`/plugins/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  getPluginSettings: () => j<Record<string, Record<string, unknown>>>("/plugin-settings"),
+  putPluginSettings: (id: string, values: Record<string, unknown>) =>
+    j<{ ok: true }>(`/plugin-settings/${encodeURIComponent(id)}`, {
+      method: "PUT",
+      body: JSON.stringify(values),
+    }),
+  getDesktopWidgets: () =>
+    j<Record<string, { x?: number; y?: number; scale?: number; enabled?: boolean }>>("/desktop-widgets"),
+  addInstance: (id: string) =>
+    j<{ ok: true; instId: string }>(`/plugin-instances/${encodeURIComponent(id)}`, { method: "POST" }),
+  removeInstance: (instId: string) =>
+    j<{ ok: true }>(`/plugin-instances/${encodeURIComponent(instId)}`, { method: "DELETE" }),
 };
 
 export interface Monitor {
@@ -85,6 +111,7 @@ export interface Settings {
   language: string;
   kbOptions: string;
   topbarTheme: string;
+  sysinfoSkin?: string;
   pinnedApps: string[];
   monitors: Monitor[];
   theme?: ThemeCfg;
@@ -92,6 +119,20 @@ export interface Settings {
   pages?: PagesCfg;
   parallax?: ParallaxCfg;
   [k: string]: unknown;
+}
+
+export type PluginSettingType = "path" | "text" | "number" | "bool";
+
+export interface PluginSetting {
+  key: string;
+  type: PluginSettingType;
+  label: string;
+  help?: string;
+  default?: unknown;
+  placeholder?: string;
+  suffix?: string;
+  min?: number;
+  max?: number;
 }
 
 export interface Plugin {
@@ -103,6 +144,9 @@ export interface Plugin {
   hasWindow: boolean;
   hasBarWidget: boolean;
   hasHooks: boolean;
+  settings: PluginSetting[];
+  desktopWidget: boolean;
+  multiInstance: boolean;
 }
 
 export interface Inventory {

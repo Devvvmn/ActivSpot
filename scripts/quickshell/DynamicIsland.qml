@@ -118,6 +118,8 @@ PanelWindow {
         if (currentPage === "notifs" && !expanded && notifAutoSwitched) notifPageRevertTimer.restart();
         else notifPageRevertTimer.stop();
     }
+    // "control" is deliberately NOT in the wheel rotation — it opens via
+    // right-click on the collapsed pill or IPC page:control (Apple-style gesture).
     property var availablePages: {
         let p = ["clock", "timer"];
         if (islandWindow.stashModel.count > 0) p.push("stash");
@@ -125,15 +127,18 @@ PanelWindow {
         if (islandWindow.discordInCall) p.push("discord");
         if (islandWindow.isMediaActive) p.push("music");
         if (islandWindow.gameActive)    p.push("game");
+        if (islandWindow.hasActivities) p.push("activity");
         if (notifHistory.count > 0 || islandWindow.notifActive) p.push("notifs");
         // Drop pages the user has disabled in config-ui.
         return p.filter(function (id) { return Theme.pageEnabled(id); });
     }
     property int stashExpandedHeight: 260
+    property int controlExpandedHeight: 340   // ControlPage grows when a detail sub-panel opens
+    property string controlDetailRequest: ""  // IPC page:control:<network|bt|mixer> lands here
     property bool _isRefreshingStash: false
     onAvailablePagesChanged: {
-        // Don't redirect away from appletPicker — it lives outside availablePages by design
-        if (!_isRefreshingStash && !islandWindow.editBarMode && availablePages.indexOf(currentPage) < 0)
+        // Don't redirect away from appletPicker/control — they live outside availablePages by design
+        if (!_isRefreshingStash && !islandWindow.editBarMode && currentPage !== "control" && availablePages.indexOf(currentPage) < 0)
             currentPage = availablePages.length > 0 ? availablePages[0] : "clock";
     }
     function navigateNext() {
@@ -144,6 +149,61 @@ PanelWindow {
         let i = availablePages.indexOf(currentPage);
         currentPage = availablePages[(i - 1 + availablePages.length) % availablePages.length];
     }
+
+    // ── Skim mode ─────────────────────────────────────────────────────────
+    // Rapid wheel flips on the collapsed pill don't run a full page morph per
+    // tick. Instead the pill freezes at its current width and a light HUD
+    // (icon + name + dots) rides the ticks; the real page switch — with its
+    // spring resize and crossfade — commits once, when scrolling settles.
+    property bool   skimming: false
+    property string skimPage: ""
+    property int    skimDir: 1
+    property real   _skimFrozenW: 200
+    function skimAdvance(dir) {
+        const pages = availablePages;
+        if (pages.length === 0) return;
+        let i = pages.indexOf(skimPage !== "" ? skimPage : currentPage);
+        skimPage = pages[((i < 0 ? 0 : i) + dir + pages.length) % pages.length];
+        skimDir = dir;
+        skimSettle.restart();
+    }
+    function skimCommit() {
+        if (!skimming) return;
+        skimming = false;
+        skimSettle.stop();
+        if (skimPage !== "" && skimPage !== currentPage) currentPage = skimPage;
+        skimPage = "";
+    }
+    // One page-flip step — shared by the island WheelHandler and the
+    // compositor-level Meta+scroll bind (IPC next/prev). Single step = full
+    // transition; rapid steps enter skim mode. `throttled` guards direct
+    // wheel/touchpad floods; IPC batches arrive pre-paced, so they skip it.
+    function wheelStep(dir, throttled) {
+        if (notifActive || editBarMode) return;
+        if (expanded) {
+            if (!scrollCooldown.running) {
+                if (dir < 0) navigatePrev(); else navigateNext();
+                scrollCooldown.start();
+            }
+            return;
+        }
+        if (skimming) {
+            if (throttled && skimTickCd.running) return;
+            skimAdvance(dir);
+            skimTickCd.restart();
+        } else if (scrollCooldown.running) {
+            _skimFrozenW = Math.max(islandShape.width, s(200));
+            skimPage = currentPage;
+            skimming = true;
+            skimAdvance(dir);
+            skimTickCd.restart();
+        } else {
+            if (dir < 0) navigatePrev(); else navigateNext();
+            scrollCooldown.start();
+        }
+    }
+    Timer { id: skimSettle; interval: 420; onTriggered: islandWindow.skimCommit() }
+    Timer { id: skimTickCd; interval: 80 }
 
     // Music
     property var musicData: ({
@@ -358,6 +418,25 @@ PanelWindow {
         running: !islandWindow.volDragging
     }
 
+    // ── Liquid morph: squash-and-stretch pulse on every expand/collapse ──
+    // Only the pill *background* deforms (content stays crisp). The value
+    // snaps up fast then springs back to 0, so the blob visibly wobbles as it
+    // resizes instead of gliding to a dead stop.
+    // _morphDir: +1 while growing (expand), -1 while shrinking (collapse).
+    property real _morphSquash: 0.0
+    property real _morphDir:    1.0
+    SequentialAnimation {
+        id: morphPulseAnim
+        NumberAnimation {
+            target: islandWindow; property: "_morphSquash"
+            to: 1.0; duration: 110; easing.type: Easing.OutCubic
+        }
+        SpringAnimation {
+            target: islandWindow; property: "_morphSquash"
+            to: 0.0; spring: 3.0; damping: 0.20; mass: 1.0; epsilon: 0.005
+        }
+    }
+
     // Visual edge shift caused by elastic stretch (origin at 8%/92% of collapsedW)
     readonly property real volRightExtra: volStretch > 0 ? islandShape.collapsedW * 0.92 * volStretch * 0.26 : 0
     readonly property real volLeftExtra:  volStretch < 0 ? islandShape.collapsedW * 0.92 * (-volStretch) * 0.26 : 0
@@ -367,7 +446,7 @@ PanelWindow {
 
     // Bubble slot ordering — inner index = closest to island
     property var leftSlots:  ["vpn", "music", "discord", "game"]
-    property var rightSlots: ["rec", "notif", "stash", "clock", "timer", "sw"]
+    property var rightSlots: ["rec", "notif", "activity", "stash", "clock", "timer", "sw"]
 
     // Clock / Weather
     property string timeStr:     ""
@@ -390,6 +469,136 @@ PanelWindow {
     property int  stopwatchElapsedSec: 0
 
     // =========================================================
+    // --- LIVE ACTIVITIES (zero-integration HUD) ---
+    // =========================================================
+    // Any process can appear in the island by appending one JSON line to
+    // /tmp/qs_live_activity — no QML needed. Built-in producers (pacman,
+    // downloads, mic/cam via live_activity_producers.sh; zsh long-command
+    // hook; notification progress hints from Main.qml) use the same channel.
+    //
+    // Protocol (one object per line):
+    //   { "id": "x", "event": "update"|"end", "icon": "󰇚", "title": "…",
+    //     "subtitle": "…", "progress": 0.42 | -1 (spinner) | omit (none),
+    //     "urgency": "low"|"normal"|"high", "ttlMs": 8000, "kind": "shell",
+    //     "status": "ok"|"fail" (end only),
+    //     "actions": [{"id":"cancel","label":"Cancel"}] }
+    //
+    // Producers heartbeat while alive; entries whose ttl lapses are pruned,
+    // so a crashed producer never leaves a zombie card. Finished entries
+    // flash green/red for ~3.5 s, then drop. Action taps are appended as
+    // {id, action} JSON to /tmp/qs_activity_action for producers to consume.
+    ListModel { id: laModel }
+    readonly property var activitiesModel: laModel
+
+    // Reactive summary of the top (most recent) activity — ListModel.get()
+    // in bindings is not change-tracked, so bubbles/collapsed bind to these.
+    property int    laCount:       0
+    property string laTopIcon:     ""
+    property string laTopTitle:    ""
+    property string laTopSub:      ""
+    property real   laTopProgress: -2
+    property string laTopStatus:   "live"
+    readonly property bool hasActivities: laCount > 0
+
+    function _laSyncTop() {
+        laCount = laModel.count
+        if (laModel.count === 0) {
+            laTopIcon = ""; laTopTitle = ""; laTopSub = ""
+            laTopProgress = -2; laTopStatus = "live"
+            return
+        }
+        const t = laModel.get(0)
+        laTopIcon = t.icon; laTopTitle = t.title; laTopSub = t.subtitle
+        laTopProgress = t.progress; laTopStatus = t.status
+    }
+
+    function _laFind(aid) {
+        for (let i = 0; i < laModel.count; i++)
+            if (laModel.get(i).aid === aid) return i
+        return -1
+    }
+
+    function laHandle(a) {
+        if (!a || a.id === undefined || a.id === null || a.id === "") return
+        const aid = String(a.id)
+        const idx = _laFind(aid)
+        const now = Date.now()
+
+        if (a.event === "end") {
+            if (idx < 0) return   // never surfaced (finished under threshold)
+            laModel.setProperty(idx, "status", a.status === "fail" ? "fail" : "ok")
+            if (a.status !== "fail" && laModel.get(idx).progress >= 0)
+                laModel.setProperty(idx, "progress", 1.0)
+            if (a.subtitle !== undefined) laModel.setProperty(idx, "subtitle", String(a.subtitle))
+            laModel.setProperty(idx, "lastTs", now)
+            _laSyncTop()
+            return
+        }
+
+        if (idx >= 0) {
+            if (a.icon     !== undefined) laModel.setProperty(idx, "icon",     String(a.icon))
+            if (a.title    !== undefined) laModel.setProperty(idx, "title",    String(a.title))
+            if (a.subtitle !== undefined) laModel.setProperty(idx, "subtitle", String(a.subtitle))
+            if (a.progress !== undefined) laModel.setProperty(idx, "progress", Number(a.progress))
+            if (a.urgency  !== undefined) laModel.setProperty(idx, "urgency",  String(a.urgency))
+            if (a.ttlMs    !== undefined) laModel.setProperty(idx, "ttlMs",    parseInt(a.ttlMs) || 0)
+            if (a.actions  !== undefined) laModel.setProperty(idx, "actionsJson", JSON.stringify(a.actions))
+            laModel.setProperty(idx, "status", "live")
+            laModel.setProperty(idx, "lastTs", now)
+        } else {
+            // Full role set on every insert — ListModel locks roles on first use
+            laModel.insert(0, {
+                aid:         aid,
+                icon:        a.icon !== undefined ? String(a.icon) : "󰐍",
+                title:       a.title !== undefined ? String(a.title) : aid,
+                subtitle:    a.subtitle !== undefined ? String(a.subtitle) : "",
+                progress:    a.progress !== undefined ? Number(a.progress) : -2,
+                urgency:     a.urgency !== undefined ? String(a.urgency) : "normal",
+                kind:        a.kind !== undefined ? String(a.kind) : "custom",
+                status:      "live",
+                startTs:     now,
+                lastTs:      now,
+                ttlMs:       a.ttlMs !== undefined ? (parseInt(a.ttlMs) || 0) : 10000,
+                actionsJson: a.actions !== undefined ? JSON.stringify(a.actions) : "[]"
+            })
+        }
+        _laSyncTop()
+    }
+
+    function activityAction(aid, key) {
+        if (!aid || !key) return
+        Quickshell.execDetached([
+            "bash", "-c",
+            'printf "%s\n" "$1" >> /tmp/qs_activity_action',
+            "qs_la_action", JSON.stringify({ id: aid, action: key })
+        ])
+    }
+    function activityDismiss(aid) {
+        const i = _laFind(aid)
+        if (i >= 0) { laModel.remove(i); _laSyncTop() }
+    }
+
+    // Drop finished entries after their flash; drop live entries whose
+    // producer stopped heartbeating (ttl lapsed).
+    Timer {
+        id: laPruneTimer
+        interval: 2500; repeat: true
+        running: islandWindow.laCount > 0
+        onTriggered: {
+            const now = Date.now()
+            let changed = false
+            for (let i = laModel.count - 1; i >= 0; i--) {
+                const it = laModel.get(i)
+                const dead = it.status !== "live"
+                    ? (now - it.lastTs > 3500)
+                    : (it.ttlMs > 0 && now - it.lastTs > it.ttlMs)
+                if (dead) { laModel.remove(i); changed = true }
+            }
+            if (changed) islandWindow._laSyncTop()
+        }
+    }
+
+    // =========================================================
     // --- BUBBLE PRIORITY (Apple-like Live Activities) ---
     // =========================================================
     // One bubble at a time is "primary" — slightly larger, in focus.
@@ -403,7 +612,7 @@ PanelWindow {
     // Iteration order — must match the bubbleFor() dispatch list. Stable
     // priority used by the round-robin scheduler.
     readonly property var _bubbleOrder: [
-        "rec", "notif", "timer", "music", "game",
+        "rec", "notif", "activity", "timer", "music", "game",
         "discord", "stash", "vpn", "sw", "clock"
     ]
 
@@ -495,6 +704,7 @@ PanelWindow {
         if (id === "clock")   return clockBubble
         if (id === "timer")   return timerBubble
         if (id === "sw")      return swBubble
+        if (id === "activity") return activityBubble
         return null
     }
 
@@ -579,7 +789,18 @@ PanelWindow {
         let items = [];
         for (let i = 0; i < Math.min(notifHistory.count, 100); i++) {
             let it = notifHistory.get(i);
-            items.push({ appName: it.appName, title: it.title, body: it.body, icon: it.icon, timestamp: it.timestamp || 0 });
+            // actions is a nested ListModel inside the model — re-serialize manually
+            let acts = [];
+            if (it.actions && it.actions.count !== undefined) {
+                for (let j = 0; j < it.actions.count; j++) {
+                    let a = it.actions.get(j);
+                    acts.push({ k: a.k || "", t: a.t || "" });
+                }
+            }
+            items.push({ appName: it.appName, title: it.title, body: it.body, icon: it.icon,
+                         id: it.id || 0, actions: acts, hasReply: it.hasReply === true,
+                         urgency: it.urgency || 1,
+                         timestamp: it.timestamp || 0 });
         }
         Quickshell.execDetached(["bash", "-c",
             "mkdir -p ~/.cache/quickshell && printf '%s' \"$1\" > ~/.cache/quickshell/notifications.json",
@@ -609,7 +830,10 @@ PanelWindow {
         editBarMode   = true
         currentPage   = "appletPicker"
         expanded      = true
-        Quickshell.execDetached(["bash", "-c", "printf '1' > /tmp/qs_bar_edit"])
+        // qs_bar_edit: edge signal consumed by TopBar (rm after read).
+        // qs_edit_mode: persistent state, polled by any number of watchers
+        // (PluginDesktopHost reads it to enable desktop-widget drag/scale).
+        Quickshell.execDetached(["bash", "-c", "printf '1' > /tmp/qs_bar_edit; printf '1' > /tmp/qs_edit_mode"])
     }
 
     function exitEditBarMode() {
@@ -617,7 +841,7 @@ PanelWindow {
         editBarMode = false
         currentPage = (prevPage && prevPage !== "appletPicker") ? prevPage : "clock"
         expanded    = false
-        Quickshell.execDetached(["bash", "-c", "printf '0' > /tmp/qs_bar_edit"])
+        Quickshell.execDetached(["bash", "-c", "printf '0' > /tmp/qs_bar_edit; printf '0' > /tmp/qs_edit_mode"])
     }
 
     property var pageRegistry: [
@@ -628,12 +852,16 @@ PanelWindow {
         { name: "game",         expandedH: 480, comp: gamePageComp         },
         { name: "notifs",       expandedH: 450, comp: notifsPageComp       },
         { name: "timer",        expandedH: 380, comp: timerPageComp        },
+        { name: "activity",     expandedH: 360, comp: activityPageComp     },
+        { name: "control",      expandedH: 340, comp: controlPageComp      },
         { name: "stash",        expandedH: 260, comp: stashPageComp        },
         { name: "appletPicker", expandedH: 380, comp: appletPickerPageComp },
     ]
 
     Component { id: clockPageComp;        ClockPage        { island: islandWindow } }
     Component { id: timerPageComp;        TimerPage        { island: islandWindow } }
+    Component { id: activityPageComp;     ActivityPage     { island: islandWindow } }
+    Component { id: controlPageComp;      ControlPage      { island: islandWindow } }
     Component { id: recordingPageComp;    RecordingPage    { island: islandWindow } }
     Component { id: discordPageComp;      DiscordPage      { island: islandWindow } }
     Component { id: musicPageComp;        MusicPage        { island: islandWindow } }
@@ -645,9 +873,59 @@ PanelWindow {
 
     function dismissNotif() {
         notifHideTimer.stop();
+        notifReplyOpen = false;
+        notifHasImage  = false;
         notifActive = false;
         notifData   = null;
         if (!wasExpandedBeforeNotif) expanded = false;
+    }
+
+    // ── Notification actions / inline reply (IPC back to Main.qml) ──────────
+    // The NotificationServer lives in the Main.qml process; the island sends
+    // {id, type, key?, text?} JSON through /tmp/qs_notif_action.
+    property bool notifReplyOpen: false
+    // Set by NotifExpandedPage when it detects a wide/large content image
+    // (screenshot-style, not an avatar) — grants extra banner height.
+    property bool notifHasImage: false
+    // Accent: critical (urgency 2) notifications go red and bypass DND
+    readonly property bool  notifCritical: notifActive && notifData && notifData.urgency === 2
+    readonly property color notifAccent:   notifCritical ? red : peach
+    // Typing a reply must not race the 5 s auto-dismiss
+    onNotifReplyOpenChanged: {
+        if (notifReplyOpen) notifHideTimer.stop();
+        else if (notifActive && !notifCritical) notifHideTimer.restart();
+    }
+
+    function _notifSend(payload) {
+        // Append — a second rapid action must not clobber an unconsumed one
+        Quickshell.execDetached([
+            "bash", "-c",
+            'printf "%s\n" "$1" >> /tmp/qs_notif_action',
+            "qs_notif_action_sender",
+            JSON.stringify(payload)
+        ]);
+    }
+    // id-based — usable from both the live banner and the history page
+    function notifActionById(id, key) {
+        if (!id || !key) return;
+        _notifSend({ id: id, type: "action", key: key });
+    }
+    function notifReplyById(id, text) {
+        if (!id || !text || text.trim() === "") return;
+        _notifSend({ id: id, type: "reply", text: text.trim() });
+    }
+    // Banner wrappers — act on the currently shown notification
+    function notifInvokeAction(key) {
+        if (!notifData || !notifData.id) return;
+        notifActionById(notifData.id, key);
+        dismissNotif();
+    }
+    function notifSendReply(text) {
+        if (!notifData || !notifData.id || !text || text.trim() === "") return;
+        notifReplyById(notifData.id, text);
+        // Splat pulse — the banner "fires off" the reply before collapsing
+        if (!Theme.reduceMotion) { _morphDir = -1.0; morphPulseAnim.restart(); }
+        dismissNotif();
     }
 
     Timer {
@@ -734,19 +1012,15 @@ PanelWindow {
     }
     Timer { interval: 3000; running: true; repeat: true; triggeredOnStart: true
         onTriggered: playersProc.running = true }
-    Process {
-        id: eqProc
-        command: ["bash", "-c", "~/.config/hypr/scripts/quickshell/music/equalizer.sh get"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    if (this.text && this.text.trim().length > 0) islandWindow.eqData = JSON.parse(this.text);
-                } catch(e) { console.warn(e) }
-            }
-        }
+    // NOTE: the island's equalizer poller was removed — islandWindow.eqData had
+    // zero consumers in this process (MusicPopup in Main.qml runs its own).
+    // Adaptive music poll: 800 ms while media is active (position tracking),
+    // relaxed 1500 ms player-discovery poll when nothing is playing.
+    Timer {
+        interval: islandWindow.isMediaActive ? 800 : 1500
+        running: true; repeat: true; triggeredOnStart: true
+        onTriggered: musicProc.running = true
     }
-    Timer { interval: 800; running: true; repeat: true; triggeredOnStart: true
-        onTriggered: { musicProc.running = true; eqProc.running = true; } }
 
     // Watchdog: ensure cavaProc stays in sync with play state (survives reboot/crash)
     Timer { interval: 1500; running: true; repeat: true; triggeredOnStart: true
@@ -1047,7 +1321,9 @@ PanelWindow {
         }
     }
     Timer {
-        id: gameStatsTimer; interval: 2000; running: true; repeat: true
+        // Stats are only rendered in game mode — no point forking cat every 2 s otherwise
+        id: gameStatsTimer; interval: 2000; repeat: true
+        running: islandWindow.gameActive; triggeredOnStart: true
         onTriggered: gameStatsPoller.running = true
     }
 
@@ -1080,11 +1356,19 @@ PanelWindow {
                     let items = JSON.parse(this.text.trim());
                     if (Array.isArray(items)) {
                         for (let i = 0; i < Math.min(items.length, 100); i++) {
+                            // Every field present on every row — ListModel locks its
+                            // role set from the first append; missing keys here would
+                            // silently drop actions/reply data for live inserts too.
                             notifHistory.append({
                                 appName:   items[i].appName   || "System",
                                 title:     items[i].title     || "",
                                 body:      items[i].body      || "",
                                 icon:      items[i].icon      || "",
+                                id:        items[i].id        || 0,
+                                actions:   items[i].actions   || [],
+                                hasReply:  items[i].hasReply === true,
+                                urgency:   items[i].urgency   || 1,
+                                live:      false,   // shell restarted — server-side objects are gone
                                 timestamp: items[i].timestamp || 0
                             });
                         }
@@ -1108,7 +1392,7 @@ PanelWindow {
                     let all = islandWindow.leftSlots.concat(islandWindow.rightSlots)
                     let r = islandWindow.rightSlots.slice()
                     let l = islandWindow.leftSlots.slice()
-                    for (let id of ["rec", "notif", "stash", "clock", "timer", "sw"]) {
+                    for (let id of ["rec", "notif", "activity", "stash", "clock", "timer", "sw"]) {
                         if (all.indexOf(id) < 0) r.push(id)
                     }
                     for (let id of ["vpn", "music", "discord", "game"]) {
@@ -1148,7 +1432,13 @@ PanelWindow {
         }
     }
     onExpandedChanged: {
+        // Kick the liquid squash-and-stretch pulse in the growth direction.
+        if (!Theme.reduceMotion) {
+            _morphDir = expanded ? 1.0 : -1.0;
+            morphPulseAnim.restart();
+        }
         if (expanded) {
+            skimCommit();
             islandShape.forceActiveFocus();
             if (notifBadgeVisible) notifBadgeVisible = false;
             notifPageRevertTimer.stop();
@@ -1264,6 +1554,7 @@ PanelWindow {
         Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
 
         property int collapsedW: {
+            if (islandWindow.skimming)                                                 return Math.round(islandWindow._skimFrozenW);
             if (islandWindow.osdActive)                                                return osdCollapsed.preferredWidth;
             if (islandWindow.editBarMode || islandWindow.currentPage === "appletPicker") return editModeCollapsed.preferredWidth;
             if (islandWindow.currentPage === "recording" && islandWindow.isRecording) return recordingCollapsed.preferredWidth;
@@ -1273,6 +1564,7 @@ PanelWindow {
             if (islandWindow.currentPage === "notifs")                                  return notifsCollapsed.preferredWidth;
             if (islandWindow.currentPage === "stash")                                   return stashCollapsed.preferredWidth;
             if (islandWindow.currentPage === "timer")                                   return timerCollapsed.preferredWidth;
+            if (islandWindow.currentPage === "control")                                 return controlCollapsed.preferredWidth;
             return clockCollapsed.preferredWidth;
         }
         property int collapsedH: s(36)
@@ -1286,8 +1578,17 @@ PanelWindow {
             return Math.min(s(760), Screen.width - s(32));
         }
         property int expandedH: {
-            if (islandWindow.notifActive) return s(88);
-            if (islandWindow.currentPage === "stash") return s(islandWindow.stashExpandedHeight);
+            if (islandWindow.notifActive) {
+                // Base banner + action-chip row + inline reply field + image preview
+                let h = 88;
+                let d = islandWindow.notifData;
+                if (d && ((d.actions && d.actions.length > 0) || d.hasReply)) h += 40;
+                if (islandWindow.notifReplyOpen) h += 52;
+                if (islandWindow.notifHasImage)  h += 68;
+                return s(h);
+            }
+            if (islandWindow.currentPage === "stash")   return s(islandWindow.stashExpandedHeight);
+            if (islandWindow.currentPage === "control") return s(islandWindow.controlExpandedHeight);
             let page = islandWindow.pageRegistry.find(p => p.name === islandWindow.currentPage);
             return page ? s(page.expandedH) : s(350);
         }
@@ -1297,12 +1598,16 @@ PanelWindow {
         x: Math.floor((Screen.width - width) / 2)
         y: s(4)
 
-        Behavior on width  { NumberAnimation { duration: 540; easing.type: Easing.OutExpo } }
+        // Liquid morph — spring (overshoot + settle) instead of a dead-stop tween.
+        // width & height share identical spring params so the pill resizes as one blob.
+        Behavior on width  {
+            SpringAnimation { spring: 3.6; damping: 0.42; mass: 1.0; epsilon: 0.5 }
+        }
         Behavior on height {
             SequentialAnimation {
                 // For notifications only: width expands first, height follows after
                 PauseAnimation { duration: islandWindow.notifActive && islandWindow.expanded ? 220 : 0 }
-                NumberAnimation { duration: 540; easing.type: Easing.OutExpo }
+                SpringAnimation { spring: 3.6; damping: 0.42; mass: 1.0; epsilon: 0.5 }
             }
         }
 
@@ -1310,29 +1615,37 @@ PanelWindow {
         Behavior on scale { NumberAnimation { duration: 280; easing.type: Easing.OutExpo } }
 
         // ── Drop shadow — gives floating feeling, stretches with volume drag ──
-        Rectangle {
+        // RectangularShadow (analytic, Qt 6.9+) instead of Rectangle+layer+MultiEffect:
+        // the blurred layer re-rasterized every frame while springs animate
+        // width/height/radius; the analytic shadow costs nothing to animate.
+        RectangularShadow {
             id: islandShadow
             anchors.fill: parent
             anchors.margins: -s(6)
             anchors.topMargin: s(10)
-            radius: bg.radius + s(6)
-            Behavior on radius { NumberAnimation { duration: 540; easing.type: Easing.OutExpo } }
+            radius: bg.radius + s(6)   // tracks bg.radius spring per-frame — no own Behavior
+            blur: 28
+            spread: 0
             color: Qt.rgba(0, 0, 0, islandWindow.expanded ? 0.38 : 0.28)
             Behavior on color { ColorAnimation { duration: 400 } }
             z: -1
 
-            transform: Scale {
-                xScale: islandWindow.expanded ? 1.0 : (1.0 + Math.abs(islandWindow.volStretch) * 0.26)
-                origin.x: islandWindow.volStretch >= 0 ? islandShadow.width * 0.08 : islandShadow.width * 0.92
-                origin.y: islandShadow.height * 0.5
-            }
-
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                blurEnabled: true
-                blur: 1.0
-                blurMax: 28
-            }
+            transform: [
+                Scale {
+                    xScale: islandWindow.expanded ? 1.0 : (1.0 + Math.abs(islandWindow.volStretch) * 0.26)
+                    origin.x: islandWindow.volStretch >= 0 ? islandShadow.width * 0.08 : islandShadow.width * 0.92
+                    origin.y: islandShadow.height * 0.5
+                },
+                // Mirror bg's liquid morph — shadow wobbles with the pill.
+                // origin.y −s(10): islandShape's top edge in shadow-local coords
+                // (shadow sits topMargin s(10) below it).
+                Scale {
+                    origin.x: islandShadow.width / 2
+                    origin.y: -s(10)
+                    xScale: 1.0 + islandWindow._morphSquash * islandWindow._morphDir * 0.045
+                    yScale: 1.0 - islandWindow._morphSquash * islandWindow._morphDir * 0.050
+                }
+            ]
         }
 
         // ── Background pill ──────────────────────────────────
@@ -1340,13 +1653,24 @@ PanelWindow {
             id: bg
             anchors.fill: parent
             radius: islandWindow.expanded ? s(26) : height / 2
-            Behavior on radius { NumberAnimation { duration: 540; easing.type: Easing.OutExpo } }
-            // Elastic volume-drag deform
-            transform: Scale {
-                xScale: islandWindow.expanded ? 1.0 : (1.0 + Math.abs(islandWindow.volStretch) * 0.26)
-                origin.x: islandWindow.volStretch >= 0 ? bg.width * 0.08 : bg.width * 0.92
-                origin.y: bg.height * 0.5
-            }
+            Behavior on radius { SpringAnimation { spring: 4.2; damping: 0.5; mass: 1.0; epsilon: 0.25 } }
+            // Two composed deforms: elastic volume-drag stretch + liquid morph squash.
+            transform: [
+                Scale {
+                    xScale: islandWindow.expanded ? 1.0 : (1.0 + Math.abs(islandWindow.volStretch) * 0.26)
+                    origin.x: islandWindow.volStretch >= 0 ? bg.width * 0.08 : bg.width * 0.92
+                    origin.y: bg.height * 0.5
+                },
+                // Jelly wobble: stretch wide + squash short while growing (dir +1),
+                // pinch tall + narrow while shrinking (dir −1). Anchored at the top
+                // edge (origin.y 0) since the island grows downward from a fixed top.
+                Scale {
+                    origin.x: bg.width / 2
+                    origin.y: 0
+                    xScale: 1.0 + islandWindow._morphSquash * islandWindow._morphDir * 0.045
+                    yScale: 1.0 - islandWindow._morphSquash * islandWindow._morphDir * 0.050
+                }
+            ]
 
             color: {
                 if (islandWindow.glassTheme) {
@@ -1387,7 +1711,7 @@ PanelWindow {
                 if (islandWindow.isRecording)
                     return Qt.rgba(islandWindow.red.r, islandWindow.red.g, islandWindow.red.b, islandWindow.recordingDotOpacity * 0.85);
                 if (islandWindow.notifActive)
-                    return Qt.rgba(islandWindow.peach.r, islandWindow.peach.g, islandWindow.peach.b, islandWindow.notifPulse);
+                    return Qt.rgba(islandWindow.notifAccent.r, islandWindow.notifAccent.g, islandWindow.notifAccent.b, islandWindow.notifPulse);
                 if (islandWindow.isMediaActive && islandWindow.musicData.status === "Playing" && !islandWindow.expanded) {
                     // Tighten musicPulse (0.22→0.72) into a calmer 0.22→0.36 band — premium breath, no neon flash
                     let p = 0.22 + (islandWindow.musicPulse - 0.22) * 0.28;
@@ -1403,8 +1727,7 @@ PanelWindow {
 
             // Notif / Recording inner glow
             Rectangle {
-                anchors.fill: parent; radius: bg.radius
-                Behavior on radius { NumberAnimation { duration: 540; easing.type: Easing.OutExpo } }
+                anchors.fill: parent; radius: bg.radius   // follows bg.radius spring
                 opacity: islandWindow.isRecording
                     ? islandWindow.recordingDotOpacity * 0.12
                     : (islandWindow.notifActive ? islandWindow.notifPulse * 0.18 : 0)
@@ -1415,8 +1738,7 @@ PanelWindow {
 
             // Expanded gradient veil
             Rectangle {
-                anchors.fill: parent; radius: bg.radius
-                Behavior on radius { NumberAnimation { duration: 540; easing.type: Easing.OutExpo } }
+                anchors.fill: parent; radius: bg.radius   // follows bg.radius spring
                 visible: islandWindow.expanded
                 opacity: islandWindow.expanded ? 1 : 0
                 Behavior on opacity { NumberAnimation { duration: 400 } }
@@ -1435,8 +1757,7 @@ PanelWindow {
             id: glowRim
             anchors.fill: parent
             anchors.margins: -s(2)
-            radius: bg.radius + s(2)
-            Behavior on radius { NumberAnimation { duration: 540; easing.type: Easing.OutExpo } }
+            radius: bg.radius + s(2)   // follows bg.radius spring
             color: "transparent"
             border.width: s(1)
             border.color: Qt.rgba(islandWindow.mauve.r, islandWindow.mauve.g, islandWindow.mauve.b, 0.55)
@@ -1455,13 +1776,23 @@ PanelWindow {
             z: 0
 
             // Mirror bg's elastic stretch — origin corrected for -s(3) margin offset
-            transform: Scale {
-                xScale: islandWindow.expanded ? 1.0 : (1.0 + Math.abs(islandWindow.volStretch) * 0.26)
-                origin.x: islandWindow.volStretch >= 0
-                    ? (s(3) + bg.width * 0.08)
-                    : (s(3) + bg.width * 0.92)
-                origin.y: glowRim.height * 0.5
-            }
+            transform: [
+                Scale {
+                    xScale: islandWindow.expanded ? 1.0 : (1.0 + Math.abs(islandWindow.volStretch) * 0.26)
+                    origin.x: islandWindow.volStretch >= 0
+                        ? (s(3) + bg.width * 0.08)
+                        : (s(3) + bg.width * 0.92)
+                    origin.y: glowRim.height * 0.5
+                },
+                // Mirror bg's liquid morph — rim wobbles with the pill.
+                // origin.y s(2): islandShape's top edge in rim-local coords (-s(2) margin).
+                Scale {
+                    origin.x: glowRim.width / 2
+                    origin.y: s(2)
+                    xScale: 1.0 + islandWindow._morphSquash * islandWindow._morphDir * 0.045
+                    yScale: 1.0 - islandWindow._morphSquash * islandWindow._morphDir * 0.050
+                }
+            ]
         }
 
         // ── Mouse: hover + horizontal volume drag ────────────
@@ -1507,26 +1838,29 @@ PanelWindow {
                         islandWindow.playSound("volume");
                 }
             }
-            acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+            acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
             onClicked: (mouse) => {
                 if (mouse.button === Qt.MiddleButton) {
                     Quickshell.execDetached(["bash", "-c", "echo 'music' > /tmp/qs_widget_state"]);
+                } else if (mouse.button === Qt.RightButton) {
+                    // Control Center gesture — lives outside the wheel rotation
+                    if (!islandWindow.expanded && !islandWindow.editBarMode) {
+                        islandWindow.skimCommit();
+                        islandWindow.currentPage = "control";
+                        islandWindow.expanded = true;
+                    }
                 } else if (!wasDragging) {
-                    islandWindow.expanded = true;
+                    islandWindow.skimCommit();
+                    if (mouse.modifiers & (Qt.MetaModifier | Qt.ControlModifier)) {
+                        // Ctrl+click (or Meta+click where the compositor lets it
+                        // through — hyprland's `bindm movewindow` usually eats
+                        // Super+LMB) → toggle bar edit mode.
+                        if (islandWindow.editBarMode) islandWindow.exitEditBarMode();
+                        else                          islandWindow.enterEditBarMode();
+                    } else {
+                        islandWindow.expanded = true;
+                    }
                 }
-            }
-        }
-
-        // ── Double-tap → toggle bar edit mode ─────────────────────
-        // Collapsed + not editing  → enter edit mode (expands picker)
-        // Collapsed + editing      → exit edit mode entirely
-        TapHandler {
-            enabled: !islandWindow.expanded
-            acceptedButtons: Qt.LeftButton
-            // longPressThreshold kept at default; double-tap window = 300 ms
-            onDoubleTapped: {
-                if (islandWindow.editBarMode) islandWindow.exitEditBarMode()
-                else                          islandWindow.enterEditBarMode()
             }
         }
 
@@ -1540,12 +1874,7 @@ PanelWindow {
             onWheel: (event) => {
                 // In expanded edit mode let scroll propagate to the Flickable
                 if (islandWindow.editBarMode && islandWindow.expanded) return;
-                if (scrollCooldown.running || islandWindow.notifActive || islandWindow.editBarMode) {
-                    event.accepted = true; return;
-                }
-                if (event.angleDelta.y > 0) islandWindow.navigatePrev();
-                else                        islandWindow.navigateNext();
-                scrollCooldown.start();
+                islandWindow.wheelStep(event.angleDelta.y > 0 ? -1 : 1, true);
                 event.accepted = true;
             }
         }
@@ -1589,7 +1918,7 @@ PanelWindow {
             id: collapsedContent
             anchors.fill: parent
             clip: true
-            opacity: islandWindow.expanded ? 0 : 1
+            opacity: (islandWindow.expanded || islandWindow.skimming) ? 0 : 1
             visible: opacity > 0.001
             Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.InOutCubic } }
             z: 5
@@ -1648,6 +1977,16 @@ PanelWindow {
                 }}
             }
 
+            ControlCollapsed {
+                id: controlCollapsed; island: islandWindow; anchors.centerIn: parent
+                opacity: (!islandWindow.osdActive && !islandWindow.volDragging && islandWindow.currentPage === "control") ? 1.0 : 0.0
+                visible: opacity > 0.001
+                Behavior on opacity { SequentialAnimation {
+                    PauseAnimation { duration: islandWindow.currentPage === "control" && !islandWindow.osdActive ? 60 : 0 }
+                    NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
+                }}
+            }
+
             TimerCollapsed {
                 id: timerCollapsed; island: islandWindow; anchors.centerIn: parent
                 opacity: (!islandWindow.osdActive && !islandWindow.volDragging && islandWindow.currentPage === "timer") ? 1.0 : 0.0
@@ -1674,6 +2013,16 @@ PanelWindow {
                 visible: opacity > 0.001
                 Behavior on opacity { SequentialAnimation {
                     PauseAnimation { duration: islandWindow.currentPage === "discord" ? 60 : 0 }
+                    NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
+                }}
+            }
+
+            ActivityCollapsed {
+                id: activityCollapsed; island: islandWindow; anchors.centerIn: parent
+                opacity: (!islandWindow.osdActive && !islandWindow.volDragging && islandWindow.currentPage === "activity" && islandWindow.hasActivities) ? 1.0 : 0.0
+                visible: opacity > 0.001
+                Behavior on opacity { SequentialAnimation {
+                    PauseAnimation { duration: islandWindow.currentPage === "activity" && !islandWindow.osdActive ? 60 : 0 }
                     NumberAnimation { duration: 200; easing.type: Easing.InOutCubic }
                 }}
             }
@@ -1710,22 +2059,173 @@ PanelWindow {
         }
 
         // ============================================================
-        // EXPANDED: PAGES — loaded from pageRegistry via Loader
+        // SKIM HUD — light page flipper shown during rapid wheel scrolls.
+        // The pill is frozen; only this icon/name/dots row changes per tick.
         // ============================================================
-        Repeater {
-            model: islandWindow.pageRegistry
-            delegate: Loader {
+        Item {
+            id: skimHud
+            anchors.fill: parent
+            z: 6
+            opacity: (!islandWindow.expanded && islandWindow.skimming) ? 1 : 0
+            visible: opacity > 0.001
+            Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+
+            function pageIcon(p) {
+                if (p === "clock")     return "󰅐"
+                if (p === "timer")     return "󰔛"
+                if (p === "music")     return "󰝚"
+                if (p === "notifs")    return "󰂚"
+                if (p === "stash")     return "󰵙"
+                if (p === "recording") return "●"
+                if (p === "game")      return "󰓅"
+                if (p === "discord")   return "󰙯"
+                if (p === "control")   return "󰨙"
+                return "󰐊"
+            }
+
+            // Two stacked layers roll like a carousel: the outgoing name slides
+            // away in the scroll direction while the incoming one slides in
+            // from the opposite side. Rapid ticks overlap the layers, so fast
+            // scrolling reads as one continuous motion instead of text swaps.
+            component RollLabel: Item {
+                id: rl
+                property string page: ""
+                property real px: 0
+                property real op: 0
                 anchors.fill: parent
-                sourceComponent: modelData.comp
-                z: 5
+                opacity: op
+                visible: op > 0.001
+                transform: Translate { x: rl.px }
+                Row {
+                    anchors.centerIn: parent
+                    spacing: s(7)
+                    Text {
+                        text: skimHud.pageIcon(rl.page)
+                        font.family: "Iosevka Nerd Font"
+                        font.pixelSize: s(15)
+                        color: Theme.accent
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                    Text {
+                        text: rl.page
+                        font.family: "JetBrains Mono"
+                        font.pixelSize: s(13)
+                        font.weight: Font.Black
+                        color: Theme.text
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+            }
 
-                readonly property bool isCurrent: islandWindow.expanded && !islandWindow.notifActive && islandWindow.currentPage === modelData.name
-                readonly property bool userEnabled: Theme.pageEnabled(modelData.name)
+            property bool _useA: true
+            function roll(dir) {
+                const inc = _useA ? rollB : rollA
+                const out = _useA ? rollA : rollB
+                _useA = !_useA
+                inc.page = islandWindow.skimPage
+                if (Theme.reduceMotion) {
+                    out.op = 0; inc.px = 0; inc.op = 1
+                    return
+                }
+                outAnim.stop(); incAnim.stop()
+                outX.target = out; outX.to = -dir * s(30)
+                outO.target = out
+                incX.target = inc
+                incO.target = inc
+                inc.px = dir * s(30); inc.op = 0
+                outAnim.restart(); incAnim.restart()
+            }
+            ParallelAnimation {
+                id: outAnim
+                NumberAnimation { id: outX; property: "px"; duration: 220; easing.type: Easing.OutQuad }
+                NumberAnimation { id: outO; property: "op"; to: 0; duration: 190; easing.type: Easing.OutQuad }
+            }
+            ParallelAnimation {
+                id: incAnim
+                NumberAnimation { id: incX; property: "px"; to: 0; duration: 280; easing.type: Easing.OutCubic }
+                NumberAnimation { id: incO; property: "op"; to: 1; duration: 210; easing.type: Easing.OutQuad }
+            }
+            Connections {
+                target: islandWindow
+                function onSkimPageChanged() {
+                    if (islandWindow.skimming && islandWindow.skimPage !== "")
+                        skimHud.roll(islandWindow.skimDir)
+                }
+                function onSkimmingChanged() {
+                    if (!islandWindow.skimming) { rollA.op = 0; rollB.op = 0 }
+                }
+            }
 
-                enabled: isCurrent && userEnabled
-                opacity: (isCurrent && userEnabled) ? 1 : 0
-                visible: opacity > 0.001
-                Behavior on opacity { NumberAnimation { duration: Theme.pageAnimDuration; easing.type: Easing.InOutCubic } }
+            Item {
+                id: rollSlot
+                anchors { left: parent.left; right: skimDots.left; rightMargin: s(6); top: parent.top; bottom: parent.bottom }
+                clip: true
+                RollLabel { id: rollA }
+                RollLabel { id: rollB }
+            }
+            Row {
+                id: skimDots
+                spacing: s(4)
+                anchors { right: parent.right; rightMargin: s(18); verticalCenter: parent.verticalCenter }
+                Repeater {
+                    model: islandWindow.availablePages
+                    Rectangle {
+                        required property var modelData
+                        width: s(5); height: s(5); radius: s(2.5)
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: modelData === islandWindow.skimPage
+                            ? Theme.accent
+                            : Qt.rgba(Theme.text.r, Theme.text.g, Theme.text.b, 0.25)
+                        scale: modelData === islandWindow.skimPage ? 1.25 : 1.0
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                        Behavior on scale { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+                    }
+                }
+            }
+        }
+
+        // ============================================================
+        // EXPANDED: PAGES — loaded from pageRegistry via Loader
+        // Pages get FIXED target geometry (their registered expanded size), not
+        // the spring-animated shape size: laying out against the oscillating
+        // height re-ran the page layout every frame and made content visibly
+        // jitter. Instead the content is static and the clipping pill sweeps
+        // over it (Apple-mask behavior). Horizontal centering still tracks the
+        // animated width, but that's a rigid translate — no internal re-layout.
+        // ============================================================
+        Item {
+            id: pageClip
+            anchors.fill: parent
+            clip: true
+            z: 5
+
+            Repeater {
+                model: islandWindow.pageRegistry
+                delegate: Loader {
+                    readonly property real targetW: {
+                        if (modelData.name === "stash") return Math.min(s(750), Screen.width - s(32));
+                        if (modelData.name === "music") return Math.min(s(420), Screen.width - s(32));
+                        return Math.min(s(760), Screen.width - s(32));
+                    }
+                    readonly property real targetH: modelData.name === "stash"
+                        ? s(islandWindow.stashExpandedHeight)
+                        : modelData.name === "control"
+                            ? s(islandWindow.controlExpandedHeight)
+                            : s(modelData.expandedH)
+                    width:  targetW
+                    height: targetH
+                    x: (pageClip.width - targetW) / 2
+                    y: 0
+                    sourceComponent: modelData.comp
+
+                    readonly property bool isCurrent: islandWindow.expanded && !islandWindow.notifActive && islandWindow.currentPage === modelData.name
+                    readonly property bool userEnabled: Theme.pageEnabled(modelData.name)
+
+                    enabled: isCurrent && userEnabled
+                    opacity: (isCurrent && userEnabled) ? 1 : 0
+                    visible: opacity > 0.001
+                    Behavior on opacity { NumberAnimation { duration: Theme.pageAnimDuration; easing.type: Easing.InOutCubic } }
+                }
             }
         }
 
@@ -1941,6 +2441,54 @@ PanelWindow {
         homeY: s(4) + (islandShape.collapsedH - height) / 2
     }
 
+    ActivityMiniBubble {
+        parent: bubblesGate
+        visible: Theme.bubbleEnabled("Activity") && Theme.pageEnabled("activity")
+        id: activityBubble
+        island: islandWindow
+        primary: islandWindow.primaryBubbleId === "activity"
+        z: primary ? 12 : 10
+        homeX: homeXFor("activity")
+        homeY: s(4) + (islandShape.collapsedH - height) / 2
+    }
+
+    // =========================================================
+    // IPC: Live Activities — append-mode JSON lines, single-shot inotifywait
+    // =========================================================
+    Process {
+        id: laIpcWatcher; running: true
+        command: ["bash", "-c",
+            "inotifywait -qq -e close_write,moved_to --include 'qs_live_activity$' /tmp/ 2>/dev/null; " +
+            "if [ -f /tmp/qs_live_activity ]; then cat /tmp/qs_live_activity; rm -f /tmp/qs_live_activity; fi"
+        ]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let lines = this.text.trim().split("\n");
+                for (let li = 0; li < lines.length; li++) {
+                    let data = lines[li].trim();
+                    if (!data) continue;
+                    try { islandWindow.laHandle(JSON.parse(data)); }
+                    catch(e) { console.warn("live activity parse:", e); }
+                }
+                laIpcWatcher.running = false;
+                laIpcWatcher.running = true;
+            }
+        }
+    }
+
+    // Zero-integration producers (pacman, downloads, mic/camera). The script
+    // heartbeats into /tmp/qs_live_activity; flock inside makes duplicate
+    // spawns exit immediately, so reloads are safe. Respawn if it dies.
+    Process {
+        id: laProducers; running: true
+        command: ["bash", "-c", "exec bash \"$HOME/.config/hypr/scripts/live_activity_producers.sh\""]
+    }
+    Timer {
+        interval: 15000; repeat: true
+        running: !laProducers.running
+        onTriggered: laProducers.running = true
+    }
+
     // =========================================================
     // IPC: Incoming notification from Main.qml
     // =========================================================
@@ -1952,25 +2500,62 @@ PanelWindow {
         ]
         stdout: StdioCollector {
             onStreamFinished: {
-                let data = this.text.trim();
-                if (data) {
+                // File is append-mode — may hold several JSON lines
+                let lines = this.text.trim().split("\n");
+                for (let li = 0; li < lines.length; li++) {
+                    let data = lines[li].trim();
+                    if (!data) continue;
                     try {
                         let n = JSON.parse(data);
+
+                        // ── "closed" broadcast: app/server destroyed the notification ──
+                        if (n.type === "closed") {
+                            let cid = n.id || 0;
+                            if (cid) {
+                                // Grey out dead action chips in history
+                                for (let i = 0; i < notifHistory.count; i++) {
+                                    if (notifHistory.get(i).id === cid) {
+                                        notifHistory.setProperty(i, "live", false);
+                                        break;
+                                    }
+                                }
+                                // Retract the live banner (message read elsewhere) —
+                                // but never yank it while the user is typing a reply
+                                if (islandWindow.notifActive && !islandWindow.notifReplyOpen
+                                        && islandWindow.notifData && islandWindow.notifData.id === cid)
+                                    islandWindow.dismissNotif();
+                            }
+                            continue;
+                        }
+
                         let item = {
                             appName:   n.appName || "System",
                             title:     n.title   || "",
                             body:      n.body    || "",
                             icon:      n.icon    || "",
+                            id:        n.id       || 0,
+                            actions:   n.actions  || [],
+                            hasReply:  n.hasReply === true,
+                            urgency:   n.urgency !== undefined ? n.urgency : 1,
+                            live:      true,
                             timestamp: Date.now()
                         };
+                        let critical = item.urgency === 2;
 
                         // Always persist to history
                         notifHistory.insert(0, item);
                         islandWindow.saveNotifHistory();
 
-                        if (!islandWindow.dndEnabled) {
-                            // Normal: show popup card + sound
+                        if (islandWindow.notifReplyOpen && islandWindow.notifActive) {
+                            // User is typing a reply — never steal the banner.
+                            // The new notification is already in history; badge it.
+                            if (!islandWindow.dndEnabled) islandWindow.playSound("notification");
+                            islandWindow.notifBadgeVisible = true;
+                        } else if (!islandWindow.dndEnabled || critical) {
+                            // Normal (or critical — bypasses DND per fd.o spec)
                             islandWindow.playSound("notification");
+                            islandWindow.notifReplyOpen         = false;
+                            islandWindow.notifHasImage          = false;
                             islandWindow.notifData              = item;
                             islandWindow.wasExpandedBeforeNotif = islandWindow.expanded;
                             islandWindow.notifActive            = true;
@@ -1982,7 +2567,9 @@ PanelWindow {
                             } else {
                                 islandWindow.notifBadgeVisible = true;
                             }
-                            notifHideTimer.restart();
+                            // Critical notifications stay until explicitly dismissed
+                            if (critical) notifHideTimer.stop();
+                            else          notifHideTimer.restart();
                         } else {
                             // DND: silent badge only
                             if (!islandWindow.expanded) islandWindow.notifBadgeVisible = true;
@@ -2064,19 +2651,41 @@ PanelWindow {
     // IPC: External expand/collapse toggle (e.g. keybind)
     Process {
         id: ipcWatcher; running: true
+        // mv-then-read keeps commands appended (>>) during the read from being
+        // lost; the handler processes every line, so scroll bursts arrive as
+        // one batch instead of dropped ticks.
         command: ["bash", "-c",
             "inotifywait -qq -e close_write,moved_to --include 'qs_island_toggle$' /tmp/ 2>/dev/null; " +
-            "if [ -f /tmp/qs_island_toggle ]; then cat /tmp/qs_island_toggle; rm -f /tmp/qs_island_toggle; fi"
+            "if [ -f /tmp/qs_island_toggle ]; then " +
+            "mv /tmp/qs_island_toggle /tmp/qs_island_toggle.rd 2>/dev/null && " +
+            "{ cat /tmp/qs_island_toggle.rd; rm -f /tmp/qs_island_toggle.rd; }; fi"
         ]
         stdout: StdioCollector {
             onStreamFinished: {
-                let cmd = this.text.trim();
-                if (cmd === "toggle")        islandWindow.expanded = !islandWindow.expanded;
-                else if (cmd === "expand")   islandWindow.expanded = true;
-                else if (cmd === "collapse") islandWindow.expanded = false;
-                else if (cmd === "edit")     islandWindow.editBarMode ? islandWindow.exitEditBarMode() : islandWindow.enterEditBarMode();
+                const cmds = this.text.trim().split("\n");
+                for (let ci = 0; ci < cmds.length; ci++)
+                    islandWindow.handleIslandCmd(cmds[ci].trim());
                 ipcWatcher.running = false;
                 ipcWatcher.running = true;
+            }
+        }
+    }
+    function handleIslandCmd(cmd) {
+        if (cmd === "")              return;
+        if (cmd === "toggle")        expanded = !expanded;
+        else if (cmd === "expand")   expanded = true;
+        else if (cmd === "collapse") expanded = false;
+        else if (cmd === "next")     wheelStep(1, false);
+        else if (cmd === "prev")     wheelStep(-1, false);
+        else if (cmd === "edit")     editBarMode ? exitEditBarMode() : enterEditBarMode();
+        else if (cmd.indexOf("page:") === 0) {
+            let sub = cmd.slice(5).split(":");
+            let pg  = sub[0];
+            if (pg === "control" || availablePages.indexOf(pg) >= 0) {
+                currentPage = pg;
+                expanded = true;
+                if (pg === "control" && sub.length > 1)
+                    controlDetailRequest = sub[1];
             }
         }
     }
@@ -2221,7 +2830,7 @@ PanelWindow {
                         color: dotSlot.isActive
                             ? (_onDark
                                 ? Qt.rgba(islandWindow.mauve.r, islandWindow.mauve.g, islandWindow.mauve.b, 1.0)
-                                : Qt.rgba(Theme.overlay0.r, Theme.overlay0.g, Theme.overlay0.b, 1.0))
+                                : Qt.rgba(1.0, 1.0, 1.0, 1.0))
                             : (_onDark
                                 ? Qt.rgba(1.0, 1.0, 1.0, _baseAlpha)
                                 : Qt.rgba(0.08, 0.08, 0.08, Math.min(1.0, _baseAlpha + 0.15)))

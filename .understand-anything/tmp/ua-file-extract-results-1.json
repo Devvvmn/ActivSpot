@@ -1,0 +1,1937 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 6,
+  "filesSkipped": [
+    "config-ui/src/App.tsx",
+    "config-ui/src/components/Icon.tsx",
+    "config-ui/src/components/Preview.tsx",
+    "config-ui/src/components/UI.tsx",
+    "config-ui/src/main.tsx",
+    "config-ui/src/sections/BindingsSection.tsx",
+    "config-ui/src/sections/KeyboardSection.tsx",
+    "config-ui/src/sections/MinibubblesSection.tsx",
+    "config-ui/src/sections/MonitorsSection.tsx",
+    "config-ui/src/sections/PagesSection.tsx",
+    "config-ui/src/sections/ParallaxSection.tsx",
+    "config-ui/src/sections/PinnedAppsSection.tsx",
+    "config-ui/src/sections/RawSection.tsx",
+    "config-ui/src/sections/ThemeSection.tsx"
+  ],
+  "results": [
+    {
+      "path": "config-ui/src/api.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 130,
+      "nonEmptyLines": 115,
+      "functions": [
+        {
+          "name": "j",
+          "startLine": 3,
+          "endLine": 10,
+          "params": [
+            "url",
+            "opts"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "api",
+          "line": 27,
+          "isDefault": false
+        },
+        {
+          "name": "PARALLAX_EASINGS",
+          "line": 76,
+          "isDefault": false
+        },
+        {
+          "name": "defaults",
+          "line": 125,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "j",
+          "callee": "fetch",
+          "lineNumber": 4
+        },
+        {
+          "caller": "j",
+          "callee": "r.json",
+          "lineNumber": 9
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 3,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "config-ui/src/main.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 5,
+      "nonEmptyLines": 4,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "config-ui/svelte.config.js",
+      "language": "javascript",
+      "fileCategory": "config",
+      "totalLines": 5,
+      "nonEmptyLines": 4,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "config-ui/vite.config.ts",
+      "language": "typescript",
+      "fileCategory": "config",
+      "totalLines": 17,
+      "nonEmptyLines": 16,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "installer/src/main.rs",
+      "language": "rust",
+      "fileCategory": "code",
+      "totalLines": 622,
+      "nonEmptyLines": 542,
+      "functions": [
+        {
+          "name": "default",
+          "startLine": 55,
+          "endLine": 65,
+          "params": []
+        },
+        {
+          "name": "main",
+          "startLine": 68,
+          "endLine": 89,
+          "params": []
+        },
+        {
+          "name": "run_app",
+          "startLine": 91,
+          "endLine": 108,
+          "params": [
+            "terminal",
+            "app"
+          ]
+        },
+        {
+          "name": "handle_key",
+          "startLine": 110,
+          "endLine": 148,
+          "params": [
+            "app",
+            "code"
+          ]
+        },
+        {
+          "name": "start_installation",
+          "startLine": 150,
+          "endLine": 155,
+          "params": [
+            "app"
+          ]
+        },
+        {
+          "name": "advance_install_step",
+          "startLine": 157,
+          "endLine": 179,
+          "params": [
+            "app"
+          ]
+        },
+        {
+          "name": "centered_rect",
+          "startLine": 183,
+          "endLine": 194,
+          "params": [
+            "max_width",
+            "r"
+          ]
+        },
+        {
+          "name": "spinner_frame",
+          "startLine": 196,
+          "endLine": 198,
+          "params": [
+            "tick"
+          ]
+        },
+        {
+          "name": "pulse_color",
+          "startLine": 201,
+          "endLine": 203,
+          "params": [
+            "tick",
+            "hi",
+            "lo"
+          ]
+        },
+        {
+          "name": "ui",
+          "startLine": 207,
+          "endLine": 238,
+          "params": [
+            "f",
+            "app"
+          ]
+        },
+        {
+          "name": "render_header",
+          "startLine": 242,
+          "endLine": 283,
+          "params": [
+            "f",
+            "area",
+            "app"
+          ]
+        },
+        {
+          "name": "render_welcome",
+          "startLine": 287,
+          "endLine": 341,
+          "params": [
+            "f",
+            "area",
+            "app"
+          ]
+        },
+        {
+          "name": "render_system_check",
+          "startLine": 345,
+          "endLine": 398,
+          "params": [
+            "f",
+            "area",
+            "app"
+          ]
+        },
+        {
+          "name": "render_installing",
+          "startLine": 402,
+          "endLine": 495,
+          "params": [
+            "f",
+            "area",
+            "app"
+          ]
+        },
+        {
+          "name": "render_success",
+          "startLine": 499,
+          "endLine": 549,
+          "params": [
+            "f",
+            "area",
+            "app"
+          ]
+        },
+        {
+          "name": "render_error",
+          "startLine": 553,
+          "endLine": 584,
+          "params": [
+            "f",
+            "area",
+            "app"
+          ]
+        },
+        {
+          "name": "render_footer",
+          "startLine": 588,
+          "endLine": 622,
+          "params": [
+            "f",
+            "area",
+            "app"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "Screen",
+          "startLine": 35,
+          "endLine": 41,
+          "methods": [],
+          "properties": [
+            "Welcome",
+            "SystemCheck",
+            "Installing",
+            "Success",
+            "Error"
+          ]
+        },
+        {
+          "name": "App",
+          "startLine": 44,
+          "endLine": 52,
+          "methods": [
+            "default"
+          ],
+          "properties": [
+            "screen",
+            "should_quit",
+            "current_step",
+            "logs",
+            "error_message",
+            "install_started",
+            "tick"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "default",
+          "callee": "Vec::new",
+          "lineNumber": 60
+        },
+        {
+          "caller": "main",
+          "callee": "color_eyre::install",
+          "lineNumber": 69
+        },
+        {
+          "caller": "main",
+          "callee": "enable_raw_mode",
+          "lineNumber": 71
+        },
+        {
+          "caller": "main",
+          "callee": "stdout",
+          "lineNumber": 72
+        },
+        {
+          "caller": "main",
+          "callee": "CrosstermBackend::new",
+          "lineNumber": 74
+        },
+        {
+          "caller": "main",
+          "callee": "Terminal::new",
+          "lineNumber": 75
+        },
+        {
+          "caller": "main",
+          "callee": "App::default",
+          "lineNumber": 77
+        },
+        {
+          "caller": "main",
+          "callee": "run_app",
+          "lineNumber": 78
+        },
+        {
+          "caller": "main",
+          "callee": "disable_raw_mode",
+          "lineNumber": 80
+        },
+        {
+          "caller": "main",
+          "callee": "terminal.show_cursor",
+          "lineNumber": 82
+        },
+        {
+          "caller": "main",
+          "callee": "Ok",
+          "lineNumber": 88
+        },
+        {
+          "caller": "run_app",
+          "callee": "app.tick.wrapping_add",
+          "lineNumber": 93
+        },
+        {
+          "caller": "run_app",
+          "callee": "terminal.draw",
+          "lineNumber": 94
+        },
+        {
+          "caller": "run_app",
+          "callee": "ui",
+          "lineNumber": 94
+        },
+        {
+          "caller": "run_app",
+          "callee": "Ok",
+          "lineNumber": 97
+        },
+        {
+          "caller": "run_app",
+          "callee": "event::poll",
+          "lineNumber": 100
+        },
+        {
+          "caller": "run_app",
+          "callee": "std::time::Duration::from_millis",
+          "lineNumber": 100
+        },
+        {
+          "caller": "run_app",
+          "callee": "event::read",
+          "lineNumber": 101
+        },
+        {
+          "caller": "run_app",
+          "callee": "handle_key",
+          "lineNumber": 103
+        },
+        {
+          "caller": "handle_key",
+          "callee": "app.logs.clear",
+          "lineNumber": 121
+        },
+        {
+          "caller": "handle_key",
+          "callee": "start_installation",
+          "lineNumber": 130
+        },
+        {
+          "caller": "handle_key",
+          "callee": "advance_install_step",
+          "lineNumber": 133
+        },
+        {
+          "caller": "start_installation",
+          "callee": "app.logs.clear",
+          "lineNumber": 152
+        },
+        {
+          "caller": "start_installation",
+          "callee": "app.logs.push",
+          "lineNumber": 154
+        },
+        {
+          "caller": "start_installation",
+          "callee": "\"Checking AUR helper (paru)...\".to_string",
+          "lineNumber": 154
+        },
+        {
+          "caller": "advance_install_step",
+          "callee": "app.logs.last_mut",
+          "lineNumber": 169
+        },
+        {
+          "caller": "advance_install_step",
+          "callee": "steps.len",
+          "lineNumber": 173
+        },
+        {
+          "caller": "advance_install_step",
+          "callee": "app.logs.push",
+          "lineNumber": 174
+        },
+        {
+          "caller": "advance_install_step",
+          "callee": "steps[app.current_step].to_string",
+          "lineNumber": 174
+        },
+        {
+          "caller": "spinner_frame",
+          "callee": "SPINNER.len",
+          "lineNumber": 197
+        },
+        {
+          "caller": "ui",
+          "callee": "f.area",
+          "lineNumber": 208
+        },
+        {
+          "caller": "ui",
+          "callee": "f.render_widget",
+          "lineNumber": 211
+        },
+        {
+          "caller": "ui",
+          "callee": "Block::default().style",
+          "lineNumber": 212
+        },
+        {
+          "caller": "ui",
+          "callee": "Block::default",
+          "lineNumber": 212
+        },
+        {
+          "caller": "ui",
+          "callee": "Style::default().bg",
+          "lineNumber": 212
+        },
+        {
+          "caller": "ui",
+          "callee": "Style::default",
+          "lineNumber": 212
+        },
+        {
+          "caller": "ui",
+          "callee": "centered_rect",
+          "lineNumber": 216
+        },
+        {
+          "caller": "ui",
+          "callee": "Layout::default()\n        .direction(Direction::Vertical)\n        .constraints([\n            Constraint::Length(9),\n            Constraint::Min(10),\n            Constraint::Length(3),\n        ]).split",
+          "lineNumber": 218
+        },
+        {
+          "caller": "ui",
+          "callee": "Layout::default()\n        .direction(Direction::Vertical).constraints",
+          "lineNumber": 218
+        },
+        {
+          "caller": "ui",
+          "callee": "Layout::default().direction",
+          "lineNumber": 218
+        },
+        {
+          "caller": "ui",
+          "callee": "Layout::default",
+          "lineNumber": 218
+        },
+        {
+          "caller": "ui",
+          "callee": "Constraint::Length",
+          "lineNumber": 221
+        },
+        {
+          "caller": "ui",
+          "callee": "Constraint::Min",
+          "lineNumber": 222
+        },
+        {
+          "caller": "ui",
+          "callee": "Constraint::Length",
+          "lineNumber": 223
+        },
+        {
+          "caller": "ui",
+          "callee": "render_header",
+          "lineNumber": 227
+        },
+        {
+          "caller": "ui",
+          "callee": "render_welcome",
+          "lineNumber": 230
+        },
+        {
+          "caller": "ui",
+          "callee": "render_system_check",
+          "lineNumber": 231
+        },
+        {
+          "caller": "ui",
+          "callee": "render_installing",
+          "lineNumber": 232
+        },
+        {
+          "caller": "ui",
+          "callee": "render_success",
+          "lineNumber": 233
+        },
+        {
+          "caller": "ui",
+          "callee": "render_error",
+          "lineNumber": 234
+        },
+        {
+          "caller": "ui",
+          "callee": "render_footer",
+          "lineNumber": 237
+        },
+        {
+          "caller": "render_header",
+          "callee": "pulse_color",
+          "lineNumber": 243
+        },
+        {
+          "caller": "render_header",
+          "callee": "sparks.len",
+          "lineNumber": 247
+        },
+        {
+          "caller": "render_header",
+          "callee": "Paragraph::new(banner)\n        .alignment(Alignment::Center).block",
+          "lineNumber": 273
+        },
+        {
+          "caller": "render_header",
+          "callee": "Paragraph::new(banner).alignment",
+          "lineNumber": 273
+        },
+        {
+          "caller": "render_header",
+          "callee": "Paragraph::new",
+          "lineNumber": 273
+        },
+        {
+          "caller": "render_header",
+          "callee": "Block::default()\n                .borders(Borders::ALL)\n                .border_style(Style::default().fg(ACCENT_DIM)).style",
+          "lineNumber": 276
+        },
+        {
+          "caller": "render_header",
+          "callee": "Block::default()\n                .borders(Borders::ALL).border_style",
+          "lineNumber": 276
+        },
+        {
+          "caller": "render_header",
+          "callee": "Block::default().borders",
+          "lineNumber": 276
+        },
+        {
+          "caller": "render_header",
+          "callee": "Block::default",
+          "lineNumber": 276
+        },
+        {
+          "caller": "render_header",
+          "callee": "Style::default().fg",
+          "lineNumber": 278
+        },
+        {
+          "caller": "render_header",
+          "callee": "Style::default",
+          "lineNumber": 278
+        },
+        {
+          "caller": "render_header",
+          "callee": "Style::default().bg",
+          "lineNumber": 279
+        },
+        {
+          "caller": "render_header",
+          "callee": "Style::default",
+          "lineNumber": 279
+        },
+        {
+          "caller": "render_header",
+          "callee": "f.render_widget",
+          "lineNumber": 282
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "pulse_color",
+          "lineNumber": 288
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "Paragraph::new(lines)\n        .wrap(Wrap { trim: false }).block",
+          "lineNumber": 330
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "Paragraph::new(lines).wrap",
+          "lineNumber": 330
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "Paragraph::new",
+          "lineNumber": 330
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "Block::default()\n                .title(Span::styled(\" Overview \", Style::default().fg(ACCENT).bold()))\n                .borders(Borders::ALL)\n                .border_style(Style::default().fg(ACCENT_DIM)).style",
+          "lineNumber": 333
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "Block::default()\n                .title(Span::styled(\" Overview \", Style::default().fg(ACCENT).bold()))\n                .borders(Borders::ALL).border_style",
+          "lineNumber": 333
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "Block::default()\n                .title(Span::styled(\" Overview \", Style::default().fg(ACCENT).bold())).borders",
+          "lineNumber": 333
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "Block::default().title",
+          "lineNumber": 333
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "Block::default",
+          "lineNumber": 333
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "Span::styled",
+          "lineNumber": 334
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "Style::default().fg(ACCENT).bold",
+          "lineNumber": 334
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "Style::default().fg",
+          "lineNumber": 334
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "Style::default",
+          "lineNumber": 334
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "Style::default().fg",
+          "lineNumber": 336
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "Style::default",
+          "lineNumber": 336
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "Style::default().bg",
+          "lineNumber": 337
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "Style::default",
+          "lineNumber": 337
+        },
+        {
+          "caller": "render_welcome",
+          "callee": "f.render_widget",
+          "lineNumber": 340
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "pulse_color",
+          "lineNumber": 346
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "lines.push",
+          "lineNumber": 366
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Line::from",
+          "lineNumber": 366
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "lines.push",
+          "lineNumber": 373
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Line::from",
+          "lineNumber": 373
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "lines.push",
+          "lineNumber": 374
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Line::from",
+          "lineNumber": 374
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "lines.push",
+          "lineNumber": 381
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Line::from",
+          "lineNumber": 381
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "lines.push",
+          "lineNumber": 382
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Line::from",
+          "lineNumber": 382
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "lines.push",
+          "lineNumber": 383
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Line::from",
+          "lineNumber": 383
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Paragraph::new(lines).block",
+          "lineNumber": 388
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Paragraph::new",
+          "lineNumber": 388
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Block::default()\n                .title(Span::styled(\" System Check \", Style::default().fg(ACCENT).bold()))\n                .borders(Borders::ALL)\n                .border_style(Style::default().fg(ACCENT_DIM)).style",
+          "lineNumber": 390
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Block::default()\n                .title(Span::styled(\" System Check \", Style::default().fg(ACCENT).bold()))\n                .borders(Borders::ALL).border_style",
+          "lineNumber": 390
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Block::default()\n                .title(Span::styled(\" System Check \", Style::default().fg(ACCENT).bold())).borders",
+          "lineNumber": 390
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Block::default().title",
+          "lineNumber": 390
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Block::default",
+          "lineNumber": 390
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Span::styled",
+          "lineNumber": 391
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Style::default().fg(ACCENT).bold",
+          "lineNumber": 391
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Style::default().fg",
+          "lineNumber": 391
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Style::default",
+          "lineNumber": 391
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Style::default().fg",
+          "lineNumber": 393
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Style::default",
+          "lineNumber": 393
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Style::default().bg",
+          "lineNumber": 394
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "Style::default",
+          "lineNumber": 394
+        },
+        {
+          "caller": "render_system_check",
+          "callee": "f.render_widget",
+          "lineNumber": 397
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Layout::default()\n        .direction(Direction::Vertical)\n        .constraints([\n            Constraint::Min(5),\n            Constraint::Length(3),\n        ]).split",
+          "lineNumber": 404
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Layout::default()\n        .direction(Direction::Vertical).constraints",
+          "lineNumber": 404
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Layout::default().direction",
+          "lineNumber": 404
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Layout::default",
+          "lineNumber": 404
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Constraint::Min",
+          "lineNumber": 407
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Constraint::Length",
+          "lineNumber": 408
+        },
+        {
+          "caller": "render_installing",
+          "callee": "pulse_color",
+          "lineNumber": 423
+        },
+        {
+          "caller": "render_installing",
+          "callee": "lines.push",
+          "lineNumber": 424
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Line::from",
+          "lineNumber": 424
+        },
+        {
+          "caller": "render_installing",
+          "callee": "app.logs.iter().enumerate",
+          "lineNumber": 432
+        },
+        {
+          "caller": "render_installing",
+          "callee": "app.logs.iter",
+          "lineNumber": 432
+        },
+        {
+          "caller": "render_installing",
+          "callee": "app.logs.len",
+          "lineNumber": 433
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Span::styled",
+          "lineNumber": 436
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default().fg",
+          "lineNumber": 436
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default",
+          "lineNumber": 436
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Span::styled",
+          "lineNumber": 438
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default().fg",
+          "lineNumber": 440
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default",
+          "lineNumber": 440
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Span::styled",
+          "lineNumber": 443
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default().fg",
+          "lineNumber": 443
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default",
+          "lineNumber": 443
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default().fg(ACCENT).add_modifier",
+          "lineNumber": 447
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default().fg",
+          "lineNumber": 447
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default",
+          "lineNumber": 447
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default().fg",
+          "lineNumber": 449
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default",
+          "lineNumber": 449
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default().fg",
+          "lineNumber": 451
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default",
+          "lineNumber": 451
+        },
+        {
+          "caller": "render_installing",
+          "callee": "lines.push",
+          "lineNumber": 454
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Line::from",
+          "lineNumber": 454
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Paragraph::new(lines)\n        .wrap(Wrap { trim: false }).block",
+          "lineNumber": 457
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Paragraph::new(lines).wrap",
+          "lineNumber": 457
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Paragraph::new",
+          "lineNumber": 457
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Block::default()\n                .title(Span::styled(\" Installing ActivSpot \", Style::default().fg(ACCENT).bold()))\n                .borders(Borders::ALL)\n                .border_style(Style::default().fg(ACCENT_DIM)).style",
+          "lineNumber": 460
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Block::default()\n                .title(Span::styled(\" Installing ActivSpot \", Style::default().fg(ACCENT).bold()))\n                .borders(Borders::ALL).border_style",
+          "lineNumber": 460
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Block::default()\n                .title(Span::styled(\" Installing ActivSpot \", Style::default().fg(ACCENT).bold())).borders",
+          "lineNumber": 460
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Block::default().title",
+          "lineNumber": 460
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Block::default",
+          "lineNumber": 460
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Span::styled",
+          "lineNumber": 461
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default().fg(ACCENT).bold",
+          "lineNumber": 461
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default().fg",
+          "lineNumber": 461
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default",
+          "lineNumber": 461
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default().fg",
+          "lineNumber": 463
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default",
+          "lineNumber": 463
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default().bg",
+          "lineNumber": 464
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default",
+          "lineNumber": 464
+        },
+        {
+          "caller": "render_installing",
+          "callee": "f.render_widget",
+          "lineNumber": 467
+        },
+        {
+          "caller": "render_installing",
+          "callee": "app.logs.iter().filter(|(_, done)| *done).count",
+          "lineNumber": 470
+        },
+        {
+          "caller": "render_installing",
+          "callee": "app.logs.iter().filter",
+          "lineNumber": 470
+        },
+        {
+          "caller": "render_installing",
+          "callee": "app.logs.iter",
+          "lineNumber": 470
+        },
+        {
+          "caller": "render_installing",
+          "callee": "(completed as f64 / TOTAL_STEPS as f64).min",
+          "lineNumber": 472
+        },
+        {
+          "caller": "render_installing",
+          "callee": "\" waiting \".to_string",
+          "lineNumber": 480
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Gauge::default()\n        .block(\n            Block::default()\n                .borders(Borders::ALL)\n                .border_style(Style::default().fg(ACCENT_DIM))\n                .style(Style::default().bg(SURFACE)),\n        )\n        .gauge_style(Style::default().fg(ACCENT).bg(SURFACE))\n        .ratio(ratio).label",
+          "lineNumber": 483
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Gauge::default()\n        .block(\n            Block::default()\n                .borders(Borders::ALL)\n                .border_style(Style::default().fg(ACCENT_DIM))\n                .style(Style::default().bg(SURFACE)),\n        )\n        .gauge_style(Style::default().fg(ACCENT).bg(SURFACE)).ratio",
+          "lineNumber": 483
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Gauge::default()\n        .block(\n            Block::default()\n                .borders(Borders::ALL)\n                .border_style(Style::default().fg(ACCENT_DIM))\n                .style(Style::default().bg(SURFACE)),\n        ).gauge_style",
+          "lineNumber": 483
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Gauge::default().block",
+          "lineNumber": 483
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Gauge::default",
+          "lineNumber": 483
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Block::default()\n                .borders(Borders::ALL)\n                .border_style(Style::default().fg(ACCENT_DIM)).style",
+          "lineNumber": 485
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Block::default()\n                .borders(Borders::ALL).border_style",
+          "lineNumber": 485
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Block::default().borders",
+          "lineNumber": 485
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Block::default",
+          "lineNumber": 485
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default().fg",
+          "lineNumber": 487
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default",
+          "lineNumber": 487
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default().bg",
+          "lineNumber": 488
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default",
+          "lineNumber": 488
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default().fg(ACCENT).bg",
+          "lineNumber": 490
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default().fg",
+          "lineNumber": 490
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default",
+          "lineNumber": 490
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Span::styled",
+          "lineNumber": 492
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default().fg(TEXT).bold",
+          "lineNumber": 492
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default().fg",
+          "lineNumber": 492
+        },
+        {
+          "caller": "render_installing",
+          "callee": "Style::default",
+          "lineNumber": 492
+        },
+        {
+          "caller": "render_installing",
+          "callee": "f.render_widget",
+          "lineNumber": 494
+        },
+        {
+          "caller": "render_success",
+          "callee": "pulse_color",
+          "lineNumber": 500
+        },
+        {
+          "caller": "render_success",
+          "callee": "Color::Rgb",
+          "lineNumber": 500
+        },
+        {
+          "caller": "render_success",
+          "callee": "Paragraph::new(lines)\n        .alignment(Alignment::Left)\n        .wrap(Wrap { trim: false }).block",
+          "lineNumber": 537
+        },
+        {
+          "caller": "render_success",
+          "callee": "Paragraph::new(lines)\n        .alignment(Alignment::Left).wrap",
+          "lineNumber": 537
+        },
+        {
+          "caller": "render_success",
+          "callee": "Paragraph::new(lines).alignment",
+          "lineNumber": 537
+        },
+        {
+          "caller": "render_success",
+          "callee": "Paragraph::new",
+          "lineNumber": 537
+        },
+        {
+          "caller": "render_success",
+          "callee": "Block::default()\n                .title(Span::styled(\" ✓ Success \", Style::default().fg(SUCCESS).bold()))\n                .borders(Borders::ALL)\n                .border_style(Style::default().fg(SUCCESS)).style",
+          "lineNumber": 541
+        },
+        {
+          "caller": "render_success",
+          "callee": "Block::default()\n                .title(Span::styled(\" ✓ Success \", Style::default().fg(SUCCESS).bold()))\n                .borders(Borders::ALL).border_style",
+          "lineNumber": 541
+        },
+        {
+          "caller": "render_success",
+          "callee": "Block::default()\n                .title(Span::styled(\" ✓ Success \", Style::default().fg(SUCCESS).bold())).borders",
+          "lineNumber": 541
+        },
+        {
+          "caller": "render_success",
+          "callee": "Block::default().title",
+          "lineNumber": 541
+        },
+        {
+          "caller": "render_success",
+          "callee": "Block::default",
+          "lineNumber": 541
+        },
+        {
+          "caller": "render_success",
+          "callee": "Span::styled",
+          "lineNumber": 542
+        },
+        {
+          "caller": "render_success",
+          "callee": "Style::default().fg(SUCCESS).bold",
+          "lineNumber": 542
+        },
+        {
+          "caller": "render_success",
+          "callee": "Style::default().fg",
+          "lineNumber": 542
+        },
+        {
+          "caller": "render_success",
+          "callee": "Style::default",
+          "lineNumber": 542
+        },
+        {
+          "caller": "render_success",
+          "callee": "Style::default().fg",
+          "lineNumber": 544
+        },
+        {
+          "caller": "render_success",
+          "callee": "Style::default",
+          "lineNumber": 544
+        },
+        {
+          "caller": "render_success",
+          "callee": "Style::default().bg",
+          "lineNumber": 545
+        },
+        {
+          "caller": "render_success",
+          "callee": "Style::default",
+          "lineNumber": 545
+        },
+        {
+          "caller": "render_success",
+          "callee": "f.render_widget",
+          "lineNumber": 548
+        },
+        {
+          "caller": "render_error",
+          "callee": "app.error_message.as_deref().unwrap_or",
+          "lineNumber": 554
+        },
+        {
+          "caller": "render_error",
+          "callee": "app.error_message.as_deref",
+          "lineNumber": 554
+        },
+        {
+          "caller": "render_error",
+          "callee": "Paragraph::new(lines).block",
+          "lineNumber": 574
+        },
+        {
+          "caller": "render_error",
+          "callee": "Paragraph::new",
+          "lineNumber": 574
+        },
+        {
+          "caller": "render_error",
+          "callee": "Block::default()\n                .title(Span::styled(\" ✗ Error \", Style::default().fg(ERROR).bold()))\n                .borders(Borders::ALL)\n                .border_style(Style::default().fg(ERROR)).style",
+          "lineNumber": 576
+        },
+        {
+          "caller": "render_error",
+          "callee": "Block::default()\n                .title(Span::styled(\" ✗ Error \", Style::default().fg(ERROR).bold()))\n                .borders(Borders::ALL).border_style",
+          "lineNumber": 576
+        },
+        {
+          "caller": "render_error",
+          "callee": "Block::default()\n                .title(Span::styled(\" ✗ Error \", Style::default().fg(ERROR).bold())).borders",
+          "lineNumber": 576
+        },
+        {
+          "caller": "render_error",
+          "callee": "Block::default().title",
+          "lineNumber": 576
+        },
+        {
+          "caller": "render_error",
+          "callee": "Block::default",
+          "lineNumber": 576
+        },
+        {
+          "caller": "render_error",
+          "callee": "Span::styled",
+          "lineNumber": 577
+        },
+        {
+          "caller": "render_error",
+          "callee": "Style::default().fg(ERROR).bold",
+          "lineNumber": 577
+        },
+        {
+          "caller": "render_error",
+          "callee": "Style::default().fg",
+          "lineNumber": 577
+        },
+        {
+          "caller": "render_error",
+          "callee": "Style::default",
+          "lineNumber": 577
+        },
+        {
+          "caller": "render_error",
+          "callee": "Style::default().fg",
+          "lineNumber": 579
+        },
+        {
+          "caller": "render_error",
+          "callee": "Style::default",
+          "lineNumber": 579
+        },
+        {
+          "caller": "render_error",
+          "callee": "Style::default().bg",
+          "lineNumber": 580
+        },
+        {
+          "caller": "render_error",
+          "callee": "Style::default",
+          "lineNumber": 580
+        },
+        {
+          "caller": "render_error",
+          "callee": "f.render_widget",
+          "lineNumber": 583
+        },
+        {
+          "caller": "render_footer",
+          "callee": "keys.iter().enumerate",
+          "lineNumber": 598
+        },
+        {
+          "caller": "render_footer",
+          "callee": "keys.iter",
+          "lineNumber": 598
+        },
+        {
+          "caller": "render_footer",
+          "callee": "spans.push",
+          "lineNumber": 600
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Span::styled",
+          "lineNumber": 600
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Style::default().fg",
+          "lineNumber": 600
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Style::default",
+          "lineNumber": 600
+        },
+        {
+          "caller": "render_footer",
+          "callee": "spans.push",
+          "lineNumber": 602
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Span::styled",
+          "lineNumber": 602
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Style::default().fg(BG).bg(ACCENT_DIM).bold",
+          "lineNumber": 604
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Style::default().fg(BG).bg",
+          "lineNumber": 604
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Style::default().fg",
+          "lineNumber": 604
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Style::default",
+          "lineNumber": 604
+        },
+        {
+          "caller": "render_footer",
+          "callee": "spans.push",
+          "lineNumber": 606
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Span::styled",
+          "lineNumber": 606
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Style::default().fg",
+          "lineNumber": 608
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Style::default",
+          "lineNumber": 608
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Paragraph::new(Line::from(spans))\n        .alignment(Alignment::Left).block",
+          "lineNumber": 612
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Paragraph::new(Line::from(spans)).alignment",
+          "lineNumber": 612
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Paragraph::new",
+          "lineNumber": 612
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Line::from",
+          "lineNumber": 612
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Block::default()\n                .borders(Borders::TOP)\n                .border_style(Style::default().fg(ACCENT_DIM)).style",
+          "lineNumber": 615
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Block::default()\n                .borders(Borders::TOP).border_style",
+          "lineNumber": 615
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Block::default().borders",
+          "lineNumber": 615
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Block::default",
+          "lineNumber": 615
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Style::default().fg",
+          "lineNumber": 617
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Style::default",
+          "lineNumber": 617
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Style::default().bg",
+          "lineNumber": 618
+        },
+        {
+          "caller": "render_footer",
+          "callee": "Style::default",
+          "lineNumber": 618
+        },
+        {
+          "caller": "render_footer",
+          "callee": "f.render_widget",
+          "lineNumber": 621
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 17,
+        "classCount": 2
+      }
+    },
+    {
+      "path": "scripts/quickshell/WindowRegistry.js",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 82,
+      "nonEmptyLines": 65,
+      "functions": [
+        {
+          "name": "getScale",
+          "startLine": 3,
+          "endLine": 17,
+          "params": [
+            "mw",
+            "userScale"
+          ]
+        },
+        {
+          "name": "s",
+          "startLine": 20,
+          "endLine": 22,
+          "params": [
+            "val",
+            "scale"
+          ]
+        },
+        {
+          "name": "getLayout",
+          "startLine": 25,
+          "endLine": 64,
+          "params": [
+            "name",
+            "mx",
+            "my",
+            "mw",
+            "mh",
+            "userScale"
+          ]
+        },
+        {
+          "name": "getPopupLayout",
+          "startLine": 69,
+          "endLine": 82,
+          "params": [
+            "mw",
+            "userScale"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "getScale",
+          "callee": "Math.max",
+          "lineNumber": 9
+        },
+        {
+          "caller": "getScale",
+          "callee": "Math.pow",
+          "lineNumber": 9
+        },
+        {
+          "caller": "getScale",
+          "callee": "Math.pow",
+          "lineNumber": 12
+        },
+        {
+          "caller": "s",
+          "callee": "Math.round",
+          "lineNumber": 21
+        },
+        {
+          "caller": "getLayout",
+          "callee": "getScale",
+          "lineNumber": 26
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 30
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 30
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 30
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 30
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 32
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 32
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 32
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 32
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 36
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 36
+        },
+        {
+          "caller": "getLayout",
+          "callee": "Math.floor",
+          "lineNumber": 36
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 36
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 36
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 39
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 39
+        },
+        {
+          "caller": "getLayout",
+          "callee": "Math.floor",
+          "lineNumber": 39
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 39
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 39
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 42
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 42
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 42
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 42
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 44
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 44
+        },
+        {
+          "caller": "getLayout",
+          "callee": "Math.floor",
+          "lineNumber": 44
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 44
+        },
+        {
+          "caller": "getLayout",
+          "callee": "Math.floor",
+          "lineNumber": 44
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 44
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 45
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 45
+        },
+        {
+          "caller": "getLayout",
+          "callee": "Math.floor",
+          "lineNumber": 45
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 45
+        },
+        {
+          "caller": "getLayout",
+          "callee": "Math.floor",
+          "lineNumber": 45
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 45
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 46
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 46
+        },
+        {
+          "caller": "getLayout",
+          "callee": "Math.floor",
+          "lineNumber": 46
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 46
+        },
+        {
+          "caller": "getLayout",
+          "callee": "Math.floor",
+          "lineNumber": 46
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 46
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 47
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 47
+        },
+        {
+          "caller": "getLayout",
+          "callee": "Math.floor",
+          "lineNumber": 47
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 47
+        },
+        {
+          "caller": "getLayout",
+          "callee": "Math.floor",
+          "lineNumber": 47
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 47
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 51
+        },
+        {
+          "caller": "getLayout",
+          "callee": "Math.floor",
+          "lineNumber": 51
+        },
+        {
+          "caller": "getLayout",
+          "callee": "s",
+          "lineNumber": 51
+        },
+        {
+          "caller": "getPopupLayout",
+          "callee": "getScale",
+          "lineNumber": 70
+        },
+        {
+          "caller": "getPopupLayout",
+          "callee": "s",
+          "lineNumber": 73
+        },
+        {
+          "caller": "getPopupLayout",
+          "callee": "s",
+          "lineNumber": 74
+        },
+        {
+          "caller": "getPopupLayout",
+          "callee": "s",
+          "lineNumber": 75
+        },
+        {
+          "caller": "getPopupLayout",
+          "callee": "s",
+          "lineNumber": 78
+        },
+        {
+          "caller": "getPopupLayout",
+          "callee": "s",
+          "lineNumber": 79
+        },
+        {
+          "caller": "getPopupLayout",
+          "callee": "s",
+          "lineNumber": 80
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 4,
+        "classCount": 0
+      }
+    }
+  ]
+}

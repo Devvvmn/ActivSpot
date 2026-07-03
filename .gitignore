@@ -35,6 +35,17 @@ scripts/addons-src/float-mode/
 scripts/hypr-dock/
 plugins/float-mode/
 
+# Installed addon copies — generated per-machine by plugin_install.sh from a
+# .qsplugin. Never track these (they leak what's installed and duplicate the
+# addons-src/ sources). example-addon is the one deliberate exception: it stays
+# tracked as the reference package format.
+plugins/*
+!plugins/example-addon/
+
+# Built addon packages — reproducible from scripts/addons-src/ via pack_addon.sh.
+# Distribute free addons via GitHub Releases instead of committing binaries.
+dist/
+
 # Node
 node_modules/
 **/node_modules/

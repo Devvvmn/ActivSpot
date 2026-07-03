@@ -74,6 +74,9 @@ async function pluginDetails(ids) {
         hasWindow: !!m?.window,
         hasBarWidget: !!m?.entryPoints?.barWidget,
         hasHooks: !!m?.hooks,
+        settings: Array.isArray(m?.settings) ? m.settings : [],
+        desktopWidget: !!m?.desktopWidget,
+        multiInstance: !!m?.multiInstance,
       };
     }),
   );
@@ -103,7 +106,12 @@ async function inventory() {
 }
 
 const PLUGIN_INSTALL = join(HYPR_DIR, "scripts/plugin_install.sh");
+const PLUGIN_SETTINGS = join(HYPR_DIR, "plugin-settings.json");
+const DESKTOP_WIDGETS = join(os.homedir(), ".cache/quickshell/desktop_widgets.json");
 const VALID_PLUGIN_ID = /^[a-z0-9][a-z0-9._-]*$/;
+// Extra desktop-widget instances are keyed "<pid>#<n>" (n >= 2). The base
+// instance uses the bare plugin id and cannot be removed.
+const VALID_INSTANCE_ID = /^[a-z0-9][a-z0-9._-]*#[0-9]+$/;
 
 function uninstallPlugin(id) {
   return new Promise((resolve) => {
@@ -162,6 +170,17 @@ async function colorsPalette() {
 
 const WEATHER_JSON = join(os.homedir(), ".cache/quickshell/weather/weather.json");
 const RELOAD_SCRIPT = join(HYPR_DIR, "scripts/qs_reload.sh");
+const CARD_SKINS_SCRIPT = join(HYPR_DIR, "scripts/card_skins.sh");
+
+function cardSkins() {
+  return new Promise((resolve) => {
+    exec(`bash ${JSON.stringify(CARD_SKINS_SCRIPT)} list`, { timeout: 10000 }, (err, stdout) => {
+      if (err) return resolve([]);
+      try { resolve(JSON.parse(stdout || "[]")); }
+      catch { resolve([]); }
+    });
+  });
+}
 
 function reloadShell() {
   return new Promise((resolve) => {
@@ -244,6 +263,53 @@ const server = createServer(async (req, res) => {
       const r = await uninstallPlugin(id);
       return send(res, r.ok ? 200 : 500, r);
     }
+    if (pathname === "/api/plugin-settings" && req.method === "GET") {
+      return send(res, 200, (await readJson(PLUGIN_SETTINGS, {})) || {});
+    }
+    if (pathname.startsWith("/api/plugin-settings/") && req.method === "PUT") {
+      const id = decodeURIComponent(pathname.slice("/api/plugin-settings/".length));
+      if (!VALID_PLUGIN_ID.test(id)) return send(res, 400, { error: "invalid plugin id" });
+      const body = await readBody(req);
+      if (!body || typeof body !== "object" || Array.isArray(body))
+        return send(res, 400, { error: "expected an object" });
+      const all = (await readJson(PLUGIN_SETTINGS, {})) || {};
+      all[id] = body;
+      await writeFile(PLUGIN_SETTINGS, JSON.stringify(all, null, 2) + "\n", "utf8");
+      return send(res, 200, { ok: true });
+    }
+    // ── desktop-widget instances (multiInstance plugins) ──────────────────────
+    // Instance registry lives in the QML store file ~/.cache/quickshell/
+    // desktop_widgets.json (keys = instance ids). DesktopWidgetStore watches it,
+    // so adding/removing a key makes a widget appear/disappear live.
+    if (pathname === "/api/desktop-widgets" && req.method === "GET") {
+      return send(res, 200, (await readJson(DESKTOP_WIDGETS, {})) || {});
+    }
+    if (pathname.startsWith("/api/plugin-instances/") && req.method === "POST") {
+      const id = decodeURIComponent(pathname.slice("/api/plugin-instances/".length));
+      if (!VALID_PLUGIN_ID.test(id)) return send(res, 400, { error: "invalid plugin id" });
+      const store = (await readJson(DESKTOP_WIDGETS, {})) || {};
+      let n = 2;
+      while (store[`${id}#${n}`] !== undefined) n++;
+      const instId = `${id}#${n}`;
+      store[instId] = { enabled: true };   // no x/y → host uses staggered default
+      await writeFile(DESKTOP_WIDGETS, JSON.stringify(store, null, 2) + "\n", "utf8");
+      return send(res, 200, { ok: true, instId });
+    }
+    if (pathname.startsWith("/api/plugin-instances/") && req.method === "DELETE") {
+      const instId = decodeURIComponent(pathname.slice("/api/plugin-instances/".length));
+      if (!VALID_INSTANCE_ID.test(instId))
+        return send(res, 400, { error: "can only remove extra instances (<id>#<n>)" });
+      const store = (await readJson(DESKTOP_WIDGETS, {})) || {};
+      delete store[instId];
+      await writeFile(DESKTOP_WIDGETS, JSON.stringify(store, null, 2) + "\n", "utf8");
+      // drop its saved settings too
+      const settings = (await readJson(PLUGIN_SETTINGS, {})) || {};
+      if (settings[instId] !== undefined) {
+        delete settings[instId];
+        await writeFile(PLUGIN_SETTINGS, JSON.stringify(settings, null, 2) + "\n", "utf8");
+      }
+      return send(res, 200, { ok: true });
+    }
     if (pathname === "/api/keybinds" && req.method === "GET") {
       return send(res, 200, await parseKeybinds());
     }
@@ -265,6 +331,9 @@ const server = createServer(async (req, res) => {
     if (pathname === "/api/colors" && req.method === "GET") {
       const c = await colorsPalette();
       return send(res, 200, c || {});
+    }
+    if (pathname === "/api/cardskins" && req.method === "GET") {
+      return send(res, 200, await cardSkins());
     }
     if (pathname === "/api/weather" && req.method === "GET") {
       const w = await readJson(WEATHER_JSON, null);

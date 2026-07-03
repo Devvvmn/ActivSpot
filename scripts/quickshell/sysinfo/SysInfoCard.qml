@@ -19,59 +19,127 @@ Item {
         Quickshell.execDetached(["sh", "-c", "echo 'close' > /tmp/qs_widget_state"])
     }
 
-    // ── Skin — swap this object to change the entire card look ───────────────
+    // ── Skin system ─────────────────────────────────────────────────────────
+    // Skins are JSON files (sysinfo/skins/*.json + addon `cardSkin` manifests),
+    // discovered by scripts/card_skins.sh. The active id comes from
+    // settings.json → `sysinfoSkin`. The `skin` object below maps the loaded
+    // JSON onto typed properties, falling back to Carbon for any missing key —
+    // so the card never breaks if a skin is incomplete or the scan fails.
+    property string activeSkinId: "carbon"
+    property var    skinList:     []
+    property var    skinData:     ({})
+
+    function _str(v, d) { return (typeof v === "string" && v.length) ? v : d }
+    function _num(v, d) { return (typeof v === "number" && !isNaN(v)) ? v : d }
+
+    function _recomputeSkin() {
+        var found = null
+        for (var i = 0; i < skinList.length; i++) {
+            if (skinList[i] && skinList[i].id === activeSkinId) { found = skinList[i]; break }
+        }
+        // Fall back to the first skin (or {}) if the active id isn't found.
+        skinData = found ? found : (skinList.length ? skinList[0] : ({}))
+    }
+
     QtObject {
         id: skin
 
         // Identity
-        readonly property string name:       "Carbon"
-        readonly property string edition:    "© CARBON FOUNDRY · MMXXVI"
-        readonly property string rarity:     "RARE · 03/100"
+        readonly property string name:       root._str(root.skinData.name, "Carbon")
+        readonly property string edition:    root._str(root.skinData.edition, "© CARBON FOUNDRY · MMXXVI")
+        readonly property string rarity:     root._str(root.skinData.rarity, "RARE · 03/100")
         readonly property string logoSource: Qt.resolvedUrl("arch.svg")
-        readonly property string fontFamily: "JetBrains Mono"
+        readonly property string fontFamily: root._str(root.skinData.fontFamily, "JetBrains Mono")
 
         // Base palette
-        readonly property color text:    "#f5f5f5"
-        readonly property color muted:   "#888888"
-        readonly property color subtle:  "#555555"
-        readonly property color accent:  "#e8e8e8"   // silver
-        readonly property color line:    Qt.rgba(1, 1, 1, 0.06)
-        readonly property color lineHi:  Qt.rgba(1, 1, 1, 0.12)
+        readonly property color text:    root._str(root.skinData.text,   "#f5f5f5")
+        readonly property color muted:   root._str(root.skinData.muted,  "#888888")
+        readonly property color subtle:  root._str(root.skinData.subtle, "#555555")
+        readonly property color accent:  root._str(root.skinData.accent, "#e8e8e8")
+        readonly property color line:    root._str(root.skinData.line,   "#0fffffff")
+        readonly property color lineHi:  root._str(root.skinData.lineHi, "#1fffffff")
 
         // Card body gradient
-        readonly property color bodyTop:    "#1f1f1f"
-        readonly property color bodyBottom: "#0b0b0b"
+        readonly property color bodyTop:    root._str(root.skinData.bodyTop,    "#1f1f1f")
+        readonly property color bodyBottom: root._str(root.skinData.bodyBottom, "#0b0b0b")
 
         // Badge (MEM%) gradient
-        readonly property color badgeTop:    "#2e2e2e"
-        readonly property color badgeBottom: "#141414"
+        readonly property color badgeTop:    root._str(root.skinData.badgeTop,    "#2e2e2e")
+        readonly property color badgeBottom: root._str(root.skinData.badgeBottom, "#141414")
 
         // Logo window gradient
-        readonly property color logoWinTop:    "#1a1a1a"
-        readonly property color logoWinBottom: "#060606"
+        readonly property color logoWinTop:    root._str(root.skinData.logoWinTop,    "#1a1a1a")
+        readonly property color logoWinBottom: root._str(root.skinData.logoWinBottom, "#060606")
 
         // Disk bar gradient (left → right)
-        readonly property color diskBarStart: "#d8d8d8"
-        readonly property color diskBarEnd:   "#f5f5f5"
+        readonly property color diskBarStart: root._str(root.skinData.diskBarStart, "#d8d8d8")
+        readonly property color diskBarEnd:   root._str(root.skinData.diskBarEnd,   "#f5f5f5")
 
         // Holo background tints (Canvas rgba strings)
-        readonly property string holoTop:         "rgba(232,232,232,0.07)"
-        readonly property string holoBottomLeft:  "rgba(96,165,250,0.08)"
-        readonly property string holoBottomRight: "rgba(134,239,172,0.05)"
+        readonly property string holoTop:         root._str(root.skinData.holoTop,         "rgba(232,232,232,0.07)")
+        readonly property string holoBottomLeft:  root._str(root.skinData.holoBottomLeft,  "rgba(96,165,250,0.08)")
+        readonly property string holoBottomRight: root._str(root.skinData.holoBottomRight, "rgba(134,239,172,0.05)")
 
         // Glow behind logo
-        readonly property string logoGlow: "rgba(232,232,232,0.16)"
+        readonly property string logoGlow: root._str(root.skinData.logoGlow, "rgba(232,232,232,0.16)")
 
         // Grid texture line opacity
-        readonly property real gridOpacity: 0.03
+        readonly property real gridOpacity: root._num(root.skinData.gridOpacity, 0.03)
 
         // Foil sheen intensities
-        readonly property real foilCenter: 0.16
-        readonly property real foilEdge:   0.04
+        readonly property real foilCenter: root._num(root.skinData.foilCenter, 0.16)
+        readonly property real foilEdge:   root._num(root.skinData.foilEdge,   0.04)
 
         // Parallax tilt strength (degrees)
-        readonly property real tiltStrengthX: 6
-        readonly property real tiltStrengthY: 7
+        readonly property real tiltStrengthX: root._num(root.skinData.tiltStrengthX, 6)
+        readonly property real tiltStrengthY: root._num(root.skinData.tiltStrengthY, 7)
+    }
+
+    // ── Skin IO ───────────────────────────────────────────────────────────────
+    // Active skin id from settings.json.
+    Process {
+        id: skinSettingsReader
+        running: true
+        command: ["bash", "-c",
+            "jq -r '.sysinfoSkin // \"carbon\"' ~/.config/hypr/settings.json 2>/dev/null || echo carbon"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var v = this.text.trim() || "carbon"
+                if (root.activeSkinId !== v) { root.activeSkinId = v }
+                root._recomputeSkin()
+            }
+        }
+    }
+
+    // Full skin list (built-in + addon) via the shared scanner.
+    Process {
+        id: skinListReader
+        running: true
+        command: ["bash", "-c",
+            "bash ~/.config/hypr/scripts/card_skins.sh list 2>/dev/null || echo '[]'"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try { root.skinList = JSON.parse(this.text.trim() || "[]") }
+                catch (e) { root.skinList = [] }
+                root._recomputeSkin()
+            }
+        }
+    }
+
+    // Live reload on settings change (skin switch from config-ui).
+    Process {
+        id: skinSettingsWatcher
+        running: true
+        command: ["bash", "-c",
+            "while [ ! -f ~/.config/hypr/settings.json ]; do sleep 1; done; " +
+            "inotifywait -qq -e modify,close_write,move_self ~/.config/hypr/settings.json 2>/dev/null"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                skinSettingsReader.running = false; skinSettingsReader.running = true
+                skinListReader.running     = false; skinListReader.running     = true
+                skinSettingsWatcher.running = false; skinSettingsWatcher.running = true
+            }
+        }
     }
 
     // ── System data ───────────────────────────────────────────────────────────
@@ -235,6 +303,9 @@ Item {
                 property string h0: skin.holoTop
                 property string h1: skin.holoBottomLeft
                 property string h2: skin.holoBottomRight
+                onH0Changed: requestPaint()
+                onH1Changed: requestPaint()
+                onH2Changed: requestPaint()
                 onPaint: {
                     let ctx = getContext("2d");
                     ctx.clearRect(0, 0, width, height);
@@ -370,6 +441,7 @@ Item {
                         Canvas {
                             anchors.fill: parent
                             property real gridOp: skin.gridOpacity
+                            onGridOpChanged: requestPaint()
                             onPaint: {
                                 let ctx = getContext("2d");
                                 ctx.clearRect(0, 0, width, height);
@@ -385,6 +457,7 @@ Item {
                         Canvas {
                             anchors.fill: parent
                             property string glow: skin.logoGlow
+                            onGlowChanged: requestPaint()
                             onPaint: {
                                 let ctx = getContext("2d");
                                 ctx.clearRect(0, 0, width, height);

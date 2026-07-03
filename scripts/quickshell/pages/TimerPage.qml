@@ -54,7 +54,7 @@ Item {
                             text: island.timerRunning ? "Pause" : "Start"
                             font.family: Theme.fontUI
                             font.pixelSize: island.s(12)
-                            font.weight: Font.SemiBold
+                            font.weight: Font.DemiBold
                             color: island.timerRunning ? island.red : island.mauve
                             Behavior on color { ColorAnimation { duration: 180 } }
                         }

@@ -10,5 +10,7 @@ StashPage 1.0 StashPage.qml
 AppletPickerPage 1.0 AppletPickerPage.qml
 GamePage 1.0 GamePage.qml
 HelloPage 1.0 HelloPage.qml
+ControlPage 1.0 ControlPage.qml
 internal WeatherScene WeatherScene.qml
 internal FlipDigit FlipDigit.qml
+ActivityPage 1.0 ActivityPage.qml

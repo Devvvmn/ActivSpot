@@ -1,0 +1,9 @@
+{
+  "id": "now-playing",
+  "name": "Now Playing",
+  "version": "1.0.0",
+  "author": "dxvmxn",
+  "description": "Wallpaper-level synced-lyrics widget: fetches LRC lyrics from lrclib.net and scrolls them karaoke-style, highlighting the current line by playback position.",
+  "desktopWidget": "NowPlayingWidget.qml",
+  "scripts": ["nowplaying.sh", "lyrics.sh"]
+}

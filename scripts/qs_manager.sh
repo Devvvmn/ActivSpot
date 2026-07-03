@@ -19,6 +19,7 @@ NETWORK_MODE_FILE="$QS_NETWORK_CACHE/mode"
 ACTION="$1"
 TARGET="$2"
 SUBTARGET="$3"
+ANCHOR="$4"   # optional: screen-x of the triggering applet (position-following popups)
 
 # -----------------------------------------------------------------------------
 # FAST PATH: WORKSPACE SWITCHING
@@ -178,7 +179,7 @@ if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
                     echo "close" > "$IPC_FILE"
                 else
                     echo "$SUBTARGET" > "$NETWORK_MODE_FILE"
-                    echo "$TARGET" > "$IPC_FILE"
+                    echo "$TARGET${ANCHOR:+:$ANCHOR}" > "$IPC_FILE"
                 fi
             else
                 echo "close" > "$IPC_FILE"
@@ -186,7 +187,7 @@ if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
         else
             handle_network_prep
             [[ -n "$SUBTARGET" ]] && echo "$SUBTARGET" > "$NETWORK_MODE_FILE"
-            echo "$TARGET" > "$IPC_FILE"
+            echo "$TARGET${ANCHOR:+:$ANCHOR}" > "$IPC_FILE"
         fi
         exit 0
     fi

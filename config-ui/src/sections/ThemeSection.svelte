@@ -1,5 +1,6 @@
 <script lang="ts">
-  import type { Settings } from "../api";
+  import { onMount } from "svelte";
+  import { api, type Settings, type CardSkin } from "../api";
   import Sub from "../components/Sub.svelte";
   import Row from "../components/Row.svelte";
   import Toggle from "../components/Toggle.svelte";
@@ -9,6 +10,12 @@
   export let s: Settings;
   export let set: (p: Partial<Settings>) => void;
   export let palette: Record<string, string> = {};
+
+  let cardSkins: CardSkin[] = [];
+  onMount(() => {
+    api.cardSkins().then((sk) => (cardSkins = sk)).catch(() => {});
+  });
+  $: activeSkin = s.sysinfoSkin ?? "carbon";
 
   const VARIANTS = [
     { id: "mocha",    name: "Mocha",    desc: "Warm night",      colors: ["#1e1e2e","#cba6f7","#89b4fa","#fab387"] },
@@ -53,14 +60,35 @@
     </div>
   </Sub>
 
-  <Sub num={2} title="Interface scale" desc="Global multiplier from 0.5× to 2.0×. Applies without restarting the shell.">
+  <Sub num={2} title="System card skin" desc="Skin for the system-info collectible card. Install more as addons (.qsplugin with a cardSkin manifest field) — they appear here automatically.">
+    {#if cardSkins.length === 0}
+      <div class="empty">No card skins detected.</div>
+    {:else}
+      <div class="variant-grid">
+        {#each cardSkins as sk}
+          <button type="button" class="variant" class:active={activeSkin === sk.id} on:click={() => set({ sysinfoSkin: sk.id })}>
+            <div class="stripe">
+              <span style="background:{sk.bodyTop || '#1f1f1f'}" />
+              <span style="background:{sk.accent || '#e8e8e8'}" />
+              <span style="background:{sk.diskBarStart || '#d8d8d8'}" />
+              <span style="background:{sk.bodyBottom || '#0b0b0b'}" />
+            </div>
+            <div class="name">{sk.name}{#if !sk.builtin}<span class="addon-badge">addon</span>{/if}</div>
+            <div class="desc">{sk.rarity || ""}</div>
+          </button>
+        {/each}
+      </div>
+    {/if}
+  </Sub>
+
+  <Sub num={3} title="Interface scale" desc="Global multiplier from 0.5× to 2.0×. Applies without restarting the shell.">
     <Row label="UI scale" code="qs.uiScale">
       <Slider value={+(s.uiScale ?? 1).toFixed(2)} min={0.5} max={2} step={0.05} unit="×"
               onChange={(v) => set({ uiScale: v })} />
     </Row>
   </Sub>
 
-  <Sub num={3} title="Palette overrides" desc="Pin individual qs_colors.json tokens. Empty values fall back to matugen output.">
+  <Sub num={4} title="Palette overrides" desc="Pin individual qs_colors.json tokens. Empty values fall back to matugen output.">
     <svelte:fragment slot="right">
       {#if Object.keys(overrides).length > 0}
         <button class="btn ghost" on:click={() => set({ theme: { ...theme, overrides: {} } })}>
@@ -87,7 +115,7 @@
     {/if}
   </Sub>
 
-  <Sub num={4} title="Wallpaper & startup">
+  <Sub num={5} title="Wallpaper & startup">
     <Row label="Wallpaper directory" hint="Scanned by the wallpaper picker">
       <input type="text" value={s.wallpaperDir || ""} on:input={(e) => set({ wallpaperDir: e.currentTarget.value })} style="width:320px" />
     </Row>

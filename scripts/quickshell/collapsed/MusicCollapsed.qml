@@ -44,8 +44,8 @@ Row {
     // Title + artist
     ColumnLayout {
         spacing: -1; anchors.verticalCenter: parent.verticalCenter
-        Text { text: island.musicData.title || "Unknown"; font.family: Theme.fontUI; font.pixelSize: island.s(12); font.weight: Font.SemiBold; color: island.text; Layout.maximumWidth: island.s(200); elide: Text.ElideRight }
-        Text { text: island.musicData.artist || ""; visible: !!island.musicData.artist; font.family: Theme.fontUI; font.pixelSize: island.s(10); font.weight: Font.Regular; color: island.subtext0; Layout.maximumWidth: island.s(200); elide: Text.ElideRight }
+        Text { text: island.musicData.title || "Unknown"; font.family: Theme.fontUI; font.pixelSize: island.s(12); font.weight: Font.DemiBold; color: island.text; Layout.maximumWidth: island.s(200); elide: Text.ElideRight }
+        Text { text: island.musicData.artist || ""; visible: !!island.musicData.artist; font.family: Theme.fontUI; font.pixelSize: island.s(10); font.weight: Font.Normal; color: island.subtext0; Layout.maximumWidth: island.s(200); elide: Text.ElideRight }
     }
 
     // Playback controls

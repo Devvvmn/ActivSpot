@@ -671,6 +671,17 @@ textarea {
   text-transform: uppercase;
 }
 .variant.active .desc { color: #000; opacity: 0.7; }
+.variant .name .addon-badge {
+  margin-left: 6px;
+  padding: 1px 5px;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #000;
+  vertical-align: middle;
+}
 
 /* Swatches */
 .swatch-grid {

@@ -1,0 +1,25 @@
+{
+  "projectRoot": "/home/dxvmxn/.config/hypr",
+  "batchFiles": [
+    {"path": "config-ui/src/components/Chip.svelte", "language": "svelte", "sizeLines": 8, "fileCategory": "markup"},
+    {"path": "config-ui/src/components/PaletteCard.svelte", "language": "svelte", "sizeLines": 40, "fileCategory": "markup"},
+    {"path": "config-ui/src/components/Row.svelte", "language": "svelte", "sizeLines": 14, "fileCategory": "markup"},
+    {"path": "config-ui/src/components/Slider.svelte", "language": "svelte", "sizeLines": 20, "fileCategory": "markup"},
+    {"path": "config-ui/src/components/Sub.svelte", "language": "svelte", "sizeLines": 19, "fileCategory": "markup"},
+    {"path": "config-ui/src/components/Toggle.svelte", "language": "svelte", "sizeLines": 15, "fileCategory": "markup"},
+    {"path": "config-ui/src/sections/AddonsSection.svelte", "language": "svelte", "sizeLines": 134, "fileCategory": "markup"}
+  ],
+  "batchImportData": {
+    "config-ui/src/components/Chip.svelte": [],
+    "config-ui/src/components/PaletteCard.svelte": [],
+    "config-ui/src/components/Row.svelte": [],
+    "config-ui/src/components/Slider.svelte": [],
+    "config-ui/src/components/Sub.svelte": [],
+    "config-ui/src/components/Toggle.svelte": [],
+    "config-ui/src/sections/AddonsSection.svelte": [
+      "config-ui/src/api.ts",
+      "config-ui/src/components/Sub.svelte",
+      "config-ui/src/components/Icon.svelte"
+    ]
+  }
+}

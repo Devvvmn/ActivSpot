@@ -40,15 +40,20 @@ Item {
         { id: "avatar",    label: "Profile",     icon: "󰀄" },
     ]
 
-    // Full registry: built-ins + installed plugins
+    // Full bar registry: built-ins + installed plugins that declare a bar widget.
+    // Desktop-only widgets (no entryPoints.barWidget) are excluded here — they
+    // get their own section below.
     readonly property var registry: {
-        let pluginEntries = PluginLoader.plugins.map(p => ({
-            id:    "plugin-" + p.id,
-            label: p.name,
-            icon:  "󰐱"
-        }))
+        let pluginEntries = PluginLoader.plugins
+            .filter(p => p.entryPoints && p.entryPoints.barWidget)
+            .map(p => ({ id: "plugin-" + p.id, label: p.name, icon: "󰐱" }))
         return _builtinRegistry.concat(pluginEntries)
     }
+
+    // Installed desktop widgets (manifest "desktopWidget"), toggled here.
+    readonly property var desktopWidgets: PluginLoader.plugins
+        .filter(p => p.desktopWidget)
+        .map(p => ({ id: p.id, label: p.name }))
 
     function allPlaced() { return leftOrder.concat(rightOrder) }
 
@@ -353,6 +358,79 @@ Item {
                                     if (appletCard.placed) root.removeApplet(modelData.id)
                                     else                   root.addApplet(modelData.id)
                                 }
+                            }
+                        }
+                    }
+                }
+
+                // ── Desktop widgets label ────────────────────────────────
+                Text {
+                    visible: root.desktopWidgets.length > 0
+                    text: "Desktop widgets"
+                    font.family: "Ubuntu"
+                    font.pixelSize: island.s(11)
+                    font.weight: Font.Medium
+                    color: island.subtext0
+                    topPadding: island.s(6)
+                }
+
+                // ── Desktop widgets list (toggle visibility on the wallpaper) ─
+                Flow {
+                    width: parent.width
+                    spacing: island.s(8)
+                    visible: root.desktopWidgets.length > 0
+
+                    Repeater {
+                        model: root.desktopWidgets
+                        delegate: Rectangle {
+                            id: dwCard
+                            required property var modelData
+                            property bool shown: DesktopWidgetStore.isEnabled(modelData.id)
+                            property bool cardHovered: dwMouse.containsMouse
+
+                            width:  dwRow.implicitWidth + island.s(24)
+                            height: island.s(34)
+                            radius: island.s(10)
+
+                            color: shown
+                                ? Qt.rgba(island.mauve.r, island.mauve.g, island.mauve.b, cardHovered ? 0.35 : 0.2)
+                                : Qt.rgba(island.surface1.r, island.surface1.g, island.surface1.b, cardHovered ? 0.7 : 0.4)
+                            border.width: 1
+                            border.color: shown
+                                ? Qt.rgba(island.mauve.r, island.mauve.g, island.mauve.b, 0.5)
+                                : Qt.rgba(island.text.r, island.text.g, island.text.b, 0.08)
+
+                            Behavior on color { ColorAnimation { duration: 150 } }
+                            scale: dwMouse.pressed ? 0.94 : 1.0
+                            Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
+
+                            Row {
+                                id: dwRow
+                                anchors.centerIn: parent
+                                spacing: island.s(6)
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "󰸗"
+                                    font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(15)
+                                    color: dwCard.shown ? island.mauve : island.subtext0
+                                }
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: modelData.label
+                                    font.family: "Ubuntu"; font.pixelSize: island.s(12); font.weight: Font.Normal
+                                    color: dwCard.shown ? island.text : island.subtext0
+                                }
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: dwCard.shown ? "󰈉" : "󰈈"
+                                    font.family: "Iosevka Nerd Font"; font.pixelSize: island.s(13); font.weight: Font.DemiBold
+                                    color: dwCard.shown ? island.text : island.subtext0
+                                }
+                            }
+
+                            MouseArea {
+                                id: dwMouse; anchors.fill: parent; hoverEnabled: true
+                                onClicked: DesktopWidgetStore.toggleEnabled(modelData.id)
                             }
                         }
                     }

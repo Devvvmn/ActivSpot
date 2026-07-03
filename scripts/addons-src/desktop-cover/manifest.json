@@ -1,0 +1,8 @@
+{
+  "id": "desktop-cover",
+  "name": "Desktop Cover Art",
+  "version": "1.0.0",
+  "author": "dxvmxn",
+  "description": "Wallpaper-level album cover of the current track with a blurred glow backdrop and crossfade on track change. Pairs with the lyrics widget. Sources music/music_info.sh.",
+  "desktopWidget": "CoverWidget.qml"
+}

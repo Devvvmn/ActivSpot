@@ -25,48 +25,6 @@
   },
   "nodes": [
     {
-      "id": "file:config-ui/src/api.ts",
-      "type": "file",
-      "name": "api.ts",
-      "filePath": "config-ui/src/api.ts",
-      "summary": "Клиентский API-модуль для React-настроек ActivSpot: предоставляет объект `api` с методами для получения и сохранения конфигурации через HTTP, а также константы PARALLAX_EASINGS и defaults для значений по умолчанию.",
-      "tags": [
-        "api-handler",
-        "utility",
-        "service",
-        "конфигурация"
-      ],
-      "complexity": "moderate"
-    },
-    {
-      "id": "file:config-ui/src/components/UI.tsx",
-      "type": "file",
-      "name": "UI.tsx",
-      "filePath": "config-ui/src/components/UI.tsx",
-      "summary": "Библиотека переиспользуемых UI-примитивов для панели настроек: экспортирует компоненты Toggle, Row, Sub, Chip и Slider, используемые во всех секциях настроек.",
-      "tags": [
-        "component",
-        "ui-library",
-        "barrel",
-        "переиспользование"
-      ],
-      "complexity": "moderate"
-    },
-    {
-      "id": "file:config-ui/src/sections/BindingsSection.tsx",
-      "type": "file",
-      "name": "BindingsSection.tsx",
-      "filePath": "config-ui/src/sections/BindingsSection.tsx",
-      "summary": "Секция настроек, отображающая все привязки клавиш Hyprland: загружает биндинги через API, поддерживает фильтрацию по тексту и нумерованный список результатов.",
-      "tags": [
-        "component",
-        "секция-настроек",
-        "api-handler",
-        "фильтрация"
-      ],
-      "complexity": "moderate"
-    },
-    {
       "id": "file:config-ui/src/sections/BubblesSection.tsx",
       "type": "file",
       "name": "BubblesSection.tsx",
@@ -78,20 +36,6 @@
         "минипузырьки"
       ],
       "complexity": "simple"
-    },
-    {
-      "id": "file:config-ui/src/sections/ThemeSection.tsx",
-      "type": "file",
-      "name": "ThemeSection.tsx",
-      "filePath": "config-ui/src/sections/ThemeSection.tsx",
-      "summary": "Секция настройки темы ActivSpot: позволяет выбрать вариант палитры, переопределить отдельные цветовые токены, задать масштаб UI, радиус скругления и прозрачность, используя вспомогательную функцию normalizeHex.",
-      "tags": [
-        "component",
-        "секция-настроек",
-        "темизация",
-        "цветовая-палитра"
-      ],
-      "complexity": "complex"
     },
     {
       "id": "file:config-ui/src/sections/GeneralSection.tsx",
@@ -120,160 +64,6 @@
       ],
       "complexity": "complex",
       "languageNotes": "Использует ES-модули (import/export) и нативные Node.js API (node:http, node:fs/promises) без внешних зависимостей — намеренный минималистичный подход."
-    },
-    {
-      "id": "function:config-ui/src/api.ts:j",
-      "type": "function",
-      "name": "j",
-      "filePath": "config-ui/src/api.ts",
-      "lineRange": [
-        3,
-        10
-      ],
-      "summary": "Внутренняя обёртка над fetch: выполняет HTTP-запрос и возвращает разобранный JSON-ответ.",
-      "tags": [
-        "utility",
-        "http-клиент"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "function:config-ui/src/components/UI.tsx:Toggle",
-      "type": "function",
-      "name": "Toggle",
-      "filePath": "config-ui/src/components/UI.tsx",
-      "lineRange": [
-        3,
-        12
-      ],
-      "summary": "React-компонент переключателя (toggle switch) с коллбэком onChange.",
-      "tags": [
-        "component",
-        "ui-primitive",
-        "интерактивность"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "function:config-ui/src/components/UI.tsx:Row",
-      "type": "function",
-      "name": "Row",
-      "filePath": "config-ui/src/components/UI.tsx",
-      "lineRange": [
-        14,
-        35
-      ],
-      "summary": "Контейнерная строка настройки с меткой, подсказкой, опциональным кодовым блоком и слотом для дочерних элементов управления.",
-      "tags": [
-        "component",
-        "ui-primitive",
-        "layout"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "function:config-ui/src/components/UI.tsx:Sub",
-      "type": "function",
-      "name": "Sub",
-      "filePath": "config-ui/src/components/UI.tsx",
-      "lineRange": [
-        37,
-        65
-      ],
-      "summary": "Нумерованная подсекция с заголовком, описанием, правым слотом и дочерними элементами — используется для группировки связанных настроек.",
-      "tags": [
-        "component",
-        "ui-primitive",
-        "группировка"
-      ],
-      "complexity": "moderate"
-    },
-    {
-      "id": "function:config-ui/src/components/UI.tsx:Chip",
-      "type": "function",
-      "name": "Chip",
-      "filePath": "config-ui/src/components/UI.tsx",
-      "lineRange": [
-        67,
-        94
-      ],
-      "summary": "Кликабельный чип с поддержкой активного состояния и кнопкой удаления, используется для выбора элементов из списка.",
-      "tags": [
-        "component",
-        "ui-primitive",
-        "интерактивность"
-      ],
-      "complexity": "moderate"
-    },
-    {
-      "id": "function:config-ui/src/components/UI.tsx:Slider",
-      "type": "function",
-      "name": "Slider",
-      "filePath": "config-ui/src/components/UI.tsx",
-      "lineRange": [
-        96,
-        128
-      ],
-      "summary": "Компонент ползунка с диапазоном, шагом и единицами измерения, отображает текущее значение рядом с элементом управления.",
-      "tags": [
-        "component",
-        "ui-primitive",
-        "ввод-данных"
-      ],
-      "complexity": "moderate"
-    },
-    {
-      "id": "function:config-ui/src/sections/BindingsSection.tsx:BindingsSection",
-      "type": "function",
-      "name": "BindingsSection",
-      "filePath": "config-ui/src/sections/BindingsSection.tsx",
-      "lineRange": [
-        6,
-        78
-      ],
-      "summary": "Основной компонент секции биндингов: загружает список привязок клавиш через API, фильтрует их по поисковой строке и рендерит нумерованную таблицу с колонками mod/key/action.",
-      "tags": [
-        "component",
-        "секция-настроек",
-        "api-handler",
-        "фильтрация"
-      ],
-      "complexity": "moderate"
-    },
-    {
-      "id": "function:config-ui/src/sections/ThemeSection.tsx:ThemeSection",
-      "type": "function",
-      "name": "ThemeSection",
-      "filePath": "config-ui/src/sections/ThemeSection.tsx",
-      "lineRange": [
-        13,
-        133
-      ],
-      "summary": "Главный компонент секции темы: отображает выбор варианта цветовой схемы, редактор цветовых токенов с color-picker, ползунки для масштаба UI и радиуса скругления, управление прозрачностью.",
-      "tags": [
-        "component",
-        "темизация",
-        "цветовая-палитра",
-        "секция-настроек"
-      ],
-      "complexity": "complex"
-    },
-    {
-      "id": "function:config-ui/src/sections/ThemeSection.tsx:normalizeHex",
-      "type": "function",
-      "name": "normalizeHex",
-      "filePath": "config-ui/src/sections/ThemeSection.tsx",
-      "lineRange": [
-        135,
-        140
-      ],
-      "summary": "Утилита нормализации HEX-цвета: расширяет сокращённые 3-символьные коды (#abc → #aabbcc) до полного 6-символьного формата.",
-      "tags": [
-        "utility",
-        "цвет",
-        "нормализация"
-      ],
-      "complexity": "simple"
     },
     {
       "id": "function:config-ui/server/server.mjs:send",
@@ -438,220 +228,6 @@
         "utility",
         "api-handler",
         "service"
-      ],
-      "complexity": "moderate"
-    },
-    {
-      "id": "file:config-ui/src/App.tsx",
-      "type": "file",
-      "name": "App.tsx",
-      "filePath": "config-ui/src/App.tsx",
-      "summary": "Корневой React-компонент конфигуратора ActivSpot: управляет состоянием настроек (загрузка, черновик, сохранение), навигацией по вкладкам и отображает соответствующую секцию настроек вместе с превью-панелью.",
-      "tags": [
-        "entry-point",
-        "component",
-        "api-handler",
-        "state-management"
-      ],
-      "complexity": "complex",
-      "languageNotes": "Использует useMemo для сравнения JSON-снимков загруженных и черновых настроек, что позволяет эффективно отслеживать несохранённые изменения без глубокого сравнения объектов."
-    },
-    {
-      "id": "function:config-ui/src/App.tsx:App",
-      "type": "function",
-      "name": "App",
-      "filePath": "config-ui/src/App.tsx",
-      "lineRange": [
-        31,
-        239
-      ],
-      "summary": "Главный компонент приложения: управляет состоянием вкладок, загружает настройки и инвентарь через API, реализует логику сохранения, перезагрузки оболочки и отмены изменений.",
-      "tags": [
-        "component",
-        "state-management",
-        "api-handler"
-      ],
-      "complexity": "complex"
-    },
-    {
-      "id": "file:config-ui/src/main.tsx",
-      "type": "file",
-      "name": "main.tsx",
-      "filePath": "config-ui/src/main.tsx",
-      "summary": "Точка входа React-приложения конфигуратора: монтирует корневой компонент App в DOM-элемент #root в режиме StrictMode.",
-      "tags": [
-        "entry-point",
-        "bootstrap"
-      ],
-      "complexity": "simple",
-      "languageNotes": "Использует createRoot из React 18 для конкурентного рендеринга."
-    },
-    {
-      "id": "file:config-ui/src/sections/PagesSection.tsx",
-      "type": "file",
-      "name": "PagesSection.tsx",
-      "filePath": "config-ui/src/sections/PagesSection.tsx",
-      "summary": "Секция настроек страниц расширенного вида Dynamic Island: позволяет включать/отключать отдельные страницы из инвентаря и настраивать анимации перехода (длительность и тип easing).",
-      "tags": [
-        "component",
-        "settings-section",
-        "ui"
-      ],
-      "complexity": "moderate"
-    },
-    {
-      "id": "function:config-ui/src/sections/PagesSection.tsx:PagesSection",
-      "type": "function",
-      "name": "PagesSection",
-      "filePath": "config-ui/src/sections/PagesSection.tsx",
-      "lineRange": [
-        7,
-        71
-      ],
-      "summary": "React-компонент секции страниц: отображает список переключаемых чипов для каждой страницы из инвентаря и слайдеры/селекторы для настройки анимации раскрытия панели.",
-      "tags": [
-        "component",
-        "settings-section",
-        "animation-config"
-      ],
-      "complexity": "moderate"
-    },
-    {
-      "id": "file:config-ui/src/components/Icon.tsx",
-      "type": "file",
-      "name": "Icon.tsx",
-      "filePath": "config-ui/src/components/Icon.tsx",
-      "summary": "Предоставляет React-компонент Icon для рендеринга иконок Nerd Font по символическому имени, а также экспортирует словарь BUBBLE_META с метаданными (метка и иконка) для каждого типа минибубблов ActivSpot.",
-      "tags": [
-        "component",
-        "utility",
-        "ui-handler",
-        "type-definition"
-      ],
-      "complexity": "simple",
-      "languageNotes": "Использует Unicode code points (\\u{...}) для задания глифов Nerd Font напрямую в объекте GLYPHS. BUBBLE_META служит центральным реестром всех доступных минибубблов."
-    },
-    {
-      "id": "function:config-ui/src/components/Icon.tsx:Icon",
-      "type": "function",
-      "name": "Icon",
-      "filePath": "config-ui/src/components/Icon.tsx",
-      "lineRange": [
-        42,
-        61
-      ],
-      "summary": "React-компонент, рендерящий span с CSS-классом nf и символом из словаря GLYPHS по имени; поддерживает настройку размера и пользовательских стилей.",
-      "tags": [
-        "component",
-        "utility"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "file:config-ui/src/components/Preview.tsx",
-      "type": "file",
-      "name": "Preview.tsx",
-      "filePath": "config-ui/src/components/Preview.tsx",
-      "summary": "Экспортирует три визуальных блока для панели предпросмотра настроек: PreviewIsland — живой макет Dynamic Island с текущим временем и активными бубблами, PaletteCard — сетка цветов текущей темы Catppuccin, ShortcutsCard — справочная карточка клавиатурных сочетаний.",
-      "tags": [
-        "component",
-        "ui-handler",
-        "utility"
-      ],
-      "complexity": "complex",
-      "languageNotes": "Хук useNow обновляет время каждую секунду через setInterval. Поддерживаются четыре флейвора Catppuccin (mocha, macchiato, frappe, latte) с автоматическим выбором цвета чернил в зависимости от темы."
-    },
-    {
-      "id": "function:config-ui/src/components/Preview.tsx:useNow",
-      "type": "function",
-      "name": "useNow",
-      "filePath": "config-ui/src/components/Preview.tsx",
-      "lineRange": [
-        5,
-        12
-      ],
-      "summary": "Пользовательский React-хук, возвращающий объект Date с текущим временем и обновляющий его каждую секунду через setInterval с автоматической очисткой при размонтировании.",
-      "tags": [
-        "hook",
-        "utility"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "function:config-ui/src/components/Preview.tsx:PreviewIsland",
-      "type": "function",
-      "name": "PreviewIsland",
-      "filePath": "config-ui/src/components/Preview.tsx",
-      "lineRange": [
-        21,
-        93
-      ],
-      "summary": "React-компонент, отображающий уменьшенный макет Dynamic Island: текущее время, значок погоды, список активных минибубблов с состоянием вкл/выкл, а также метаданные текущей конфигурации (тема, масштаб UI, тайминги).",
-      "tags": [
-        "component",
-        "ui-handler"
-      ],
-      "complexity": "moderate"
-    },
-    {
-      "id": "function:config-ui/src/components/Preview.tsx:PaletteCard",
-      "type": "function",
-      "name": "PaletteCard",
-      "filePath": "config-ui/src/components/Preview.tsx",
-      "lineRange": [
-        95,
-        160
-      ],
-      "summary": "React-компонент, рендерящий сетку 4×2 с цветовыми токенами активной палитры Catppuccin; поддерживает пользовательские переопределения цветов с визуальным индикатором.",
-      "tags": [
-        "component",
-        "ui-handler"
-      ],
-      "complexity": "moderate"
-    },
-    {
-      "id": "function:config-ui/src/components/Preview.tsx:ShortcutsCard",
-      "type": "function",
-      "name": "ShortcutsCard",
-      "filePath": "config-ui/src/components/Preview.tsx",
-      "lineRange": [
-        162,
-        184
-      ],
-      "summary": "React-компонент, отображающий статичную карточку с клавиатурными сочетаниями UI настроек: сохранение, отмена, перезагрузка шелла и поиск.",
-      "tags": [
-        "component",
-        "utility"
-      ],
-      "complexity": "simple"
-    },
-    {
-      "id": "file:config-ui/src/sections/MinibubblesSection.tsx",
-      "type": "file",
-      "name": "MinibubblesSection.tsx",
-      "filePath": "config-ui/src/sections/MinibubblesSection.tsx",
-      "summary": "Секция настроек минибубблов: позволяет включать/отключать отдельные типы бубблов и настраивать тайминги анимации (show/hide в мс) и кривую easing для BaseBubble.",
-      "tags": [
-        "component",
-        "api-handler",
-        "ui-handler"
-      ],
-      "complexity": "moderate",
-      "languageNotes": "Управление состоянием включённых бубблов выполняется через Set с немутирующим togglem; список кривых easing соответствует значениям qt::Easing, используемым в QML-слое."
-    },
-    {
-      "id": "function:config-ui/src/sections/MinibubblesSection.tsx:MinibubblesSection",
-      "type": "function",
-      "name": "MinibubblesSection",
-      "filePath": "config-ui/src/sections/MinibubblesSection.tsx",
-      "lineRange": [
-        8,
-        95
-      ],
-      "summary": "React-компонент — секция настроек минибубблов. Рендерит интерактивный список бубблов с тоглами, слайдеры тайминга анимации и выпадающий список кривых easing.",
-      "tags": [
-        "component",
-        "api-handler"
       ],
       "complexity": "moderate"
     },
@@ -2121,20 +1697,6 @@
         "backup"
       ],
       "complexity": "complex"
-    },
-    {
-      "id": "file:config-ui/vite.config.ts",
-      "type": "file",
-      "name": "vite.config.ts",
-      "filePath": "config-ui/vite.config.ts",
-      "summary": "Конфигурация Vite для React UI настроек: dev-сервер на порту 7332 с проксированием запросов /api на backend-сервер (7331) и сборка в папку dist/.",
-      "tags": [
-        "configuration",
-        "build-system",
-        "development"
-      ],
-      "complexity": "simple",
-      "languageNotes": "Использует TypeScript-конфиг Vite с плагином @vitejs/plugin-react и strictPort для детерминированного номера порта."
     },
     {
       "id": "file:hypridle.conf",
@@ -4283,55 +3845,6 @@
       "complexity": "moderate"
     },
     {
-      "id": "file:scripts/quickshell/WindowRegistry.js",
-      "type": "file",
-      "name": "WindowRegistry.js",
-      "filePath": "scripts/quickshell/WindowRegistry.js",
-      "summary": "Централизованный реестр размеров и позиций всех виджетов-окон ActivSpot. Вычисляет масштабные координаты для 12 попапов (battery, powermenu, volume, calendar, music, network и др.) относительно размера экрана.",
-      "tags": [
-        "utility",
-        "layout",
-        "registry",
-        "singleton"
-      ],
-      "complexity": "moderate",
-      "languageNotes": "Файл использует `.pragma library` для загрузки как синглтон в QML. Функция getScale применяет степенное масштабирование (0.85 для уменьшения, 0.5 для увеличения) для плавной адаптации к разным разрешениям."
-    },
-    {
-      "id": "function:scripts/quickshell/WindowRegistry.js:getLayout",
-      "type": "function",
-      "name": "getLayout",
-      "filePath": "scripts/quickshell/WindowRegistry.js",
-      "lineRange": [
-        25,
-        63
-      ],
-      "summary": "Возвращает масштабированные размеры и абсолютные координаты для именованного виджета с учётом размеров монитора и пользовательского масштаба.",
-      "tags": [
-        "layout",
-        "registry",
-        "positioning"
-      ],
-      "complexity": "moderate"
-    },
-    {
-      "id": "function:scripts/quickshell/WindowRegistry.js:getScale",
-      "type": "function",
-      "name": "getScale",
-      "filePath": "scripts/quickshell/WindowRegistry.js",
-      "lineRange": [
-        3,
-        17
-      ],
-      "summary": "Вычисляет коэффициент масштабирования UI на основе ширины экрана относительно базового разрешения 1920px с применением пользовательского масштаба.",
-      "tags": [
-        "utility",
-        "scaling",
-        "math"
-      ],
-      "complexity": "simple"
-    },
-    {
       "id": "file:scripts/quickshell/workspaces.sh",
       "type": "file",
       "name": "workspaces.sh",
@@ -4344,121 +3857,499 @@
         "daemon"
       ],
       "complexity": "moderate"
+    },
+    {
+      "id": "file:config-ui/src/App.svelte",
+      "type": "file",
+      "name": "App.svelte",
+      "filePath": "config-ui/src/App.svelte",
+      "summary": "Root Svelte component for the ActivSpot Configurator UI — manages global state (settings draft, inventory, palette, weather), tab navigation across 9 sections, and save/reload/discard actions with keyboard shortcuts.",
+      "tags": [
+        "entry-point",
+        "component",
+        "state-management",
+        "config-ui"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:config-ui/src/api.ts",
+      "type": "file",
+      "name": "api.ts",
+      "filePath": "config-ui/src/api.ts",
+      "summary": "Centralized API client and TypeScript type definitions for the config-ui — exports the `api` object with methods for settings, keybinds, colors, weather, and hyprconf, plus all shared Settings/Inventory/Plugin interfaces and default values.",
+      "tags": [
+        "api-handler",
+        "type-definition",
+        "service",
+        "utility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:config-ui/src/components/Icon.svelte",
+      "type": "file",
+      "name": "Icon.svelte",
+      "filePath": "config-ui/src/components/Icon.svelte",
+      "summary": "Nerd Font glyph icon component mapping icon names to Unicode codepoints; also exports BUBBLE_META with icon and label metadata for all Dynamic Island bubbles.",
+      "tags": [
+        "component",
+        "utility",
+        "ui-component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:config-ui/src/components/PreviewIsland.svelte",
+      "type": "file",
+      "name": "PreviewIsland.svelte",
+      "filePath": "config-ui/src/components/PreviewIsland.svelte",
+      "summary": "Live preview component that renders a miniaturized Dynamic Island reflecting the current theme, active bubbles, weather data, and time — used in the right rail of the configurator for real-time visual feedback.",
+      "tags": [
+        "component",
+        "preview",
+        "ui-component"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:config-ui/src/main.ts",
+      "type": "file",
+      "name": "main.ts",
+      "filePath": "config-ui/src/main.ts",
+      "summary": "Svelte application entry point that mounts the App component into the DOM element with id 'app'.",
+      "tags": [
+        "entry-point",
+        "bootstrap"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:config-ui/src/sections/BindingsSection.svelte",
+      "type": "file",
+      "name": "BindingsSection.svelte",
+      "filePath": "config-ui/src/sections/BindingsSection.svelte",
+      "summary": "Hyprland keybinding editor section — loads bindings from hyprland.conf via API, supports inline re-binding through keyboard capture, adding new bindings, removing existing ones, and filtering by modifier/key/action.",
+      "tags": [
+        "component",
+        "api-handler",
+        "config",
+        "keybindings"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:config-ui/src/sections/KeyboardSection.svelte",
+      "type": "file",
+      "name": "KeyboardSection.svelte",
+      "filePath": "config-ui/src/sections/KeyboardSection.svelte",
+      "summary": "Keyboard layout and XKB options configuration section — provides toggle chips for common layouts (us, ru, de, etc.) and XKB modifier behaviour options like CapsLock swapping.",
+      "tags": [
+        "component",
+        "config",
+        "keyboard"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:config-ui/src/sections/MinibubblesSection.svelte",
+      "type": "file",
+      "name": "MinibubblesSection.svelte",
+      "filePath": "config-ui/src/sections/MinibubblesSection.svelte",
+      "summary": "Minibubble configuration section — allows toggling which Dynamic Island bubbles are enabled and configures animation timing (show/hide durations, easing curve) and focus rotation interval.",
+      "tags": [
+        "component",
+        "config",
+        "bubbles"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:config-ui/src/sections/MonitorsSection.svelte",
+      "type": "file",
+      "name": "MonitorsSection.svelte",
+      "filePath": "config-ui/src/sections/MonitorsSection.svelte",
+      "summary": "Monitor layout configuration section — renders a proportional visual map of detected outputs and provides per-monitor editing of resolution, refresh rate, position, scale, and transform.",
+      "tags": [
+        "component",
+        "config",
+        "monitors"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:config-ui/src/sections/PagesSection.svelte",
+      "type": "file",
+      "name": "PagesSection.svelte",
+      "filePath": "config-ui/src/sections/PagesSection.svelte",
+      "summary": "Pages (expanded island view) configuration section — allows toggling which pages are enabled via inventory and configures page transition animation duration and easing.",
+      "tags": [
+        "component",
+        "config",
+        "pages"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:config-ui/src/sections/ParallaxSection.svelte",
+      "type": "file",
+      "name": "ParallaxSection.svelte",
+      "filePath": "config-ui/src/sections/ParallaxSection.svelte",
+      "summary": "Parallax wallpaper daemon (hyprlax) configuration section — provides controls for shift amount, animation duration, FPS, easing curve, and input source presets (workspace, cursor, window focus).",
+      "tags": [
+        "component",
+        "config",
+        "parallax"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:config-ui/src/sections/RawSection.svelte",
+      "type": "file",
+      "name": "RawSection.svelte",
+      "filePath": "config-ui/src/sections/RawSection.svelte",
+      "summary": "Raw JSON editor section exposing the full settings.json as an editable textarea with live JSON validation, Apply-to-draft action, and a Reset button.",
+      "tags": [
+        "component",
+        "config",
+        "raw-editor"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:config-ui/src/sections/ThemeSection.svelte",
+      "type": "file",
+      "name": "ThemeSection.svelte",
+      "filePath": "config-ui/src/sections/ThemeSection.svelte",
+      "summary": "Theme configuration section — provides a visual grid to select among Catppuccin variants (Mocha, Nord, Carbon, Midnight, Apple, Matugen), a UI scale slider, and per-token palette overrides via color pickers.",
+      "tags": [
+        "component",
+        "config",
+        "theme",
+        "Система тем"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:config-ui/svelte.config.js",
+      "type": "config",
+      "name": "svelte.config.js",
+      "filePath": "config-ui/svelte.config.js",
+      "summary": "Svelte preprocessor configuration enabling vitePreprocess for TypeScript and CSS processing inside .svelte files.",
+      "tags": [
+        "configuration",
+        "build-system",
+        "svelte"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:config-ui/vite.config.ts",
+      "type": "config",
+      "name": "vite.config.ts",
+      "filePath": "config-ui/vite.config.ts",
+      "summary": "Vite build configuration for the config-ui — sets up the Svelte plugin, dev server on port 7332, an API proxy to the backend at port 7331, and production build output to dist/.",
+      "tags": [
+        "configuration",
+        "build-system",
+        "vite",
+        "proxy"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:installer/src/main.rs",
+      "type": "file",
+      "name": "main.rs",
+      "filePath": "installer/src/main.rs",
+      "summary": "Terminal UI installer for ActivSpot built with Ratatui — implements a multi-screen TUI (Welcome, SystemCheck, Installing, Success, Error) with animated ASCII banner, progress gauge, step-by-step install log, and keyboard navigation.",
+      "tags": [
+        "entry-point",
+        "installer",
+        "tui",
+        "cli"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Uses Ratatui for TUI rendering with Crossterm backend; the App struct implements Default for initialization and drives a tick-based event loop."
+    },
+    {
+      "id": "class:installer/src/main.rs:App",
+      "type": "class",
+      "name": "App",
+      "filePath": "installer/src/main.rs",
+      "lineRange": [
+        44,
+        52
+      ],
+      "summary": "TUI application state struct holding current screen, install step, log entries with completion status, error message, and an animation tick counter.",
+      "tags": [
+        "data-model",
+        "state-management"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:installer/src/main.rs:Screen",
+      "type": "class",
+      "name": "Screen",
+      "filePath": "installer/src/main.rs",
+      "lineRange": [
+        35,
+        41
+      ],
+      "summary": "Enum representing the five installer screens: Welcome, SystemCheck, Installing, Success, and Error.",
+      "tags": [
+        "data-model",
+        "state-management"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:installer/src/main.rs:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "installer/src/main.rs",
+      "lineRange": [
+        68,
+        89
+      ],
+      "summary": "Application entry point — initializes Crossterm raw mode, creates the Ratatui terminal with CrosstermBackend, constructs App state, runs the event loop, then restores the terminal on exit.",
+      "tags": [
+        "entry-point",
+        "bootstrap"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:installer/src/main.rs:run_app",
+      "type": "function",
+      "name": "run_app",
+      "filePath": "installer/src/main.rs",
+      "lineRange": [
+        91,
+        108
+      ],
+      "summary": "Main event loop — ticks animation at ~60fps, draws the UI frame, polls for keyboard events and dispatches them to handle_key.",
+      "tags": [
+        "event-handler",
+        "tui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:installer/src/main.rs:ui",
+      "type": "function",
+      "name": "ui",
+      "filePath": "installer/src/main.rs",
+      "lineRange": [
+        207,
+        238
+      ],
+      "summary": "Top-level Ratatui render function — lays out the terminal into three vertical sections (header, content, footer) and delegates rendering to screen-specific render functions.",
+      "tags": [
+        "component",
+        "tui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:installer/src/main.rs:render_installing",
+      "type": "function",
+      "name": "render_installing",
+      "filePath": "installer/src/main.rs",
+      "lineRange": [
+        402,
+        495
+      ],
+      "summary": "Renders the Installing screen with a color-coded installation log (pending/active/done entries) and a progress gauge showing completion ratio across all install steps.",
+      "tags": [
+        "tui",
+        "installer"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:scripts/quickshell/WindowRegistry.js",
+      "type": "file",
+      "name": "WindowRegistry.js",
+      "filePath": "scripts/quickshell/WindowRegistry.js",
+      "summary": "QML pragma library providing centralized layout mathematics for all Dynamic Island popup windows — computes scaled pixel dimensions and absolute screen coordinates for each named popup (battery, calendar, music, network, etc.) based on monitor dimensions and user UI scale.",
+      "tags": [
+        "utility",
+        "layout",
+        "quickshell",
+        "qml-service"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Uses .pragma library to make this a shared QML singleton importable across the shell. Scaling uses a non-linear power function to gracefully handle sub-1080p and super-1080p monitors."
+    },
+    {
+      "id": "function:scripts/quickshell/WindowRegistry.js:getLayout",
+      "type": "function",
+      "name": "getLayout",
+      "filePath": "scripts/quickshell/WindowRegistry.js",
+      "lineRange": [
+        25,
+        64
+      ],
+      "summary": "Returns a layout descriptor object (w, h, x, y, comp) for a named popup by applying scale-aware dimension calculations and monitor offset to absolute screen coordinates.",
+      "tags": [
+        "utility",
+        "layout"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/quickshell/WindowRegistry.js:getScale",
+      "type": "function",
+      "name": "getScale",
+      "filePath": "scripts/quickshell/WindowRegistry.js",
+      "lineRange": [
+        3,
+        17
+      ],
+      "summary": "Computes a responsive UI scale factor from monitor width relative to 1920px baseline, then multiplies by the user's uiScale preference.",
+      "tags": [
+        "utility",
+        "scaling"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/quickshell/WindowRegistry.js:getPopupLayout",
+      "type": "function",
+      "name": "getPopupLayout",
+      "filePath": "scripts/quickshell/WindowRegistry.js",
+      "lineRange": [
+        69,
+        82
+      ],
+      "summary": "Returns layout parameters for notification OSD popups (width, marginTop, marginRight, spacing, radius, padding) scaled for the active monitor.",
+      "tags": [
+        "utility",
+        "layout"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:config-ui/src/components/Chip.svelte",
+      "type": "file",
+      "name": "Chip.svelte",
+      "filePath": "config-ui/src/components/Chip.svelte",
+      "summary": "Reusable pill/chip button component that accepts an `active` boolean and optional click handler, rendering slotted content inside a styled button with an active state class.",
+      "tags": [
+        "component",
+        "ui-control",
+        "button",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:config-ui/src/components/PaletteCard.svelte",
+      "type": "file",
+      "name": "PaletteCard.svelte",
+      "filePath": "config-ui/src/components/PaletteCard.svelte",
+      "summary": "Color palette preview card that displays 8 semantic color tokens (mauve, blue, peach, etc.) for the active theme, supporting five built-in themes plus matugen with live color-override pin indicators.",
+      "tags": [
+        "component",
+        "theme",
+        "palette",
+        "preview"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Uses Svelte reactive declarations (`$:`) to derive theme flavour and override state from the Settings prop; matugen path merges live palette data from qs_colors.json."
+    },
+    {
+      "id": "file:config-ui/src/components/Row.svelte",
+      "type": "file",
+      "name": "Row.svelte",
+      "filePath": "config-ui/src/components/Row.svelte",
+      "summary": "Layout primitive that renders a labeled two-column row with an optional hint subtitle and inline code badge on the left, and a slot for the interactive control on the right.",
+      "tags": [
+        "component",
+        "layout",
+        "utility",
+        "form"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:config-ui/src/components/Slider.svelte",
+      "type": "file",
+      "name": "Slider.svelte",
+      "filePath": "config-ui/src/components/Slider.svelte",
+      "summary": "Controlled range-slider component that forwards min/max/step/value props to a native input and calls an `onChange` callback with the parsed float value, displaying the current value with an optional unit suffix.",
+      "tags": [
+        "component",
+        "ui-control",
+        "form",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:config-ui/src/components/Sub.svelte",
+      "type": "file",
+      "name": "Sub.svelte",
+      "filePath": "config-ui/src/components/Sub.svelte",
+      "summary": "Subsection wrapper component with an optional zero-padded numeric prefix, a title, an optional description paragraph, a named `right` slot for actions, and a default slot for subsection content.",
+      "tags": [
+        "component",
+        "layout",
+        "section",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:config-ui/src/components/Toggle.svelte",
+      "type": "file",
+      "name": "Toggle.svelte",
+      "filePath": "config-ui/src/components/Toggle.svelte",
+      "summary": "Accessible boolean toggle switch that dispatches a typed `change` event with the new boolean value on click or Enter/Space keypress, supporting ARIA `role=switch` and `aria-checked`.",
+      "tags": [
+        "component",
+        "ui-control",
+        "form",
+        "accessibility"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Uses Svelte `createEventDispatcher` with a typed generic `{ change: boolean }` — a clean pattern for type-safe component events without prop callback drilling."
+    },
+    {
+      "id": "file:config-ui/src/sections/AddonsSection.svelte",
+      "type": "file",
+      "name": "AddonsSection.svelte",
+      "filePath": "config-ui/src/sections/AddonsSection.svelte",
+      "summary": "Plugin management section that lists installed ActivSpot addons from an inventory prop, providing an uninstall flow with two-step confirmation and loading states, calling `api.uninstallPlugin` and reporting success/error via a toast callback.",
+      "tags": [
+        "component",
+        "section",
+        "plugin-management",
+        "api-handler"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:config-ui/src/sections/AddonsSection.svelte:uninstall",
+      "type": "function",
+      "name": "uninstall",
+      "filePath": "config-ui/src/sections/AddonsSection.svelte",
+      "lineRange": [
+        16,
+        32
+      ],
+      "summary": "Async function that calls `api.uninstallPlugin` for a given plugin, manages busy/confirm state, and invokes `showToast` and `refreshInventory` on completion.",
+      "tags": [
+        "async",
+        "api-handler",
+        "plugin-management"
+      ],
+      "complexity": "moderate"
     }
   ],
   "edges": [
-    {
-      "source": "file:config-ui/src/api.ts",
-      "target": "function:config-ui/src/api.ts:j",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:config-ui/src/components/UI.tsx",
-      "target": "function:config-ui/src/components/UI.tsx:Toggle",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:config-ui/src/components/UI.tsx",
-      "target": "function:config-ui/src/components/UI.tsx:Row",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:config-ui/src/components/UI.tsx",
-      "target": "function:config-ui/src/components/UI.tsx:Sub",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:config-ui/src/components/UI.tsx",
-      "target": "function:config-ui/src/components/UI.tsx:Chip",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:config-ui/src/components/UI.tsx",
-      "target": "function:config-ui/src/components/UI.tsx:Slider",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:config-ui/src/components/UI.tsx",
-      "target": "function:config-ui/src/components/UI.tsx:Toggle",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:config-ui/src/components/UI.tsx",
-      "target": "function:config-ui/src/components/UI.tsx:Row",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:config-ui/src/components/UI.tsx",
-      "target": "function:config-ui/src/components/UI.tsx:Sub",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:config-ui/src/components/UI.tsx",
-      "target": "function:config-ui/src/components/UI.tsx:Chip",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:config-ui/src/components/UI.tsx",
-      "target": "function:config-ui/src/components/UI.tsx:Slider",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:config-ui/src/sections/BindingsSection.tsx",
-      "target": "function:config-ui/src/sections/BindingsSection.tsx:BindingsSection",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:config-ui/src/sections/BindingsSection.tsx",
-      "target": "function:config-ui/src/sections/BindingsSection.tsx:BindingsSection",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:config-ui/src/sections/ThemeSection.tsx",
-      "target": "function:config-ui/src/sections/ThemeSection.tsx:ThemeSection",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:config-ui/src/sections/ThemeSection.tsx",
-      "target": "function:config-ui/src/sections/ThemeSection.tsx:normalizeHex",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:config-ui/src/sections/ThemeSection.tsx",
-      "target": "function:config-ui/src/sections/ThemeSection.tsx:ThemeSection",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
     {
       "source": "file:config-ui/server/server.mjs",
       "target": "function:config-ui/server/server.mjs:send",
@@ -4528,153 +4419,6 @@
       "type": "contains",
       "direction": "forward",
       "weight": 1
-    },
-    {
-      "source": "file:config-ui/server/server.mjs",
-      "target": "file:config-ui/src/api.ts",
-      "type": "related",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "file:config-ui/src/App.tsx",
-      "target": "function:config-ui/src/App.tsx:App",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:config-ui/src/App.tsx",
-      "target": "function:config-ui/src/App.tsx:App",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:config-ui/src/main.tsx",
-      "target": "file:config-ui/src/App.tsx",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:config-ui/src/sections/PagesSection.tsx",
-      "target": "function:config-ui/src/sections/PagesSection.tsx:PagesSection",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:config-ui/src/sections/PagesSection.tsx",
-      "target": "function:config-ui/src/sections/PagesSection.tsx:PagesSection",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:config-ui/src/App.tsx",
-      "target": "file:config-ui/src/sections/PagesSection.tsx",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "file:config-ui/src/components/Icon.tsx",
-      "target": "function:config-ui/src/components/Icon.tsx:Icon",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:config-ui/src/components/Icon.tsx",
-      "target": "function:config-ui/src/components/Icon.tsx:Icon",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:config-ui/src/components/Preview.tsx",
-      "target": "function:config-ui/src/components/Preview.tsx:useNow",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:config-ui/src/components/Preview.tsx",
-      "target": "function:config-ui/src/components/Preview.tsx:PreviewIsland",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:config-ui/src/components/Preview.tsx",
-      "target": "function:config-ui/src/components/Preview.tsx:PreviewIsland",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:config-ui/src/components/Preview.tsx",
-      "target": "function:config-ui/src/components/Preview.tsx:PaletteCard",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:config-ui/src/components/Preview.tsx",
-      "target": "function:config-ui/src/components/Preview.tsx:PaletteCard",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:config-ui/src/components/Preview.tsx",
-      "target": "function:config-ui/src/components/Preview.tsx:ShortcutsCard",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:config-ui/src/components/Preview.tsx",
-      "target": "function:config-ui/src/components/Preview.tsx:ShortcutsCard",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:config-ui/src/components/Preview.tsx",
-      "target": "file:config-ui/src/components/Icon.tsx",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
-    },
-    {
-      "source": "function:config-ui/src/components/Preview.tsx:PreviewIsland",
-      "target": "function:config-ui/src/components/Preview.tsx:useNow",
-      "type": "calls",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:config-ui/src/sections/MinibubblesSection.tsx",
-      "target": "function:config-ui/src/sections/MinibubblesSection.tsx:MinibubblesSection",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:config-ui/src/sections/MinibubblesSection.tsx",
-      "target": "function:config-ui/src/sections/MinibubblesSection.tsx:MinibubblesSection",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:config-ui/src/sections/MinibubblesSection.tsx",
-      "target": "file:config-ui/src/components/Icon.tsx",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7
     },
     {
       "source": "document:README.md",
@@ -5078,13 +4822,6 @@
     {
       "source": "file:.understand-anything/.understandignore",
       "target": "file:.understandignore",
-      "type": "related",
-      "direction": "forward",
-      "weight": 0.5
-    },
-    {
-      "source": "file:config-ui/vite.config.ts",
-      "target": "file:config-ui/src/styles.css",
       "type": "related",
       "direction": "forward",
       "weight": 0.5
@@ -6112,34 +5849,6 @@
       "weight": 1
     },
     {
-      "source": "file:scripts/quickshell/WindowRegistry.js",
-      "target": "function:scripts/quickshell/WindowRegistry.js:getLayout",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:scripts/quickshell/WindowRegistry.js",
-      "target": "function:scripts/quickshell/WindowRegistry.js:getScale",
-      "type": "contains",
-      "direction": "forward",
-      "weight": 1
-    },
-    {
-      "source": "file:scripts/quickshell/WindowRegistry.js",
-      "target": "function:scripts/quickshell/WindowRegistry.js:getLayout",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
-      "source": "file:scripts/quickshell/WindowRegistry.js",
-      "target": "function:scripts/quickshell/WindowRegistry.js:getScale",
-      "type": "exports",
-      "direction": "forward",
-      "weight": 0.8
-    },
-    {
       "source": "file:scripts/quickshell/workspaces.sh",
       "target": "file:scripts/quickshell/topbar/applets/WorkspacesApplet.qml",
       "type": "related",
@@ -6147,148 +5856,326 @@
       "weight": 0.5
     },
     {
-      "source": "file:config-ui/src/App.tsx",
+      "source": "file:config-ui/src/main.ts",
+      "target": "file:config-ui/src/App.svelte",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:config-ui/src/App.svelte",
       "target": "file:config-ui/src/api.ts",
       "type": "imports",
       "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
+      "weight": 0.7
     },
     {
-      "source": "file:config-ui/src/App.tsx",
-      "target": "file:config-ui/src/components/Icon.tsx",
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/components/Icon.svelte",
       "type": "imports",
       "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
+      "weight": 0.7
     },
     {
-      "source": "file:config-ui/src/App.tsx",
-      "target": "file:config-ui/src/components/Preview.tsx",
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/components/PreviewIsland.svelte",
       "type": "imports",
       "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
+      "weight": 0.7
     },
     {
-      "source": "file:config-ui/src/App.tsx",
-      "target": "file:config-ui/src/sections/BindingsSection.tsx",
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/sections/ThemeSection.svelte",
       "type": "imports",
       "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
+      "weight": 0.7
     },
     {
-      "source": "file:config-ui/src/App.tsx",
-      "target": "file:config-ui/src/sections/MinibubblesSection.tsx",
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/sections/MinibubblesSection.svelte",
       "type": "imports",
       "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
+      "weight": 0.7
     },
     {
-      "source": "file:config-ui/src/App.tsx",
-      "target": "file:config-ui/src/sections/ThemeSection.tsx",
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/sections/PagesSection.svelte",
       "type": "imports",
       "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
+      "weight": 0.7
     },
     {
-      "source": "file:config-ui/src/components/Preview.tsx",
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/sections/MonitorsSection.svelte",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/sections/KeyboardSection.svelte",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/sections/BindingsSection.svelte",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/sections/ParallaxSection.svelte",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/sections/RawSection.svelte",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:config-ui/src/components/PreviewIsland.svelte",
       "target": "file:config-ui/src/api.ts",
       "type": "imports",
       "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
+      "weight": 0.7
     },
     {
-      "source": "file:config-ui/src/main.tsx",
-      "target": "file:config-ui/src/styles.css",
+      "source": "file:config-ui/src/components/PreviewIsland.svelte",
+      "target": "file:config-ui/src/components/Icon.svelte",
       "type": "imports",
       "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
+      "weight": 0.7
     },
     {
-      "source": "file:config-ui/src/sections/BindingsSection.tsx",
+      "source": "file:config-ui/src/sections/BindingsSection.svelte",
       "target": "file:config-ui/src/api.ts",
       "type": "imports",
       "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
+      "weight": 0.7
     },
     {
-      "source": "file:config-ui/src/sections/BindingsSection.tsx",
-      "target": "file:config-ui/src/components/Icon.tsx",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
-    },
-    {
-      "source": "file:config-ui/src/sections/BindingsSection.tsx",
-      "target": "file:config-ui/src/components/UI.tsx",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
-    },
-    {
-      "source": "file:config-ui/src/sections/MinibubblesSection.tsx",
+      "source": "file:config-ui/src/sections/KeyboardSection.svelte",
       "target": "file:config-ui/src/api.ts",
       "type": "imports",
       "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
+      "weight": 0.7
     },
     {
-      "source": "file:config-ui/src/sections/MinibubblesSection.tsx",
-      "target": "file:config-ui/src/components/UI.tsx",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
-    },
-    {
-      "source": "file:config-ui/src/sections/PagesSection.tsx",
+      "source": "file:config-ui/src/sections/MinibubblesSection.svelte",
       "target": "file:config-ui/src/api.ts",
       "type": "imports",
       "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
+      "weight": 0.7
     },
     {
-      "source": "file:config-ui/src/sections/PagesSection.tsx",
-      "target": "file:config-ui/src/components/UI.tsx",
-      "type": "imports",
-      "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
-    },
-    {
-      "source": "file:config-ui/src/sections/ThemeSection.tsx",
+      "source": "file:config-ui/src/sections/MonitorsSection.svelte",
       "target": "file:config-ui/src/api.ts",
       "type": "imports",
       "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
+      "weight": 0.7
     },
     {
-      "source": "file:config-ui/src/sections/ThemeSection.tsx",
-      "target": "file:config-ui/src/components/Icon.tsx",
+      "source": "file:config-ui/src/sections/PagesSection.svelte",
+      "target": "file:config-ui/src/api.ts",
       "type": "imports",
       "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
+      "weight": 0.7
     },
     {
-      "source": "file:config-ui/src/sections/ThemeSection.tsx",
-      "target": "file:config-ui/src/components/UI.tsx",
+      "source": "file:config-ui/src/sections/ParallaxSection.svelte",
+      "target": "file:config-ui/src/api.ts",
       "type": "imports",
       "direction": "forward",
-      "weight": 0.7,
-      "recoveredFromImportMap": true
+      "weight": 0.7
+    },
+    {
+      "source": "file:config-ui/src/sections/RawSection.svelte",
+      "target": "file:config-ui/src/api.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:config-ui/src/sections/ThemeSection.svelte",
+      "target": "file:config-ui/src/api.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/sections/ThemeSection.svelte",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/sections/MinibubblesSection.svelte",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/sections/PagesSection.svelte",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/sections/MonitorsSection.svelte",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/sections/KeyboardSection.svelte",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/sections/BindingsSection.svelte",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/sections/ParallaxSection.svelte",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:config-ui/src/App.svelte",
+      "target": "file:config-ui/src/sections/RawSection.svelte",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:installer/src/main.rs",
+      "target": "class:installer/src/main.rs:App",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:installer/src/main.rs",
+      "target": "class:installer/src/main.rs:Screen",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:installer/src/main.rs",
+      "target": "function:installer/src/main.rs:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:installer/src/main.rs",
+      "target": "function:installer/src/main.rs:run_app",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:installer/src/main.rs",
+      "target": "function:installer/src/main.rs:ui",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:installer/src/main.rs",
+      "target": "function:installer/src/main.rs:render_installing",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/quickshell/WindowRegistry.js",
+      "target": "function:scripts/quickshell/WindowRegistry.js:getLayout",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/quickshell/WindowRegistry.js",
+      "target": "function:scripts/quickshell/WindowRegistry.js:getScale",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/quickshell/WindowRegistry.js",
+      "target": "function:scripts/quickshell/WindowRegistry.js:getPopupLayout",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "config:config-ui/vite.config.ts",
+      "target": "file:config-ui/src/main.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:config-ui/svelte.config.js",
+      "target": "file:config-ui/src/App.svelte",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:config-ui/src/sections/AddonsSection.svelte",
+      "target": "file:config-ui/src/api.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:config-ui/src/sections/AddonsSection.svelte",
+      "target": "file:config-ui/src/components/Sub.svelte",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:config-ui/src/sections/AddonsSection.svelte",
+      "target": "file:config-ui/src/components/Icon.svelte",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:config-ui/src/sections/AddonsSection.svelte",
+      "target": "function:config-ui/src/sections/AddonsSection.svelte:uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:config-ui/src/components/PaletteCard.svelte",
+      "target": "file:config-ui/src/api.ts",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
     }
   ],
   "layers": [
@@ -6365,7 +6252,10 @@
         "file:scripts/quickshell/topbar/BarZone.qml",
         "file:scripts/quickshell/topbar/qmldir",
         "file:scripts/quickshell/WindowRegistry.js",
-        "file:scripts/quickshell/workspaces.sh"
+        "file:scripts/quickshell/workspaces.sh",
+        "function:scripts/quickshell/WindowRegistry.js:getLayout",
+        "function:scripts/quickshell/WindowRegistry.js:getScale",
+        "function:scripts/quickshell/WindowRegistry.js:getPopupLayout"
       ]
     },
     {
@@ -6511,7 +6401,14 @@
         "file:scripts/update_notifier.sh",
         "file:scripts/volume_listener.sh",
         "file:scripts/watch_plugins.sh",
-        "file:scripts/pulse-backend/server.mjs"
+        "file:scripts/pulse-backend/server.mjs",
+        "file:installer/src/main.rs",
+        "class:installer/src/main.rs:App",
+        "class:installer/src/main.rs:Screen",
+        "function:installer/src/main.rs:main",
+        "function:installer/src/main.rs:run_app",
+        "function:installer/src/main.rs:ui",
+        "function:installer/src/main.rs:render_installing"
       ]
     },
     {
@@ -6519,26 +6416,52 @@
       "name": "Config UI — Панель настроек",
       "description": "React/TypeScript/Vite приложение для графической настройки ActivSpot: секции для тем, минипузырьков, страниц, биндингов и внешнего вида, UI-компоненты, API-клиент для связи с shell, встроенный HTTP-сервер для раздачи интерфейса.",
       "nodeIds": [
-        "file:config-ui/src/api.ts",
-        "file:config-ui/src/components/UI.tsx",
-        "file:config-ui/src/sections/BindingsSection.tsx",
-        "file:config-ui/src/sections/BubblesSection.tsx",
-        "file:config-ui/src/sections/ThemeSection.tsx",
-        "file:config-ui/src/sections/GeneralSection.tsx",
-        "file:config-ui/server/server.mjs",
-        "file:config-ui/src/App.tsx",
-        "file:config-ui/src/main.tsx",
-        "file:config-ui/src/sections/PagesSection.tsx",
-        "file:config-ui/src/components/Icon.tsx",
-        "file:config-ui/src/components/Preview.tsx",
-        "file:config-ui/src/sections/MinibubblesSection.tsx",
+        "file:config-ui/src/components/PreviewIsland.svelte",
         "file:config-ui/src/sections/AppearanceSection.tsx",
-        "file:config-ui/index.html",
-        "config:config-ui/package.json",
+        "file:config-ui/src/sections/KeyboardSection.svelte",
+        "config:config-ui/vite.config.ts",
+        "file:config-ui/src/sections/GeneralSection.tsx",
         "config:config-ui/tsconfig.json",
-        "file:config-ui/src/styles.css",
+        "file:config-ui/src/sections/BubblesSection.tsx",
+        "file:config-ui/index.html",
+        "file:config-ui/src/sections/MonitorsSection.svelte",
+        "file:config-ui/src/components/Icon.svelte",
+        "file:config-ui/server/server.mjs",
         "file:config-ui/src/styles.css.bak",
-        "file:config-ui/vite.config.ts"
+        "file:config-ui/src/sections/BindingsSection.svelte",
+        "file:config-ui/src/api.ts",
+        "file:config-ui/src/main.ts",
+        "config:config-ui/svelte.config.js",
+        "file:config-ui/src/sections/ParallaxSection.svelte",
+        "file:config-ui/src/sections/PagesSection.svelte",
+        "config:config-ui/package.json",
+        "file:config-ui/src/sections/MinibubblesSection.svelte",
+        "file:config-ui/src/sections/RawSection.svelte",
+        "file:config-ui/src/App.svelte",
+        "file:config-ui/src/sections/ThemeSection.svelte",
+        "file:config-ui/src/styles.css",
+        "file:config-ui/src/components/Chip.svelte",
+        "file:config-ui/src/components/PaletteCard.svelte",
+        "file:config-ui/src/components/Row.svelte",
+        "file:config-ui/src/components/Slider.svelte",
+        "file:config-ui/src/components/Sub.svelte",
+        "file:config-ui/src/components/Toggle.svelte",
+        "file:config-ui/src/sections/AddonsSection.svelte",
+        "function:config-ui/src/sections/AddonsSection.svelte:uninstall",
+        "file:config-ui/src/App.svelte",
+        "file:config-ui/src/components/Icon.svelte",
+        "file:config-ui/src/components/PreviewIsland.svelte",
+        "file:config-ui/src/main.ts",
+        "file:config-ui/src/sections/BindingsSection.svelte",
+        "file:config-ui/src/sections/KeyboardSection.svelte",
+        "file:config-ui/src/sections/MinibubblesSection.svelte",
+        "file:config-ui/src/sections/MonitorsSection.svelte",
+        "file:config-ui/src/sections/PagesSection.svelte",
+        "file:config-ui/src/sections/ParallaxSection.svelte",
+        "file:config-ui/src/sections/RawSection.svelte",
+        "file:config-ui/src/sections/ThemeSection.svelte",
+        "config:config-ui/svelte.config.js",
+        "config:config-ui/vite.config.ts"
       ]
     },
     {

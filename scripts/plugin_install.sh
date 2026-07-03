@@ -49,6 +49,10 @@ validate() {
     # Declared paths must exist and stay inside the package
     local rel
     for rel in $(jq -r '[.hypr // empty,
+                         .window // empty,
+                         .desktopWidget // empty,
+                         .cardSkin // empty,
+                         (.entryPoints.barWidget // empty),
                          (.scripts // [])[],
                          (.hooks.install // empty),
                          (.hooks.uninstall // empty)] | .[]' "$ROOT/manifest.json"); do
@@ -88,6 +92,7 @@ case "${1:-}" in
            '. + {_files: ($files | tonumber), _sizeKb: ($sizeKb | tonumber),
                  _hasHypr:   (has("hypr")),
                  _hasHooks:  (has("hooks")),
+                 _hasCardSkin: (has("cardSkin")),
                  _scriptCount: ((.scripts // []) | length),
                  _installed: false}' "$ROOT/manifest.json" \
         | jq --argjson inst "$( [ -d "$PLUGINS_DIR/$(jq -r .id "$ROOT/manifest.json")" ] && echo true || echo false )" \

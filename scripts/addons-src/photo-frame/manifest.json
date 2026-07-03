@@ -1,0 +1,15 @@
+{
+  "id": "photo-frame",
+  "name": "Photo Frame",
+  "version": "1.3.0",
+  "author": "dxvmxn",
+  "description": "Wallpaper-level picture frame that slowly cycles through the images in a folder with a paper matte and crossfade. Add several frames, each with its own folder. Drag/scale in edit mode like any desktop widget.",
+  "desktopWidget": "FrameWidget.qml",
+  "multiInstance": true,
+  "settings": [
+    { "key": "dir", "type": "path", "label": "Images folder", "help": "Folder scanned for images (jpg, png, webp, gif). ~ is expanded.", "default": "~/Pictures/Wallpapers", "placeholder": "~/Pictures/Wallpapers" },
+    { "key": "advanceSec", "type": "number", "label": "Change interval", "help": "Seconds each photo stays up before the next one.", "default": 8, "min": 2, "max": 3600, "suffix": "sec" },
+    { "key": "fadeMs", "type": "number", "label": "Crossfade", "help": "Transition length between photos.", "default": 700, "min": 0, "max": 4000, "suffix": "ms" },
+    { "key": "shuffle", "type": "bool", "label": "Shuffle order", "help": "Pick the next photo at random instead of in order.", "default": false }
+  ]
+}

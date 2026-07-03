@@ -1,0 +1,8 @@
+{
+  "id": "desktop-clock",
+  "name": "Desktop Clock",
+  "version": "1.0.0",
+  "author": "dxvmxn",
+  "description": "Large clock and date on the wallpaper. Blinking colon, smooth minute roll.",
+  "desktopWidget": "ClockWidget.qml"
+}

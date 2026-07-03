@@ -1164,4 +1164,7 @@ Variants {
 // ── Plugin windows (manifest "window" entries, e.g. float-mode dock) ───────
 PluginWindowHost {}
 
+// ── Plugin desktop widgets (manifest "desktopWidget" entries, Bottom layer) ─
+PluginDesktopHost {}
+
 } // ShellRoot

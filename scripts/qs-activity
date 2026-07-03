@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# qs-activity — publish a Live Activity to the ActivSpot island from any script.
+#
+# Usage:
+#   qs-activity update --id build --title "cargo build" [--subtitle "linking…"]
+#                      [--progress 0.42 | --spinner] [--icon 󰣪] [--ttl 8000]
+#                      [--urgency low|normal|high]
+#   qs-activity end    --id build [--ok|--fail] [--subtitle "done"]
+#
+# Example (progress loop):
+#   for i in $(seq 0 10 100); do
+#       qs-activity update --id demo --title "Demo job" --progress 0.$i
+#       sleep 1
+#   done
+#   qs-activity end --id demo --ok --subtitle "finished"
+
+OUT=/tmp/qs_live_activity
+
+die() { echo "qs-activity: $1" >&2; exit 1; }
+
+jesc() {
+    local s="$1"
+    s=${s//\\/\\\\}; s=${s//\"/\\\"}
+    s=${s//$'\n'/ }; s=${s//$'\t'/ }
+    printf '%s' "$s"
+}
+
+event="${1:-}"; shift 2>/dev/null
+[ "$event" = "update" ] || [ "$event" = "end" ] || die "first arg must be 'update' or 'end'"
+
+id="" title="" subtitle="" icon="" progress="" ttl="" urgency="" status="ok"
+has_sub=0
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --id)       id="$2"; shift 2 ;;
+        --title)    title="$2"; shift 2 ;;
+        --subtitle) subtitle="$2"; has_sub=1; shift 2 ;;
+        --icon)     icon="$2"; shift 2 ;;
+        --progress) progress="$2"; shift 2 ;;
+        --spinner)  progress="-1"; shift ;;
+        --ttl)      ttl="$2"; shift 2 ;;
+        --urgency)  urgency="$2"; shift 2 ;;
+        --ok)       status="ok"; shift ;;
+        --fail)     status="fail"; shift ;;
+        *) die "unknown option: $1" ;;
+    esac
+done
+[ -n "$id" ] || die "--id is required"
+
+json="{\"id\":\"$(jesc "$id")\""
+if [ "$event" = "end" ]; then
+    json="$json,\"event\":\"end\",\"status\":\"$status\""
+    [ "$has_sub" = 1 ] && json="$json,\"subtitle\":\"$(jesc "$subtitle")\""
+else
+    [ -n "$title" ]    && json="$json,\"title\":\"$(jesc "$title")\""
+    [ "$has_sub" = 1 ] && json="$json,\"subtitle\":\"$(jesc "$subtitle")\""
+    [ -n "$icon" ]     && json="$json,\"icon\":\"$(jesc "$icon")\""
+    [ -n "$progress" ] && json="$json,\"progress\":$progress"
+    [ -n "$urgency" ]  && json="$json,\"urgency\":\"$(jesc "$urgency")\""
+    json="$json,\"ttlMs\":${ttl:-10000},\"kind\":\"custom\""
+fi
+json="$json}"
+
+printf '%s\n' "$json" >> "$OUT"

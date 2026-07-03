@@ -474,8 +474,12 @@ Item {
                 }
             }
 
-            onWidthChanged:  reset()
-            onHeightChanged: reset()
+            // Debounce re-seed: the pill height springs/oscillates on expand, so
+            // resetting the whole particle field every frame froze the page.
+            // Coalesce into one reset after the resize settles.
+            Timer { id: resetTimer; interval: 120; onTriggered: precip.reset() }
+            onWidthChanged:  resetTimer.restart()
+            onHeightChanged: resetTimer.restart()
             Component.onCompleted: reset()
             Connections {
                 target: root

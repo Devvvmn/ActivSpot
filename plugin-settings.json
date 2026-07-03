@@ -1,0 +1,8 @@
+{
+  "photo-frame": {
+    "dir": "~/Pictures/Wallpapers",
+    "advanceSec": 50,
+    "fadeMs": 700,
+    "shuffle": false
+  }
+}

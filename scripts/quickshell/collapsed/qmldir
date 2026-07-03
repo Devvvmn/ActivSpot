@@ -9,3 +9,5 @@ TimerCollapsed 1.0 TimerCollapsed.qml
 StashCollapsed 1.0 StashCollapsed.qml
 EditModeCollapsed 1.0 EditModeCollapsed.qml
 GameCollapsed 1.0 GameCollapsed.qml
+ControlCollapsed 1.0 ControlCollapsed.qml
+ActivityCollapsed 1.0 ActivityCollapsed.qml

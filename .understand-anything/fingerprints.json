@@ -3841,5 +3841,260 @@
       "totalLines": 73,
       "hasStructuralAnalysis": true
     }
+  },
+  "config-ui/src/api.ts": {
+    "contentHash": "63e814bf67abd4968069272127c47947bdc7c842494ca0162bd578a616d108b4",
+    "functions": [
+      "j"
+    ],
+    "classes": [],
+    "imports": [],
+    "exports": [
+      "PARALLAX_EASINGS",
+      "api",
+      "defaults"
+    ]
+  },
+  "config-ui/src/main.ts": {
+    "contentHash": "5cc6ba023edf69e6000353ad03aec514cca31a217f7b6bec7c923236a4b77d46",
+    "functions": [],
+    "classes": [],
+    "imports": [
+      "./App.svelte"
+    ],
+    "exports": []
+  },
+  "config-ui/svelte.config.js": {
+    "contentHash": "27b75e5640bb04cbbbdd131c7d7d0b27189d69080430f35d0ee9daad9ce99930",
+    "functions": [],
+    "classes": [],
+    "imports": [
+      "@sveltejs/vite-plugin-svelte"
+    ],
+    "exports": []
+  },
+  "config-ui/vite.config.ts": {
+    "contentHash": "fab8c54b751b312ec2daa409badd82d8d6b78e1959e4f9018f6d0a0b16a68925",
+    "functions": [],
+    "classes": [],
+    "imports": [
+      "@sveltejs/vite-plugin-svelte",
+      "vite"
+    ],
+    "exports": []
+  },
+  "installer/src/main.rs": {
+    "contentHash": "0c589c309e3a0c64c7e17fdefc5e2f3edd1ac389ca1dd98461fbffc6d32c3116",
+    "functions": [
+      "advance_install_step",
+      "centered_rect",
+      "default",
+      "handle_key",
+      "main",
+      "pulse_color",
+      "render_error",
+      "render_footer",
+      "render_header",
+      "render_installing",
+      "render_success",
+      "render_system_check",
+      "render_welcome",
+      "run_app",
+      "spinner_frame",
+      "start_installation",
+      "ui"
+    ],
+    "classes": [
+      "App",
+      "Screen"
+    ],
+    "imports": [
+      "color_eyre::Result",
+      "std::io::stdout"
+    ],
+    "exports": []
+  },
+  "scripts/quickshell/WindowRegistry.js": {
+    "contentHash": "b00743f315b42461a5156ecc50a9d0e73faf2d8edd9119f5cd5cc29ca08fcfcd",
+    "functions": [
+      "getLayout",
+      "getPopupLayout",
+      "getScale",
+      "s"
+    ],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/App.svelte": {
+    "contentHash": "152f4f849929fe0cc4eb3c0cd035f22c643a6b1d93a1b9ed18d1b4221c0994ae",
+    "functions": [
+      "discard",
+      "loadInventory",
+      "onKeydown",
+      "pad",
+      "reload",
+      "save",
+      "set",
+      "setAll",
+      "showToast"
+    ],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/components/Icon.svelte": {
+    "contentHash": "26317b97672f06d55b148c91c0ea4355eb838a4666ea39ac2758f7d13c89d757",
+    "functions": [],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/components/PreviewIsland.svelte": {
+    "contentHash": "480815154182fed3938560b0fbfa94de0d5d38ce12b4e558eef0c20041083d68",
+    "functions": [
+      "hexToRgb",
+      "resolveTheme"
+    ],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/components/Chip.svelte": {
+    "contentHash": "72edc63463cb9541636d0b4f6a35a54ad2238f7c926e3ef173fd1ebf563988be",
+    "functions": [],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/components/PaletteCard.svelte": {
+    "contentHash": "07729c7e5be93ce157f95e581ad13ee4593f969a293c6cb3d495b01d988a3f32",
+    "functions": [],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/components/Row.svelte": {
+    "contentHash": "72ac3d6a91fb35784704da4cb5cf2cc3a8bb195fdb87b2f046964bdf63bb0ac9",
+    "functions": [],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/components/Slider.svelte": {
+    "contentHash": "800daf2a967d0d48bcfec13708067bab480cb0a9b94c6be13bdf6c3b58b04923",
+    "functions": [],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/components/Sub.svelte": {
+    "contentHash": "44bb6f9bc1f13c2e8ce294ee99a1919ca0cfd8f03f7a8be7bb96c1a266705695",
+    "functions": [],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/components/Toggle.svelte": {
+    "contentHash": "6a3f8cfd3a272156ce9e31f9827f77104f2ac568a78250a9def6cd2caacd381f",
+    "functions": [],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/sections/BindingsSection.svelte": {
+    "contentHash": "88f4fb920d518eed35ba5af0839bf4dfc675b9065adf1cc0ef0ec854cf7b7587",
+    "functions": [
+      "addBind",
+      "captureCombo",
+      "comboOf",
+      "onKeydown",
+      "removeBind",
+      "save",
+      "showSaveOk",
+      "toggleNewMod"
+    ],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/sections/KeyboardSection.svelte": {
+    "contentHash": "8122a0be67787d727a729e051125eb4c657ac7e6cf24ab0207e01fae6fb6772c",
+    "functions": [
+      "toggleLayout",
+      "toggleOpt"
+    ],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/sections/MinibubblesSection.svelte": {
+    "contentHash": "d697becc6afd0ca32c2769afb758c4a0c96afeba88cb659bc2cf19fefe2b0c9e",
+    "functions": [
+      "setCfg",
+      "toggle"
+    ],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/sections/MonitorsSection.svelte": {
+    "contentHash": "3327f55e850f678d3571912d87b7abb3a95df14fb2ce2325eec467b15678dae7",
+    "functions": [
+      "add",
+      "remove",
+      "update"
+    ],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/sections/PagesSection.svelte": {
+    "contentHash": "077b6f160ba41ad8a9d530da49cca10e3fc5169b04a65fe7ad18eb9c77fb3df2",
+    "functions": [
+      "setCfg",
+      "toggle"
+    ],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/sections/ParallaxSection.svelte": {
+    "contentHash": "5594aa2093753670aa9f9ef90fc37f981288006da3a048010e0966a04dd1959e",
+    "functions": [
+      "reset",
+      "setP"
+    ],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/sections/RawSection.svelte": {
+    "contentHash": "1bd70b2a3273b40add772d2c38b372b489d126178a7be48a15c01892fcac730c",
+    "functions": [
+      "apply"
+    ],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/sections/ThemeSection.svelte": {
+    "contentHash": "267baa4f3e71804ef411b114e286f89e69669029116a7abe7775020a13889c4d",
+    "functions": [
+      "normalizeHex",
+      "setOverride"
+    ],
+    "classes": [],
+    "imports": [],
+    "exports": []
+  },
+  "config-ui/src/sections/AddonsSection.svelte": {
+    "contentHash": "d138dacbe679465267deb5cc086825cc70c09d44918df64116ff999d3febf68f",
+    "functions": [
+      "uninstall"
+    ],
+    "classes": [],
+    "imports": [],
+    "exports": []
   }
 }

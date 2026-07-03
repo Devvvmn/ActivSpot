@@ -22,7 +22,9 @@ function s(val, scale) {
 }
 
 // Centralized registry for all widget dimensions and positional mathematics.
-function getLayout(name, mx, my, mw, mh, userScale) {
+// anchorX (optional): screen-local x to center a position-following popup under
+// (e.g. the network popup follows its bar applet). Ignored by fixed-position popups.
+function getLayout(name, mx, my, mw, mh, userScale, anchorX) {
     let scale = getScale(mw, userScale);
 
     let base = {
@@ -39,7 +41,7 @@ function getLayout(name, mx, my, mw, mh, userScale) {
         "music":     { w: s(700, scale), h: s(620, scale), rx: Math.floor((mw/2)-(s(700, scale)/2)), ry: s(70, scale), comp: "music/MusicPopup.qml" },
         
         // Right-aligned: pinned 20px from the right edge dynamically (Width: 900 + 20 margin = 920)
-        "network":   { w: s(900, scale), h: s(700, scale), rx: mw - s(920, scale), ry: s(70, scale), comp: "network/NetworkPopup.qml" },
+        "network":   { w: s(440, scale), h: s(560, scale), rx: mw - s(460, scale), ry: s(70, scale), comp: "network/NetworkPopup.qml" },
         
         "monitors":  { w: s(850, scale), h: s(580, scale), rx: Math.floor((mw/2)-(s(850, scale)/2)), ry: Math.floor((mh/2)-(s(580, scale)/2)), comp: "monitors/MonitorPopup.qml" },
         "plugininstall": { w: s(560, scale), h: s(620, scale), rx: Math.floor((mw/2)-(s(560, scale)/2)), ry: Math.floor((mh/2)-(s(620, scale)/2)), comp: "plugins/PluginInstallPopup.qml" },
@@ -54,12 +56,22 @@ function getLayout(name, mx, my, mw, mh, userScale) {
     };
 
     if (!base[name]) return null;
-    
+
     let t = base[name];
+
+    // Position-following popups: center under the supplied anchor x, clamped on-screen.
+    // Falls back to the default (right-pinned) rx when no valid anchor is given.
+    if (name === "network" && anchorX !== undefined && anchorX !== null && !isNaN(anchorX) && anchorX >= 0) {
+        let margin = s(12, scale);
+        let rx = Math.round(anchorX - t.w / 2);
+        rx = Math.max(margin, Math.min(rx, mw - t.w - margin));
+        t.rx = rx;
+    }
+
     // Calculate final absolute coordinates based on active monitor offset
     t.x = mx + t.rx;
     t.y = my + t.ry;
-    
+
     return t;
 }
 

@@ -66,6 +66,13 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         enabled: !root.editMode
-        onClicked: Quickshell.execDetached(["bash", "-c", "~/.config/hypr/scripts/qs_manager.sh toggle network wifi"])
+        onClicked: {
+            // Screen-local x of the applet centre — TopBar is a full-width panel,
+            // so window-local coords equal screen coords. Lets the popup open under us.
+            var cx = Math.round(root.mapToItem(null, root.width / 2, 0).x)
+            var mode = bar.showEthernet ? "eth" : "wifi"
+            Quickshell.execDetached(["bash", "-c",
+                "~/.config/hypr/scripts/qs_manager.sh toggle network " + mode + " " + cx])
+        }
     }
 }

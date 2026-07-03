@@ -18,7 +18,7 @@ BaseBubble {
     scale:   shouldShow ? 1.0 : 0.05
     transformOrigin: Item.Left
 
-    Behavior on scale   { SpringAnimation { spring: 5.5; damping: 0.7 } }
+    Behavior on scale   { SpringAnimation { spring: 4.0; damping: 0.38 } }
 
     Rectangle {
         anchors.fill: parent
